@@ -57,11 +57,14 @@ node_templates:
     single_job:
         type: hpc.nodes.job
         properties:
-            job_options: 
-                type: 'SRUN'
-                command: 'touch single.test'
-                partition: 'cola-corta'
-                max_time: '00:01'
+            job_options:
+                type: 'SBATCH'
+                command: "touch.script single.test"
+            deployment:
+                bootstrap: 'scripts/bootstrap_sbatch_example.sh'
+                revert: 'scripts/revert_sbatch_example.sh'
+                inputs:
+                    - 'single'
         relationships:
             - type: job_contained_in_hpc
               target: ft2_node
