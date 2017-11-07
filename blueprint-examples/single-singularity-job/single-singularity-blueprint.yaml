@@ -75,7 +75,8 @@ node_templates:
                 bootstrap: 'scripts/singularity_bootstrap_example.sh'
                 revert: 'scripts/singularity_revert_example.sh'
                 inputs:
-                    - single
+                    - '$LUSTRE'
+                    - 'openmpi_1.10.7_ring.img
         relationships:
             - type: job_contained_in_hpc
               target: ft2_node

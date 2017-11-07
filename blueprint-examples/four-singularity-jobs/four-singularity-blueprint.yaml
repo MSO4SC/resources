@@ -82,23 +82,29 @@ node_templates:
               target: ft2_node
 
     second_parallel_job:
-        type: hpc.nodes.job
+        type: hpc.nodes.singularity_job
         properties:
-            job_options: 
-                type: 'SRUN'
+            job_options:
+            job_options:
                 modules:
                     - gcc/5.3.0
+                    - openmpi/1.10.2
+                    - singularity/2.3.1
                 partition: 'thin-shared'
-                command: 'touch fourth_example_2.test'
+                image: '$LUSTRE/openmpi_1.10.7_ring.img'
+                volumes:
+                    - '/scratch'
+                command: 'ring > fourth_example_2.test'
                 nodes: 1
                 tasks: 1
                 tasks_per_node: 1
                 max_time: '00:01'
             deployment:
-                bootstrap: 'scripts/bootstrap_example.sh'
-                revert: 'scripts/revert_example.sh'
+                bootstrap: 'scripts/singularity_bootstrap_example.sh'
+                revert: 'scripts/singularity_revert_example.sh'
                 inputs:
-                    - 'second_job'
+                    - '$LUSTRE'
+                    - 'openmpi_1.10.7_ring.img'
         relationships:
             - type: job_contained_in_hpc
               target: ft2_node
@@ -108,6 +114,7 @@ node_templates:
     third_parallel_job:
         type: hpc.nodes.singularity_job
         properties:
+            job_options:
             job_options:
                 modules:
                     - gcc/5.3.0
@@ -135,16 +142,29 @@ node_templates:
               target: first_job
 
     fourth_job:
-        type: hpc.nodes.job
+        type: hpc.nodes.singularity_job
         properties:
             job_options:
-                type: 'SBATCH'
-                command: "touch.script fourth_example_4.test"
+            job_options:
+                modules:
+                    - gcc/5.3.0
+                    - openmpi/1.10.2
+                    - singularity/2.3.1
+                partition: 'thin-shared'
+                image: '$LUSTRE/openmpi_1.10.7_ring.img'
+                volumes:
+                    - '/scratch'
+                command: 'ring > fourth_example_4.test'
+                nodes: 1
+                tasks: 1
+                tasks_per_node: 1
+                max_time: '00:01'
             deployment:
-                bootstrap: 'scripts/bootstrap_sbatch_example.sh'
-                revert: 'scripts/revert_sbatch_example.sh'
+                bootstrap: 'scripts/singularity_bootstrap_example.sh'
+                revert: 'scripts/singularity_revert_example.sh'
                 inputs:
-                    - 'fourth_job'
+                    - '$LUSTRE'
+                    - 'openmpi_1.10.7_ring.img'
         relationships:
             - type: job_contained_in_hpc
               target: ft2_node
