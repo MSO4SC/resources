@@ -16,7 +16,7 @@ Besides there are two scripts to help stop or cancel an execution.
 * *force-cancel.sh* If for some reason the execution is hanged, cancel with this command. It receives the execution id as parameter. Use `cfy executions list` to see all executions status and ids.
 * *stop-instance.sh* Stops a node-instance, if necessary. It receives the node instance id as parameter. Use `cfy node-instances list` to see all node instances status and ids.
 
-== Examples description.
+== Examples description
 
 * *single-srun-job* Single job execution using srun command. Uses two dummy deployment scripts that create a file using `touch` command.
 * *single-sbatch-job* Single job execution using sbatch command. Uses two deployment scripts that create the sbatch script file in the HPC and removes it.
