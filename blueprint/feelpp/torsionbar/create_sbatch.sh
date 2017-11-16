@@ -1,0 +1,3 @@
+#!/bin/bash -l
+
+sed -i s/FEELPP_SINGULARITY_IMAGE=.*/FEELPP_SINGULARITY_IMAGE=$3/ $2

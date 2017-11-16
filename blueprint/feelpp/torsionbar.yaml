@@ -1,0 +1,41 @@
+########
+# Copyright (c) 2017 MSO4SC
+# Author(s) javier.carnero@atos.net
+#           guillaume.dolle@cemosis.fr
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+
+imports:
+    - include/cloudify.yaml
+    - include/inputs.yaml
+    - include/types_feelpp.yaml
+    - include/template_ft2.yaml
+
+node_templates:
+    job_torsionbar:
+        type: feelpp.toolbox.sbatch.job
+        properties:
+            job_options:
+                sbatch_script: 'torsionbar/torsionbar.slurm'
+            deployment:
+                bootstrap: 'torsionbar/create_sbatch.sh'
+                revert: 'torsionbar/remove_sbatch.sh'
+                inputs:
+                    - { get_property: [SELF, sbatch_script] }
+                    - { get_property: [SELF, image] }
+
+#outputs:
+#    single_job_name:
+#        description: single job name in the HPC
+#        value: { get_attribute: [single_job, job_name] }

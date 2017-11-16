@@ -1,0 +1,27 @@
+########
+# Copyright (c) 2017 MSO4SC
+# Author(s) javier.carnero@atos.net
+#           guillaume.dolle@cemosis.fr
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+
+node_templates:
+    ft2_node:
+        type: hpc.nodes.Compute
+        properties:
+            config: { get_input: ft2_config }
+            monitor_entrypoint: { get_input: monitor_entrypoint }
+            monitor_orchestrator_available: True
+            job_prefix: { get_input: job_prefix }
+#            simulate: True  # COMMENT to test against a real HPC
