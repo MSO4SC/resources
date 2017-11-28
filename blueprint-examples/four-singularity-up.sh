@@ -1,6 +1,6 @@
 #!/bin/bash
 cd four-singularity-jobs
-cfy blueprints upload -b four-singularity-job four-singularity-blueprint.yaml
+cfy blueprints upload -b four-singularity-job blueprint.yaml
 read -n 1 -s -p "Press any key to continue"
 echo ''
 cfy deployments create -b four-singularity-job -i ../local-blueprint-inputs.yaml --skip-plugins-validation four-singularity-job
