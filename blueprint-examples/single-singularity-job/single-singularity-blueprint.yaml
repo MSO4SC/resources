@@ -55,7 +55,7 @@ node_templates:
 #            simulate: True  # COMMENT to test against a real HPC
 
     single_job:
-        type: hpc.nodes.job
+        type: hpc.nodes.singularity_job
         properties:
             job_options: 
                 modules:
