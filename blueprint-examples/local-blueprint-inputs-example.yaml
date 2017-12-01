@@ -3,7 +3,7 @@
 #############################
 
 # Monitor
-monitor_entrypoint: "193.144.35.131"
+monitor_entrypoint: "193.144.35.146"
 
 # Job prefix name
 job_prefix: "mso_"
