@@ -28,12 +28,15 @@ node_templates:
         properties:
             job_options:
                 sbatch_script: 'torsionbar/torsionbar.slurm'
+                image: 'feelpp-toolboxes-latest.simg'
+                imagedir: '$LUSTRE'
             deployment:
                 bootstrap: 'torsionbar/create_sbatch.sh'
                 revert: 'torsionbar/remove_sbatch.sh'
                 inputs:
-                    - { get_property: [SELF, sbatch_script] }
-                    - { get_property: [SELF, image] }
+                    - { get_property: [SELF, sbatch_script] } # arg $1
+                    - { get_property: [SELF, image] } # arg $2
+                    - { get_property: [SELF, imagedir] } # arg $3
 
 #outputs:
 #    single_job_name:
