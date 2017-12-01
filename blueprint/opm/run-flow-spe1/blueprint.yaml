@@ -59,19 +59,20 @@ node_templates:
         properties:
             job_options: 
                 modules:
-#                    - gcc/5.3.0
-#                    - openmpi/1.10.2
+                    - gcc/5.3.0
+                    - openmpi/1.10.2
                     - singularity/2.3.1
                 partition: 'thin-shared'
                 image: '$SINGULARITY_REPO/opmrelease.img'
                 volumes:
-                    - '/scratch'
+                    - '/scratch '
+                    - '/mnt'
                 command: 'flow $LUSTRE/SIMINPUT.DATA output_dir=$LUSTRE/simoutput'
 #                command: 'echo $SINGULARITY_REPO > $LUSTRE/testout'
                 nodes: 1
                 tasks: 1
                 tasks_per_node: 1
-                max_time: '00:01'
+                max_time: '00:05'
             deployment:
                 bootstrap: 'scripts/singularity_bootstrap_run-flow-spe1.sh'
                 revert: 'scripts/singularity_revert_run-flow-spe1.sh'
