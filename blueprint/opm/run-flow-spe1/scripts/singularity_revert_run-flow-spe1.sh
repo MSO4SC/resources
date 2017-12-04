@@ -1,4 +1,7 @@
 #!/bin/bash -l
 
-cd $1
-rm $3
+WORKDIR=$1
+LOCAL_FILE=$3
+
+cd $WORKDIR
+rm $LOCAL_FILE
