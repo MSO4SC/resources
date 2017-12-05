@@ -1,0 +1,19 @@
+= Torsionbar TOSCA
+
+Connect to the cloudify client via docker.
+See https://github.com/MSO4SC/MSOOrchestrator-CLI/blob/master/README.adoc
+
+Set your local blueprint file at the root of the cloned repository.
+See http://book.mso4sc.cemosis.fr/#mso4sc_tosca_modelling_and_execution
+
+[source]
+----
+./deploy up
+----
+
+to deploy on the orchestrator
+
+[source]
+----
+./deploy down
+----
