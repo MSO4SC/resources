@@ -52,7 +52,7 @@ node_templates:
             monitor_entrypoint: { get_input: monitor_entrypoint }
             monitor_orchestrator_available: True
             job_prefix: { get_input: job_prefix }
-            #            simulate: True  # COMMENT to test against a real HPC
+#            simulate: True  # COMMENT to test against a real HPC
 
     create_geometry:
         type: hpc.nodes.singularity_job

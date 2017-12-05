@@ -1,5 +1,9 @@
 = Torsionbar TOSCA
 
+The "upload" is uploaded on the orchestrator.
+
+:WARNING: Don't put your local in the upload directory.
+
 Connect to the cloudify client via docker.
 See https://github.com/MSO4SC/MSOOrchestrator-CLI/blob/master/README.adoc
 
