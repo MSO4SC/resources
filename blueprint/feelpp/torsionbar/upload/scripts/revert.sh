@@ -1,5 +1,8 @@
 #!/bin/bash -l
 
-if [ -f $1/$2 ]; then
-    rm $1/$2
+# Only remove singularity image if file was copy from the repo.
+if [ -f ${SINGULARITY_REPO}/$2 ]
+    if [ -f $1/$2 ]; then
+        rm $1/$2
+    fi
 fi
