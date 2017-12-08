@@ -73,7 +73,7 @@ node_templates:
                 tasks: 1
                 tasks_per_node: 1
                 max_time: '00:05:00'
-                image: '${LUSTRE}/images/singularity_images/feelpp-toolboxes-mso4sc.simg'
+                image: '${LUSTRE}/singularity_images/feelpp-toolboxes-mso4sc.simg'
             deployment:
                 bootstrap: 'scripts/bootstrap.sh'
                 revert: 'scripts/revert.sh'
