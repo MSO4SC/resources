@@ -66,20 +66,20 @@ node_templates:
                 volumes:
                     - '/scratch'
                     - '${LUSTRE}/feel:/feel'
-                command: 'gmsh -3 -clscale 1 -bin \
-                     -o /feel/torsionbar.msh \
+                command: 'gmsh -3 -clscale 1 -bin
+                     -o /feel/torsionbar.msh
                     /opt/feelpp/Testcases/CSM/torsionbar/torsionbar.geo'
                 nodes: 1
                 tasks: 1
                 tasks_per_node: 1
                 max_time: '00:05:00'
-                image: '${LUSTRE}/singularity_images/feelpp-toolboxes-mso4sc.simg'
+                image: '${LUSTRE}/singularity_images/feelpp_feelpp-toolboxes-mso4sc.simg'
             deployment:
                 bootstrap: 'scripts/bootstrap.sh'
                 revert: 'scripts/revert.sh'
                 inputs:
                     - '${LUSTRE}/singularity_images/' # boostrap, revert scripts arg $1
-                    - 'feelpp-toolboxes-mso4sc.simg' # bootstrap, revert scripts arg $2
+                    - 'feelpp_feelpp-toolboxes-mso4sc.simg' # bootstrap, revert scripts arg $2
 
         relationships:
             - type: job_contained_in_hpc
@@ -98,21 +98,21 @@ node_templates:
                     - '/scratch'
                     - '${LUSTRE}/feel:/feel'
                 command: { concat:[
-                    'feelpp_mesh_partitioner \
-                     --ifile /feel/torsionbar.msh \
-                     --odir /feel/mesh_partitioned/ \
+                    'feelpp_mesh_partitioner
+                     --ifile /feel/torsionbar.msh
+                     --odir /feel/mesh_partitioned/
                      --part ', { get_property: [job_torsionbar, job_options ,tasks] }] }
                 nodes: 1
                 tasks: 1
                 tasks_per_node: 1
                 max_time: '00:05:00'
-                image: '${LUSTRE}/singularity_images/feelpp-toolboxes-mso4sc.simg'
+                image: '${LUSTRE}/singularity_images/feelpp_feelpp-toolboxes-mso4sc.simg'
             deployment:
                 bootstrap: 'scripts/bootstrap.sh'
                 revert: 'scritps/revert.sh'
                 inputs:
                     - '${LUSTRE}/singularity_images' # boostrap, revert scripts arg $1
-                    - 'feelpp-toolboxes-mso4sc.simg' # bootstrap, revert scripts arg $2
+                    - 'feelpp_feelpp-toolboxes-mso4sc.simg' # bootstrap, revert scripts arg $2
 
         relationships:
             - type: job_contained_in_hpc
@@ -131,24 +131,25 @@ node_templates:
                 partition: 'thin-shared'
                 volumes:
                     - '/scratch'
-                command: { concat: ['feelpp_toolbox_solid_3d \
-                   --config-file /opt/feelpp/Testcases/CSM/torsionbar/torsionbar.cfg \
-                   --solid.mshfile /feel/mesh_partitioned/torsionbar_p', { get_property:[SELF, job_options, tasks] },'.json \
-                   --solid.pc-type gamg \
-                   --solid.pc-view 1 \
-                   --ts.restart 0 \
+                    - '${LUSTRE}/feel:/feel'
+                command: { concat: ['feelpp_toolbox_solid_3d
+                   --config-file /opt/feelpp/Testcases/CSM/torsionbar/torsionbar.cfg
+                   --solid.mshfile /feel/mesh_partitioned/torsionbar_p', { get_property:[SELF, job_options, tasks] }, '.json
+                   --solid.pc-type gamg
+                   --solid.pc-view 1
+                   --ts.restart 0
                    --solid.scalability-save 1']}
                 nodes: 1
-                tasks: 8
+                tasks: 1
                 tasks_per_node: 1
-                max_time: '02:00:00'
-                image: '${LUSTRE}/singularity_images/feelpp-toolboxes-mso4sc.simg'
+                max_time: '00:30:00'
+                image: '${LUSTRE}/singularity_images/feelpp_feelpp-toolboxes-mso4sc.simg'
             deployment:
                 bootstrap: 'scripts/bootstrap.sh'
                 revert: 'scripts/revert.sh'
                 inputs:
                     - '${LUSTRE}/singularity_images' # boostrap, revert scripts arg $1
-                    - 'feelpp-toolboxes-mso4sc.simg' # bootstrap, revert scripts arg $2
+                    - 'feelpp_feelpp-toolboxes-mso4sc.simg' # bootstrap, revert scripts arg $2
 
         relationships:
             - type: job_contained_in_hpc

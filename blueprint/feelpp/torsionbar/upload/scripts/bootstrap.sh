@@ -12,6 +12,7 @@ if [ ! -f $1/$2 ]; then
         echo "You should download a Feel++ singularity and place it in $1/ first!"
         exit 1
     else
+        echo "Copying singularity file $SINGULARITY_REPO/$2 to $1"
         cp $SINGULARITY_REPO/$2 $1
     fi
 else
