@@ -54,7 +54,7 @@ node_templates:
             job_prefix: { get_input: job_prefix }
 #            simulate: True  # COMMENT to test against a real HPC
 
-    create_geometry:
+    job_test_thermoelectricmodel:
         type: hpc.nodes.singularity_job
         properties:
             job_options:
@@ -66,98 +66,25 @@ node_templates:
                 volumes:
                     - '/scratch'
                     - '${LUSTRE}/feel:/feel'
-                command: 'gmsh -3 -clscale 1 -bin
-                     -o /feel/torsionbar.msh
-                    /opt/feelpp/Testcases/CSM/torsionbar/torsionbar.geo'
+                command: { concat: ['feelpp_hfm_thermoelectric_model_3D_V1T1_N1
+                   --config-file /usr/local/share/hifimagnet/ThermoElectricModel/thermoelectric_3D_V1T1_N1_cvg.cfg']}
                 nodes: 1
-                tasks: 1
-                tasks_per_node: 1
-                max_time: '00:05:00'
-                image: '${LUSTRE}/singularity_images/feelpp_feelpp-toolboxes-mso4sc.simg'
-            deployment:
-                bootstrap: 'scripts/bootstrap.sh'
-                revert: 'scripts/revert.sh'
-                inputs:
-                    - '${LUSTRE}/singularity_images/' # boostrap, revert scripts arg $1
-                    - 'feelpp_feelpp-toolboxes-mso4sc.simg' # bootstrap, revert scripts arg $2
-
-        relationships:
-            - type: job_contained_in_hpc
-              target: ft2_node
-
-    partition_mesh:
-        type: hpc.nodes.singularity_job
-        properties:
-            job_options:
-                modules:
-                    - gcc/6.1.0
-                    - openmpi/1.10.2
-                    - singularity/2.4.2
-                partition: 'thin-shared'
-                volumes:
-                    - '/scratch'
-                    - '${LUSTRE}/feel:/feel'
-                command: { concat:[
-                    'feelpp_mesh_partitioner
-                     --ifile /feel/torsionbar.msh
-                     --odir /feel/mesh_partitioned/
-                     --part ', { get_property: [job_torsionbar, job_options ,tasks] }] }
-                nodes: 1
-                tasks: 1
-                tasks_per_node: 1
-                max_time: '00:05:00'
-                image: '${LUSTRE}/singularity_images/feelpp_feelpp-toolboxes-mso4sc.simg'
-            deployment:
-                bootstrap: 'scripts/bootstrap.sh'
-                revert: 'scritps/revert.sh'
-                inputs:
-                    - '${LUSTRE}/singularity_images' # boostrap, revert scripts arg $1
-                    - 'feelpp_feelpp-toolboxes-mso4sc.simg' # bootstrap, revert scripts arg $2
-
-        relationships:
-            - type: job_contained_in_hpc
-              target: ft2_node
-            - type: job_depends_on
-              target: create_geometry
-
-    job_torsionbar:
-        type: hpc.nodes.singularity_job
-        properties:
-            job_options:
-                modules:
-                    - gcc/6.1.0
-                    - openmpi/1.10.2
-                    - singularity/2.4.2
-                partition: 'thin-shared'
-                volumes:
-                    - '/scratch'
-                    - '${LUSTRE}/feel:/feel'
-                command: { concat: ['feelpp_toolbox_solid_3d
-                   --config-file /usr/local/share/feelpp/testcases/CSM/torsionbar/torsionbar.cfg
-                   --solid.mshfile /feel/mesh_partitioned/torsionbar_p', { get_property:[SELF, job_options, tasks] }, '.json
-                   --solid.pc-type gamg
-                   --solid.pc-view 1
-                   --ts.restart 0
-                   --solid.scalability-save 1']}
-                nodes: 1
-                tasks: 16
-                tasks_per_node: 16
+                tasks: 6
+                tasks_per_node: 6
                 max_time: '01:30:00'
-                image: '${LUSTRE}/singularity_images/feelpp_feelpp-toolboxes-mso4sc.simg'
+                image: '${LUSTRE}/singularity_images/feelpp_hifimagnet-develop-yakkety.simg'
             deployment:
                 bootstrap: 'scripts/bootstrap.sh'
                 revert: 'scripts/revert.sh'
                 inputs:
                     - '${LUSTRE}/singularity_images' # boostrap, revert scripts arg $1
-                    - 'feelpp_feelpp-toolboxes-mso4sc.simg' # bootstrap, revert scripts arg $2
+                    - 'feelpp_hifimagnet-develop-yakkety.simg' # bootstrap, revert scripts arg $2
 
         relationships:
             - type: job_contained_in_hpc
               target: ft2_node
-            - type: job_depends_on
-              target: partition_mesh
 
 outputs:
-    job_torsionbar:
-        description: feelpp_torsionbar results
-        value: { get_attribute: [job_torsionbar, job_name] }
+    job_test_thermoelectricmodel:
+        description: feelpp_hfm_thermoelectricmodel_3D_V1T1_N1 results
+        value: { get_attribute: [job_test_thermoelectricmodel, job_name] }
