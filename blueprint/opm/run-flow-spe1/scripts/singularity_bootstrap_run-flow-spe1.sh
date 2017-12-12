@@ -1,4 +1,8 @@
 #!/bin/bash -l
 
-cd $1
-wget -O $3 $2
+WORKDIR=$1
+LOCAL_FILE=$3
+REMOTE_FILE=$2
+
+cd $WORKDIR
+wget -O $LOCAL_FILE $REMOTE_FILE

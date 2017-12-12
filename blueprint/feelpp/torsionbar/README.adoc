@@ -1,0 +1,32 @@
+= Torsionbar TOSCA
+
+The "upload" is uploaded on the orchestrator
+
+WARNING: Don't put your local in the upload directory to not upload your user/pass
+
+You can copy the singularity image in your ${LUSTRE} folder if it's not available
+the ${SINGULARITY_REPO} directory. (module load singularity on ft2)
+
+Connect to the cloudify client via docker.
+See https://github.com/MSO4SC/MSOOrchestrator-CLI/blob/master/README.adoc
+
+Set your local blueprint file (user/password) at the root of the cloned repository
+named "local-blueprint-inputs.yaml" (It is ignored by git, then you won't risk to push
+it on the remote repository)
+See http://book.mso4sc.cemosis.fr/#mso4sc_tosca_modelling_and_execution
+
+[source]
+----
+./deploy up
+----
+
+to deploy on the orchestrator
+
+[source]
+----
+./deploy down
+----
+
+NOTE: If the application fails during one step of the deploy up process, you'll have to
+force cancel execution by hands. `cfy executions list`, `cfy executions cancel -f <id>`
+in the orchestrator client (*docker).
