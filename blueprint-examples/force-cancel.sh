@@ -1,7 +1,7 @@
 #!/bin/bash
 
-curl http://10.38.3.74/executions/$1 -X PATCH \
+curl http://193.144.35.131/executions/$2 -X PATCH \
 	--header "Tenant: default_tenant" \
-	-u admin:admin \
+	-u admin:$1 \
 	-H "Content-Type: application/json" -d '{"status": "cancelled"}'
 echo ''
