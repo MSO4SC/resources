@@ -25,9 +25,9 @@ mpirun -np 24 singularity exec -B /mnt:/mnt,/scratch:/scratch $7 $9 $1 $2 $3 $4 
 # $3: za_charge
 # $4: za_simpath
 # $5: za_mail
-# $6: za_slurm_script
-# $7: za_image			za_main.sh (in container)
+# $6: za_slurm_script -> slurm script (here as here doc)
+# $7: za_image
 # $8: za_ntomp
-# $9: za_main_script
+# $9: za_main_script -> za_main.sh (in container)
 
 EOM
