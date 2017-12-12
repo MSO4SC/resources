@@ -61,7 +61,7 @@ node_templates:
                 modules:
                     - gcc/6.1.0
                     - openmpi/1.10.2
-                    - singularity/2.3.2
+                    - singularity/2.4.2
                 partition: 'thin-shared'
                 volumes:
                     - '/scratch'
