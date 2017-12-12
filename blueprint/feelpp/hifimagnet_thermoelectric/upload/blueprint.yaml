@@ -66,19 +66,19 @@ node_templates:
                 volumes:
                     - '/scratch'
                     - '${LUSTRE}/feel:/feel'
-                command: { concat: ['feelpp_hfm_thermoelectric_model_3D_V1T1_N1
-                   --config-file /usr/local/share/hifimagnet/ThermoElectricModel/thermoelectric_3D_V1T1_N1_cvg.cfg']}
+                command: 'feelpp_hfm_thermoelectric_model_3D_V1T1_N1
+                   --config-file /usr/local/share/hifimagnet/ThermoElectricModel/thermoelectric_3D_V1T1_N1_cvg.cfg'
                 nodes: 1
                 tasks: 6
                 tasks_per_node: 6
-                max_time: '01:30:00'
-                image: '${LUSTRE}/singularity_images/feelpp_hifimagnet-develop-yakkety.simg'
+                max_time: '00:10:00'
+                image: '${LUSTRE}/singularity_images/feelpp_hifimagnet-mso4sc.simg'
             deployment:
                 bootstrap: 'scripts/bootstrap.sh'
                 revert: 'scripts/revert.sh'
                 inputs:
                     - '${LUSTRE}/singularity_images' # boostrap, revert scripts arg $1
-                    - 'feelpp_hifimagnet-develop-yakkety.simg' # bootstrap, revert scripts arg $2
+                    - 'feelpp_hifimagnet-mso4sc.simg' # bootstrap, revert scripts arg $2
 
         relationships:
             - type: job_contained_in_hpc
