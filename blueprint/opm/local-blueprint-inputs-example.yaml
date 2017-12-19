@@ -25,3 +25,25 @@ sze_config:
         password: "[PASS]"
     country_tz: "Europe/Budapest"
     workload_manager: "SLURM"
+
+
+
+#############################
+# Application specific inputs
+#############################
+
+# Number of parallel processes to use for the run (all on a single node)
+parallel_tasks: 1
+
+# Max time allowed
+max_time: '00:05'
+
+# URL for input files.
+# They are expected to be in a gzip-ed tarball, say 'case.tgz'.
+# That must unpack into a directory with the same name, in this example: 'case'.
+# That directory again is expected to contain a *single* .DATA file, that file will be
+# the one passed to the simulator.
+#
+# The URLs below point to archives with the spe1 and Norne cases, respectively.
+input_url: 'https://gitlab.srv.cesga.es/atgeirr/OPM-public-testing-data/raw/master/spe1.tgz'
+#input_url: 'https://gitlab.srv.cesga.es/atgeirr/OPM-public-testing-data/raw/master/norne.tgz'
