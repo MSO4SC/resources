@@ -25,7 +25,7 @@ inputs:
     # Monitor
     monitor_entrypoint:
         description: Monitor entrypoint IP
-        default: "127.0.0.1"
+        default: "193.144.35.146"
         type: string
 
     # Job prefix name
@@ -35,20 +35,24 @@ inputs:
         type: string
 
     # CESGA FTII parameters
-    ft2_config:
-        description: FTII connection credentials
+    mso4sc_hpc_primary:
+        description: Configuration for the primary HPC to be used
         default: {}
     
     # SZE test infrastructure parameters
-    sze_config:
-        description: SZE test infrastructure credentials
+    mso4sc_hpc_secondary:
+        description: Configuration for the secondary HPC to be used
         default: {}
 
+    mso4sc_dataset_model:
+        description: Model dataset
+        default: ""
+
 node_templates:
-    ft2_node:
+    primary_hpc:
         type: hpc.nodes.Compute
         properties:
-            config: { get_input: ft2_config }
+            config: { get_input: mso4sc_hpc_primary }
             monitor_entrypoint: { get_input: monitor_entrypoint }
             monitor_orchestrator_available: True
             job_prefix: { get_input: job_prefix }
@@ -79,7 +83,7 @@ node_templates:
                     - 'openmpi_1.10.7_ring.img'
         relationships:
             - type: job_contained_in_hpc
-              target: ft2_node
+              target: primary_hpc
 
 outputs:
     single_job_name:

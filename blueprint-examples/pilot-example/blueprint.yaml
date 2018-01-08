@@ -31,21 +31,21 @@ inputs:
         default: "mso4sc"
         type: string
 
-    # CESGA FTII parameters
-    ft2_config:
-        description: FTII connection credentials
+    # First HPC configuration
+    mso4sc_hpc_primary:
+        description: Configuration for the primary HPC to be used
         default: {}
     
-    # SZE test infrastructure parameters
-    sze_config:
-        description: SZE test infrastructure credentials
+    # Second HPC configuration
+    mso4sc_hpc_secondary:
+        description: Configuration for the secondary HPC to be used
         default: {}
 
 node_templates:
-    ft2_node:
+    first_hpc:
         type: hpc.nodes.Compute
         properties:
-            config: { get_input: ft2_config }
+            config: { get_input: mso4sc_hpc_primary }
             monitor_entrypoint: { get_input: monitor_entrypoint }
             monitor_orchestrator_available: True
             job_prefix: { get_input: job_prefix }
@@ -61,7 +61,7 @@ node_templates:
 #                    - 'test'
         relationships:
             - type: job_contained_in_hpc
-              target: ft2_node
+              target: first_hpc
 
     first_velocity_post:
         type: hpc.nodes.fenics_post
@@ -70,7 +70,7 @@ node_templates:
             file: 'velocity'
         relationships:
             - type: job_contained_in_hpc
-              target: ft2_node
+              target: first_hpc
             - type: job_depends_on
               target: first_iter
     
@@ -81,7 +81,7 @@ node_templates:
             file: 'pressure'
         relationships:
             - type: job_contained_in_hpc
-              target: ft2_node
+              target: first_hpc
             - type: job_depends_on
               target: first_iter
 
@@ -91,7 +91,7 @@ node_templates:
             iter_number: '01'
         relationships:
             - type: job_contained_in_hpc
-              target: ft2_node
+              target: first_hpc
             - type: job_depends_on
               target: first_iter
 
@@ -102,7 +102,7 @@ node_templates:
             file: 'velocity'
         relationships:
             - type: job_contained_in_hpc
-              target: ft2_node
+              target: first_hpc
             - type: job_depends_on
               target: second_iter
     
@@ -113,7 +113,7 @@ node_templates:
             file: 'pressure'
         relationships:
             - type: job_contained_in_hpc
-              target: ft2_node
+              target: first_hpc
             - type: job_depends_on
               target: second_iter
 
