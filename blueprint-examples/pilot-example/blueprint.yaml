@@ -16,7 +16,7 @@
 tosca_definitions_version: cloudify_dsl_1_3
 
 imports:
-    - maf-types.yaml
+    - madf-types.yaml
 
 inputs:
     # Monitor
