@@ -70,7 +70,7 @@ node_templates:
                 nodes: 1
                 tasks: 1
                 tasks_per_node: 1
-                max_time: '00:01'
+                max_time: '00:01:00'
             deployment:
                 bootstrap: 'scripts/singularity_bootstrap_example.sh'
                 revert: 'scripts/singularity_revert_example.sh'
@@ -98,7 +98,7 @@ node_templates:
                 nodes: 1
                 tasks: 1
                 tasks_per_node: 1
-                max_time: '00:01'
+                max_time: '00:01:00'
             deployment:
                 bootstrap: 'scripts/singularity_bootstrap_example.sh'
                 revert: 'scripts/singularity_revert_example.sh'
@@ -128,7 +128,7 @@ node_templates:
                 nodes: 1
                 tasks: 1
                 tasks_per_node: 1
-                max_time: '00:01'
+                max_time: '00:01:00'
             deployment:
                 bootstrap: 'scripts/singularity_bootstrap_example.sh'
                 revert: 'scripts/singularity_revert_example.sh'
@@ -158,7 +158,7 @@ node_templates:
                 nodes: 1
                 tasks: 1
                 tasks_per_node: 1
-                max_time: '00:01'
+                max_time: '00:01:00'
             deployment:
                 bootstrap: 'scripts/singularity_bootstrap_example.sh'
                 revert: 'scripts/singularity_revert_example.sh'
