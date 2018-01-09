@@ -1,8 +1,0 @@
-#!/bin/bash -l
-
-WORKDIR=$1
-LOCAL_FILE=$3
-REMOTE_FILE=$2
-
-cd $WORKDIR
-wget -O $LOCAL_FILE $REMOTE_FILE

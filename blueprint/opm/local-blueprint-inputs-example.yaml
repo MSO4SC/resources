@@ -9,7 +9,7 @@ monitor_entrypoint: "193.144.35.146"
 job_prefix: "mso_"
 
 # CESGA FTII credentials
-ft2_config:
+mso4sc_hpc_primary:
     credentials:
         host: "ft2.cesga.es"
         user: "[USER]"
@@ -18,7 +18,7 @@ ft2_config:
     workload_manager: "SLURM"
 
 # SZE test infrastructure credentials
-sze_config:
+mso4sc_hpc_secondary:
     credentials:
         host: "mso.tilb.sze.hu"
         user: "[USER]"
@@ -36,7 +36,7 @@ sze_config:
 parallel_tasks: 1
 
 # Max time allowed
-max_time: '00:05'
+max_time: '30:00'
 
 # URL for input files.
 # They are expected to be in a gzip-ed tarball, say 'case.tgz'.
