@@ -1,0 +1,202 @@
+########
+# Copyright (c) 2017 MSO4SC - javier.carnero@atos.net
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# 3D Air Quality Prediction blueprint
+# by Ákos Kovács & Tamás Budai
+
+tosca_definitions_version: cloudify_dsl_1_3
+
+imports:
+    # to speed things up, it is possible to download this file,
+    - http://www.getcloudify.org/spec/cloudify/4.1/types.yaml
+    # HPC pluging
+    - http://raw.githubusercontent.com/MSO4SC/cloudify-hpc-plugin/master/plugin.yaml
+
+
+inputs:
+    # Job prefix name
+    job_prefix:
+        description: 3DairqualityPred
+        default: "mso4sc"
+        type: string
+
+  # Second HPC configuration
+    mso4sc_hpc_secondary:
+        description: Configuration for the secondary HPC to be used
+        default: {}
+
+##
+##      User Input Parameters
+##
+
+    traffic_density:
+        description: Traffic density possible values low,mid,high
+        default: "low"
+        type: string
+
+    mesh_density:
+        description: Mesh density possible values low,mid
+        default: "low"
+        type: string
+
+    wind_profile:
+        description: Wind profiles, possible values 1,2
+        default: "1"
+        type: string
+
+    fluent_start_time:
+        description: Start time of the simulation (in second from midnight)
+        default: "18000"
+        type: string
+
+    fluent_iter_1:
+        description: Dispersion simulation iteration number 1
+        default: "30"
+        type: string
+
+    fluent_iter_2:
+        description: Dispersion simulation iteration number 2
+        default: "10"
+        type: string
+
+
+node_templates:
+  sze_node:
+        type: hpc.nodes.Compute
+        properties:
+            config: {get_input: sze_config}
+            monitor_entrypoint: 127.0.0.1
+            monitor_orchestrator_available: False
+            job_prefix: hpc_SZE_
+
+
+
+  # 3dairq steps
+  traffic:
+        type: hpc.nodes.job
+        properties:
+            job_options:
+                type: 'SRUN'
+                command: { concat: [ '/home/airq/3dairq/1-create_traffic.sh ',{get_input: traffic_density} ]}
+                nodes: 1
+                tasks: 1
+                tasks_per_node: 1
+                max_time: '00:10:00'
+            deployment:
+                inputs:
+                    - 'example_job'
+            avoid_cleanup: true
+        relationships:
+                    - type: job_contained_in_hpc
+                      target: sze_node
+
+  mesh:
+        type: hpc.nodes.job
+        properties:
+            job_options:
+                type: 'SRUN'
+                command: { concat: [ '/home/airq/3dairq/2-create_mesh.sh ',{get_input: mesh_density} ]}
+                nodes: 1
+                tasks: 1
+                tasks_per_node: 1
+                max_time: '00:10:00'
+            deployment:
+                inputs:
+                    - 'example_job'
+            avoid_cleanup: true
+        relationships:
+                    - type: job_contained_in_hpc
+                      target: sze_node
+                    - type: job_depends_on
+                      target: traffic
+
+  emission:
+        type: hpc.nodes.job
+        properties:
+            job_options:
+                type: 'SRUN'
+                command: '/home/airq/3dairq/3-create_emission.sh'
+                nodes: 1
+                tasks: 1
+                tasks_per_node: 1
+                max_time: '00:10:00'
+            deployment:
+                inputs:
+                    - 'example_job'
+            avoid_cleanup: true
+        relationships:
+                    - type: job_contained_in_hpc
+                      target: sze_node
+                    - type: job_depends_on
+                      target: mesh
+  wind:
+        type: hpc.nodes.job
+        properties:
+            job_options:
+                type: 'SRUN'
+                command: { concat: [ '/home/airq/3dairq/4-create_wind.sh ',{get_input: wind_profile} ]}
+                nodes: 1
+                tasks: 1
+                tasks_per_node: 1
+                max_time: '00:10:00'
+            deployment:
+                inputs:
+                    - 'example_job'
+            avoid_cleanup: true
+        relationships:
+                    - type: job_contained_in_hpc
+                      target: sze_node
+                    - type: job_depends_on
+                      target: traffic
+
+  fluentdispersion:
+        type: hpc.nodes.job
+        properties:
+            job_options:
+                type: 'SRUN'
+                command: { concat: [ '/home/airq/3dairq/5-fluent-sim.sh ',{get_input: fluent_start_time},' ',{get_input: fluent_iter_1},' ',{get_input: fluent_iter_2} ]}
+                nodes: 1
+                tasks: 1
+                tasks_per_node: 1
+                max_time: '00:10:00'
+            deployment:
+                inputs:
+                    - 'example_job'
+            avoid_cleanup: true
+        relationships:
+                    - type: job_contained_in_hpc
+                      target: sze_node
+                    - type: job_depends_on
+                      target: wind
+                    - type: job_depends_on
+                      target: emission
+
+					  
+outputs:
+    traffic_:
+        description: 3D AirQuality Prediction on SZE cluster
+        value: { get_attribute: [traffic, job_name] }
+    mesh_:
+        description: 3D AirQuality Prediction on SZE cluster
+        value: { get_attribute: [mesh, job_name] }
+    emission_:
+        description: 3D AirQuality Prediction on SZE cluster
+        value: { get_attribute: [emission, job_name] }
+    wind_:
+        description: 3D AirQuality Prediction on SZE cluster
+        value: { get_attribute: [wind, job_name] }
+    fluentdispersion_:
+        description: 3D AirQuality Prediction on SZE cluster
+        value: { get_attribute: [fluentdispersion, job_name] }
