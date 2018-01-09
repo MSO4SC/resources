@@ -6,7 +6,7 @@ arg=$1
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/" && pwd )"
 ROOT_DIR=${SCRIPT_DIR}/../../../
-JOB=feelpp_hfm_coupledcartmodel
+JOB=feelpp_torsionbar
 UPLOAD_DIR=${SCRIPT_DIR}/upload
 TOSCA=blueprint.yaml
 LOCAL=local-blueprint-inputs.yaml

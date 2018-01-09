@@ -55,7 +55,7 @@ node_templates:
             job_prefix: { get_input: job_prefix }
 #            simulate: True  # COMMENT to test against a real HPC
 
-    job_test_thermoelectricmodel:
+    job_test_coupledcartmodel:
         type: hpc.nodes.singularity_job
         properties:
             job_options:
@@ -68,18 +68,18 @@ node_templates:
                 volumes:
                     - '/scratch'
                     - '${LUSTRE}/feel:/feel'
-                command: 'feelpp_hfm_thermoelectric_model_3D_V1T1_N1
-                   --config-file /usr/local/share/hifimagnet/ThermoElectricModel/thermoelectric_3D_V1T1_N1_cvg.cfg'
+                command: { concat: ['feelpp_hfm_coupledcartmodel_3DP1N1
+                   --config-file /usr/local/share/hifimagnet/CoupledCartModel/coupledcart_bmap_3D_P1_N1_cvg.cfg']}
                 nodes: 1
-                tasks: 2
-                tasks_per_node: 2
-                max_time: '00:10:00'
-                image: '${LUSTRE}/singularity_images/feelpp_hifimagnet-mso4sc.simg'
+                tasks: 6
+                tasks_per_node: 6
+                max_time: '00:05:00'
+                image: '${STORE}/Singularity/feelpp_hifimagnet-mso4sc.simg'
             deployment:
                 bootstrap: 'scripts/bootstrap.sh'
                 revert: 'scripts/revert.sh'
                 inputs:
-                    - '${LUSTRE}/singularity_images' # boostrap, revert scripts arg $1
+                    - '${STORE}/Singularity' # boostrap, revert scripts arg $1
                     - 'feelpp_hifimagnet-mso4sc.simg' # bootstrap, revert scripts arg $2
 
         relationships:
@@ -87,6 +87,6 @@ node_templates:
               target: primary_hpc
 
 outputs:
-    job_test_thermoelectricmodel:
-        description: feelpp_hfm_thermoelectricmodel_3D_V1T1_N1 results
-        value: { get_attribute: [job_test_thermoelectricmodel, job_name] }
+    job_test_coupledcartmodel:
+        description: feelpp_hfm_coupledcartmodel_3DP1N1 results
+        value: { get_attribute: [job_test_coupledcartmodel, job_name] }
