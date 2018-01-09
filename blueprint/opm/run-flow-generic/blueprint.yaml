@@ -35,12 +35,12 @@ inputs:
         type: string
 
     # CESGA FTII parameters
-    ft2_config:
+    mso4sc_hpc_primary:
         description: FTII connection credentials
         default: {}
     
     # SZE test infrastructure parameters
-    sze_config:
+    mso4sc_hpc_secondary:
         description: SZE test infrastructure credentials
         default: {}
 
@@ -49,8 +49,8 @@ inputs:
         default: 1
 
     max_time:
-        description: maximum allowed time for run (hours and minutes)
-        default: '00:05'
+        description: maximum allowed time for run (minutes and seconds)
+        default: '30:00'
         
     input_url:
         description: url to retrieve for case file
@@ -61,7 +61,7 @@ node_templates:
     ft2_node:
         type: hpc.nodes.Compute
         properties:
-            config: { get_input: ft2_config }
+            config: { get_input: mso4sc_hpc_primary }
             monitor_entrypoint: { get_input: monitor_entrypoint }
             monitor_orchestrator_available: True
             job_prefix: { get_input: job_prefix }
@@ -70,13 +70,14 @@ node_templates:
     opm_flow_single_job:
         type: hpc.nodes.singularity_job
         properties:
-            job_options: 
+            job_options:
                 modules:
                     - gcc/5.3.0
                     - openmpi/1.10.2
                     - singularity/2.3.1
                 partition: 'thin-shared'
                 image: '$SINGULARITY_REPO/opmrelease.img'
+                home: '$HOME:/home/$USER'
                 volumes:
                     - '/scratch '
                     - '/mnt'
