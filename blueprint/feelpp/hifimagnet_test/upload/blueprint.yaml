@@ -64,7 +64,7 @@ node_templates:
                     - openmpi/1.10.2
                     - singularity/2.3.2
                 partition: 'thin-shared'
-                home: '${HOME}:/home/otcemctr'
+                home: '${HOME}:/home/${USER}'
                 volumes:
                     - '/scratch'
                     - '${LUSTRE}/feel:/feel'
@@ -96,7 +96,7 @@ node_templates:
                     - openmpi/1.10.2
                     - singularity/2.3.2
                 partition: 'thin-shared'
-                home: '${HOME}:/home/otcemctr'
+                home: '${HOME}:/home/${USER}'
                 volumes:
                     - '/scratch'
                     - '${LUSTRE}/feel:/feel'
@@ -132,7 +132,7 @@ node_templates:
                     - openmpi/1.10.2
                     - singularity/2.3.2
                 partition: 'thin-shared'
-                home: '${HOME}:/home/otcemctr'
+                home: '${HOME}:/home/${USER}'
                 volumes:
                     - '/scratch'
                     - '${LUSTRE}/feel:/feel'
