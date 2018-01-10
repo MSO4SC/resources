@@ -1,6 +1,6 @@
 #!/bin/bash
 
-sys=$1
+sys="zibaffinity"
 if [ -z ${sys+x} ]; then 
 	sys="zibaffinity"
 	#sys="test"
@@ -8,8 +8,8 @@ fi
 
 #cd zibaffinity
 echo "Uninstalling deployment.."
-cfy executions start -d ${sys}_depl uninstall #--force
+cfy executions start -d ${sys} uninstall #--force
 echo "Deleting deployment.."
-cfy deployments delete ${sys}_depl #--force
+cfy deployments delete ${sys} #--force
 echo "Deleting blueprint.."
 cfy blueprints delete ${sys}_bp
