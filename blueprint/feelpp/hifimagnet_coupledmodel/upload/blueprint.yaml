@@ -18,7 +18,8 @@
 tosca_definitions_version: cloudify_dsl_1_3
 
 imports:
-    - http://www.getcloudify.org/spec/cloudify/4.1/types.yaml
+    # to speed things up, it is possible to download this file,
+    - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-manager/17.10.19/resources/rest-service/cloudify/types/types.yaml
     - http://raw.githubusercontent.com/MSO4SC/cloudify-hpc-plugin/master/plugin.yaml
 
 inputs:
@@ -35,20 +36,20 @@ inputs:
         type: string
 
     # CESGA FTII parameters
-    ft2_config:
+    mso4sc_hpc_primary:
         description: FTII connection credentials
         default: {}
 
     # SZE test infrastructure parameters
-    sze_config:
+    mso4sc_hpc_secondary:
         description: SZE test infrastructure credentials
         default: {}
 
 node_templates:
-    ft2_node:
+    primary_hpc:
         type: hpc.nodes.Compute
         properties:
-            config: { get_input: ft2_config }
+            config: { get_input: mso4sc_hpc_primary }
             monitor_entrypoint: { get_input: monitor_entrypoint }
             monitor_orchestrator_available: True
             job_prefix: { get_input: job_prefix }
@@ -63,6 +64,7 @@ node_templates:
                     - openmpi/1.10.2
                     - singularity/2.4.2
                 partition: 'thin-shared'
+                home: '${HOME}:/home/${USER}'
                 volumes:
                     - '/scratch'
                     - '${LUSTRE}/feel:/feel'
@@ -82,7 +84,7 @@ node_templates:
 
         relationships:
             - type: job_contained_in_hpc
-              target: ft2_node
+              target: primary_hpc
 
 outputs:
     job_test_coupledmodel:

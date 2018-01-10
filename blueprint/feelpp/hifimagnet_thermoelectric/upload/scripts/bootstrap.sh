@@ -3,7 +3,7 @@
 # Singularity image retrieved from
 # https://www.singularity-hub.org/collections/253
 
-module load singularity/2.3.2
+module load singularity/2.4.2
 
 # Copy singularity image only if the user has not put an image on lustre with
 # the same name.

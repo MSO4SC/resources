@@ -18,6 +18,7 @@
 tosca_definitions_version: cloudify_dsl_1_3
 
 imports:
+    # to speed things up, it is possible to download this file,
     - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-manager/17.10.19/resources/rest-service/cloudify/types/types.yaml
     - http://raw.githubusercontent.com/MSO4SC/cloudify-hpc-plugin/master/plugin.yaml
 
@@ -35,20 +36,20 @@ inputs:
         type: string
 
     # CESGA FTII parameters
-    ft2_config:
+    mso4sc_hpc_primary:
         description: FTII connection credentials
         default: {}
 
     # SZE test infrastructure parameters
-    sze_config:
+    mso4sc_hpc_secondary:
         description: SZE test infrastructure credentials
         default: {}
 
 node_templates:
-    ft2_node:
+    primary_hpc:
         type: hpc.nodes.Compute
         properties:
-            config: { get_input: ft2_config }
+            config: { get_input: mso4sc_hpc_primary }
             monitor_entrypoint: { get_input: monitor_entrypoint }
             monitor_orchestrator_available: True
             job_prefix: { get_input: job_prefix }
@@ -70,8 +71,8 @@ node_templates:
                 command: 'feelpp_hfm_thermoelectric_model_3D_V1T1_N1
                    --config-file /usr/local/share/hifimagnet/ThermoElectricModel/thermoelectric_3D_V1T1_N1_cvg.cfg'
                 nodes: 1
-                tasks: 6
-                tasks_per_node: 6
+                tasks: 2
+                tasks_per_node: 2
                 max_time: '00:10:00'
                 image: '${LUSTRE}/singularity_images/feelpp_hifimagnet-mso4sc.simg'
             deployment:
@@ -83,7 +84,7 @@ node_templates:
 
         relationships:
             - type: job_contained_in_hpc
-              target: ft2_node
+              target: primary_hpc
 
 outputs:
     job_test_thermoelectricmodel:

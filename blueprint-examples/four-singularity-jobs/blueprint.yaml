@@ -64,6 +64,7 @@ node_templates:
                     - singularity/2.3.1
                 partition: 'thin-shared'
                 image: '$LUSTRE/openmpi_1.10.7_ring.img'
+                home: '$HOME:/home/$USER'
                 volumes:
                     - '/scratch'
                 command: 'ring > fourth_example_1.test'
@@ -92,6 +93,7 @@ node_templates:
                     - singularity/2.3.1
                 partition: 'thin-shared'
                 image: '$LUSTRE/openmpi_1.10.7_ring.img'
+                home: '$HOME:/home/$USER'
                 volumes:
                     - '/scratch'
                 command: 'ring > fourth_example_2.test'
@@ -122,6 +124,7 @@ node_templates:
                     - singularity/2.3.1
                 partition: 'thin-shared'
                 image: '$LUSTRE/openmpi_1.10.7_ring.img'
+                home: '$HOME:/home/$USER'
                 volumes:
                     - '/scratch'
                 command: 'ring > fourth_example_3.test'
@@ -152,6 +155,7 @@ node_templates:
                     - singularity/2.3.1
                 partition: 'thin-shared'
                 image: '$LUSTRE/openmpi_1.10.7_ring.img'
+                home: '$HOME:/home/$USER'
                 volumes:
                     - '/scratch'
                 command: 'ring > fourth_example_4.test'

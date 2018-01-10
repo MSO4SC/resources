@@ -1,4 +1,4 @@
-= HiFiMagnet ThermoElectric TOSCA
+= Torsionbar TOSCA
 
 The "upload" is uploaded on the orchestrator
 
@@ -13,9 +13,6 @@ See https://github.com/MSO4SC/MSOOrchestrator-CLI/blob/master/README.adoc
 Set your local blueprint file (user/password) at the root of the cloned repository
 named "local-blueprint-inputs.yaml" (It is ignored by git, then you won't risk to push
 it on the remote repository)
-See http://book.mso4sc.cemosis.fr/#mso4sc_tosca_modelling_and_execution
-
-
 See http://book.mso4sc.cemosis.fr/#mso4sc_tosca_modelling_and_execution
 
 [source]

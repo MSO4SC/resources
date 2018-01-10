@@ -1,5 +1,7 @@
 ########
-# Copyright (c) 2017 MSO4SC - javier.carnero@atos.net
+# Copyright (c) 2017 MSO4SC
+# Author(s) javier.carnero@atos.net
+#           guillaume.dolle@cemosis.fr
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,35 +20,30 @@ tosca_definitions_version: cloudify_dsl_1_3
 imports:
     # to speed things up, it is possible to download this file,
     - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-manager/17.10.19/resources/rest-service/cloudify/types/types.yaml
-    # HPC pluging
     - http://raw.githubusercontent.com/MSO4SC/cloudify-hpc-plugin/master/plugin.yaml
 
 inputs:
     # Monitor
     monitor_entrypoint:
         description: Monitor entrypoint IP
-        default: "193.144.35.146"
+        default: "127.0.0.1"
         type: string
 
     # Job prefix name
     job_prefix:
         description: Job name prefix in HPCs
-        default: "mso_"
+        default: "mso4sc"
         type: string
 
     # CESGA FTII parameters
     mso4sc_hpc_primary:
-        description: Configuration for the primary HPC to be used
-        default: {}
-    
-    # SZE test infrastructure parameters
-    mso4sc_hpc_secondary:
-        description: Configuration for the secondary HPC to be used
+        description: FTII connection credentials
         default: {}
 
-    mso4sc_dataset_model:
-        description: Model dataset
-        default: ""
+    # SZE test infrastructure parameters
+    mso4sc_hpc_secondary:
+        description: SZE test infrastructure credentials
+        default: {}
 
 node_templates:
     primary_hpc:
@@ -58,35 +55,38 @@ node_templates:
             job_prefix: { get_input: job_prefix }
 #            simulate: True  # COMMENT to test against a real HPC
 
-    single_job:
+    job_test_coupledcartmodel:
         type: hpc.nodes.singularity_job
         properties:
-            job_options: 
+            job_options:
                 modules:
-                    - gcc/5.3.0
+                    - gcc/6.1.0
                     - openmpi/1.10.2
-                    - singularity/2.3.1
+                    - singularity/2.4.2
                 partition: 'thin-shared'
-                image: '$LUSTRE/openmpi_1.10.7_ring.img'
-                home: '$HOME:/home/$USER'
+                home: '${HOME}:/home/${USER}'
                 volumes:
                     - '/scratch'
-                command: 'ring > single.test'
+                    - '${LUSTRE}/feel:/feel'
+                command: { concat: ['feelpp_hfm_coupledcartmodel_3DP1N1
+                   --config-file /usr/local/share/hifimagnet/CoupledCartModel/coupledcart_bmap_3D_P1_N1_cvg.cfg']}
                 nodes: 1
-                tasks: 1
-                tasks_per_node: 1
-                max_time: '00:01:00'
+                tasks: 6
+                tasks_per_node: 6
+                max_time: '00:05:00'
+                image: '${STORE}/Singularity/feelpp_hifimagnet-mso4sc.simg'
             deployment:
-                bootstrap: 'scripts/singularity_bootstrap_example.sh'
-                revert: 'scripts/singularity_revert_example.sh'
+                bootstrap: 'scripts/bootstrap.sh'
+                revert: 'scripts/revert.sh'
                 inputs:
-                    - '$LUSTRE'
-                    - 'openmpi_1.10.7_ring.img'
+                    - '${STORE}/Singularity' # boostrap, revert scripts arg $1
+                    - 'feelpp_hifimagnet-mso4sc.simg' # bootstrap, revert scripts arg $2
+
         relationships:
             - type: job_contained_in_hpc
               target: primary_hpc
 
 outputs:
-    single_job_name:
-        description: single job name in the HPC
-        value: { get_attribute: [single_job, job_name] }
+    job_test_coupledcartmodel:
+        description: feelpp_hfm_coupledcartmodel_3DP1N1 results
+        value: { get_attribute: [job_test_coupledcartmodel, job_name] }
