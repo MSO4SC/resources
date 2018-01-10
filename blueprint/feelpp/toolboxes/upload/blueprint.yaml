@@ -1,0 +1,107 @@
+########
+# Copyright (c) 2017 MSO4SC
+# Author(s) javier.carnero@atos.net
+#           guillaume.dolle@cemosis.fr
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+tosca_definitions_version: cloudify_dsl_1_3
+
+imports:
+    - feelpp_toolboxes_types.yaml
+
+inputs:
+    # Monitor
+    monitor_entrypoint:
+        description: Monitor entrypoint IP
+        default: "127.0.0.1"
+        type: string
+
+    # Job prefix name
+    job_prefix:
+        description: Job name prefix in HPCs
+        default: "mso4sc"
+        type: string
+
+    # CESGA FTII parameters
+    ft2_config:
+        description: FTII connection credentials
+        default: {}
+
+    # SZE test infrastructure parameters
+    sze_config:
+        description: SZE test infrastructure credentials
+        default: {}
+
+    #############################################################
+    # Feel++ Application specific configuration inputs
+    # See the local file for the config.
+    #############################################################
+
+    # feelpp mesh creation configuration.
+    feelpp_mesh_creation_config:
+        description: Feel++ toolboxes mesh creation config
+        default: {}
+
+    # SZE test infrastructure parameters
+    feelpp_mesh_partition_config:
+        description: Feel++ toolboxes mesh partionning config
+        default: {}
+
+    # SZE test infrastructure parameters
+    feelpp_toolboxes_config:
+        description: Feel++ toolboxes config
+        default: {}
+
+node_templates:
+    ft2_node:
+        type: hpc.nodes.Compute
+        properties:
+            config: { get_input: ft2_config }
+            monitor_entrypoint: { get_input: monitor_entrypoint }
+            monitor_orchestrator_available: True
+            job_prefix: { get_input: job_prefix }
+#            simulate: True  # COMMENT to test against a real HPC
+
+    feelpp_mesh_create:
+        type: hpc.nodes.feelpp.mesh.creation
+        properties:
+            config: { get_input: feelpp_mesh_creation_config }
+        relationships:
+            - type: job_contained_in_hpc
+              target: ft2_node
+
+    feelpp_mesh_part:
+        type: hpc.nodes.feelpp.mesh.partition
+        properties:
+            config: { get_input: feelpp_mesh_partition_config }
+        relationships:
+            - type: job_contained_in_hpc
+              target: ft2_node
+            - type: job_depends_on
+              target: feelpp_mesh_create
+
+    feelpp_simulate:
+        type: hpc.nodes.feelpp.toolboxes
+        properties:
+            config: { get_input: feelpp_toolboxes_config }
+        relationships:
+            - type: job_contained_in_hpc
+              target: ft2_node
+            - type: job_depends_on
+              target: feelpp_mesh_part
+
+outputs:
+    job_torsionbar:
+        description: feelpp_toolboxes results
+        value: { get_attribute: [ feelpp_simulate, job_name] }

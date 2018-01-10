@@ -1,0 +1,22 @@
+#############################
+# Configure the application
+#############################
+
+feelpp_mesh_creation_config:
+    geofile: "/usr/local/share/feelpp/testcases/CSM/torsionbar/torsionbar.geo"
+    mshfile: "/feel/torsionbar.msh"
+    dim: 3
+    opts: ""
+
+feelpp_mesh_partition_config:
+    mshfile: "/feel/torsionbar.msh"
+    part: 4
+    opts: ""
+
+feelpp_toolboxes_config:
+    toolbox: "feelpp_toolbox_solid_3d"
+    cfg: "/usr/local/share/feelpp/testcases/CSM/torsionbar/torsionbar.cfg"
+    opts: "--pc-view 1"
+    nnodes: 1
+    ntasks: 4
+    ntasks_per_nodes: 4
