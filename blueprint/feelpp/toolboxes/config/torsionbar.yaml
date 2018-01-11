@@ -1,19 +1,20 @@
 #############################
 # Configure the application
+# Generated via MSO4SC Portal.
 #############################
 
-feelpp_mesh_creation_config:
+feelpp_mesh_create:
     geofile: "/usr/local/share/feelpp/testcases/CSM/torsionbar/torsionbar.geo"
     mshfile: "/feel/torsionbar.msh"
     dim: 3
     opts: ""
 
-feelpp_mesh_partition_config:
+feelpp_mesh_part:
     mshfile: "/feel/torsionbar.msh"
     part: 4
     opts: ""
 
-feelpp_toolboxes_config:
+feelpp_toolboxes:
     toolbox: "feelpp_toolbox_solid_3d"
     cfg: "/usr/local/share/feelpp/testcases/CSM/torsionbar/torsionbar.cfg"
     opts: "--pc-view 1"

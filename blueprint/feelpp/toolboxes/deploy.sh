@@ -14,6 +14,22 @@ LOCAL_DIR=../../../../
 LOCAL_APP_DIR=../config
 LOCAL_APP=torsionbar
 
+usage()
+{
+    echo "usage: $0 [CMD] config_name"
+    echo ""
+    echo "options:"
+    echo "      up     send to orchestrator"
+    echo "    down     remove from orchestrator"
+    echo ""
+    echo "config_name:"
+    echo "    Base name of the config available in config directory."
+    echo "    torsionbar example is used by default."
+    echo ""
+    echo "Example: ./deploy up torsionbar"
+    echo "         ./deploy down torsionbar"
+}
+
 cd ${UPLOAD_DIR}
 
 if [ ! -f "${LOCAL_DIR}/${LOCAL}" ]; then
@@ -53,11 +69,6 @@ case $arg in
         cfy blueprints delete "${JOB}"
         ;;
     *)
-        echo "usage: $0 [option]"
-        echo ""
-        echo "options:"
-        echo "      up     send to orchestrator"
-        echo "    down     remove from orchestrator"
-        echo ""
+        usage
         ;;
 esac
