@@ -51,22 +51,29 @@ inputs:
         default: '$LUSTRE/data_4_javier/zibaffinity_tosca/input/17betaEstradiol.pdb'
         type: string
     
+    # $4 - ZA main simulation directory    !!!!! HPC-dependent
+    za_work_path:
+        description: ZA main simulation directory
+        default: '$LUSTRE/data_4_javier/zibaffinity_tosca'
+        type: string
+    
+    # ZA target name    !!!!! USER selection from catalogue corresponding to DB table
+    mso4sc_dataset_tar:
+        description: ZA target (path)
+        default: 'erAlpha-1gwr'
+        type: string
+    
     # $2 - ZA target path    !!!!! USER selection from DB output
     za_tar:
         description: ZA target path
-        default: '$LUSTRE/data_4_javier/zibaffinity_tosca/input/erAlpha-1gwr'
+        default: { concat: [ { get_input: za_work_path },'/',{ get_input: mso4sc_dataset_tar } ]}
+#        default: '$LUSTRE/data_4_javier/zibaffinity_tosca/input/erAlpha-1gwr'
         type: string
     
     # $3 - ZA formal ligand charge    !!!!! USER input
     za_charge:
         description: ZA formal ligand charge
         default: "0"
-        type: string
-    
-    # $4 - ZA main simulation directory    !!!!! HPC-dependent
-    za_work_path:
-        description: ZA main simulation directory
-        default: '$LUSTRE/data_4_javier/zibaffinity_tosca'
         type: string
     
     # $5 - ZA user mail address    !!!!! USER input
@@ -78,7 +85,7 @@ inputs:
     # ZA image file    !!!!! HPC-dependent
     za_image:
         description: ZA image file
-        default: 'ubuntu-16.04_sing-2.4.2_zibaffinity_writable.img'
+        default: 'zibaffinity.img'
         type: string
      
     # ZA image path    !!!!! HPC-dependent
@@ -334,8 +341,8 @@ node_templates:
         type: hpc.nodes.Compute
         properties:
             config: { get_input: mso4sc_hpc_primary }
-            monitor_entrypoint: { get_input: monitor_entrypoint }
-            monitor_orchestrator_available: True
+            external_monitor_entrypoint: { get_input: monitor_entrypoint }
+#            monitor_orchestrator_available: True
             job_prefix: { get_input: job_prefix }
 #            simulate: True  # COMMENT to test against a real HPC
 
@@ -352,11 +359,11 @@ node_templates:
                 volumes:
                     - '/mnt'
 ###             return output to mso portal and let user select a target
-                command: { concat: ['/usr/bin/sqlite3',' ',{ get_input: za_db },' ','"SELECT name FROM targets" | while read target; do echo "target molecule $target" >> ',' ',{ get_input: za_work_path },'/sim_dir/targets.txt; done']}
+                command: { concat: ['za_db_target.sh',' ',{ get_input: mso4sc_dataset_tar },' ',{ get_input: za_work_path },'/',{ get_input: za_db },' ',{ get_input: za_work_path },' ',]}
                 nodes: 1
                 tasks: 1
                 tasks_per_node: 1
-                max_time: '00:01'
+                max_time: '00:01:00'
             deployment:
                 bootstrap: 'scripts/za_db_bootstrap.sh'
                 revert: 'scripts/za_db_revert.sh'
