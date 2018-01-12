@@ -45,6 +45,54 @@ inputs:
         description: SZE test infrastructure credentials
         default: {}
 
+    parallel_nodes:
+        description: number of nodes to run in parallel
+        default: 1
+	type: integer
+
+    parallel_tasks_per_nodes:
+        description: number of tasks per nodes
+        default: 1
+	type: integer
+
+    parallel_tasks:
+        description: number of tasks/processes to run in parallel
+        default: 1
+	type: integer
+        # required: false
+
+    max_time:
+        description: maximum allowed time for run (hours, minutes and seconds)
+        default: '00:30:00'
+        
+    input_url:
+        description: url to retrieve for case file
+        default: {}
+	
+    input_cad_type:
+        description: type of cad to genererate helix or insert 
+        default: "helix"
+	type: string
+
+    input_compute_exec:
+        description: name of the executable to run 
+        default: "feelpp_hfm_thermoelectric_model_3D_V1T1_N1"
+	type: string
+
+    input_compute_cfg:
+        description: name of the simulation config file 
+        default: {}
+	type: string
+
+    input_cad_cfg:
+        description: name of the yaml CAD config file without extension 
+        default: "HL-31_H1"
+	type: string
+
+    input_cad_mesh:
+        description: name of the mesh file without extension 
+        default: "HL-31_H1"
+
 node_templates:
     primary_hpc:
         type: hpc.nodes.Compute
@@ -69,10 +117,14 @@ node_templates:
                     - '/scratch'
                     - '${LUSTRE}/feel:/feel'
                     - '${STORE}/Distene:/opt/DISTENE/DLim`
-                    - '${STORE}/HIFIMAGNET/demos/HL-dble:/data`
-                command: 'cd /data && salome
-		    -t ~/SALOME-8.3.0-DB9.3/INSTALL/HIFIMAGNET/bin/salome/HIFIMAGNET_Cmd.py
-		    args:--helix=HL-31_H1.yaml,--mesh'
+                command: { concat: [ 'salome -t ~/SALOME-8.3.0-DB9.3/INSTALL/HIFIMAGNET/bin/salome/HIFIMAGNET_Cmd.py ',
+                                      'args:--',
+                                      {get_input: input_cad_type},'=',
+				      {get_input: input_cad_cfg},'.yaml',
+				      ',--mesh' ]}
+		# command: 'cd /data && salome
+		#     -t ~/SALOME-8.3.0-DB9.3/INSTALL/HIFIMAGNET/bin/salome/HIFIMAGNET_Cmd.py
+		#     args:--helix=HL-31_H1.yaml,--mesh'
                 nodes: 1
                 tasks: 1
                 tasks_per_node: 1
@@ -84,6 +136,7 @@ node_templates:
                 inputs:
                     - '${STORE}/Singularity/' # boostrap, revert scripts arg $1
                     - 'feelpp_salome-mso4sc.simg' # bootstrap, revert scripts arg $2
+		    - '${STORE}/HIFIMAGNET/demos/HL-dble'
 
         relationships:
             - type: job_contained_in_hpc
@@ -102,9 +155,9 @@ node_templates:
                 volumes:
                     - '/scratch'
                     - '${LUSTRE}/feel:/feel'
-                    - '${STORE}/HIFIMAGNET/demos/HL-dble:/data`
-                command: 'cd /data && gmsh -3 -clscale 1 -bin
-		    -o HL-31_H1.msh'
+                command: { concat: [ 'gmsh -3 -clscale 1 -bin ',{get_input: input_yaml_cfg},'.med -o,',{get_input: input_yaml_cfg},'.msh' ]}
+		# command: 'cd /data && gmsh -3 -clscale 1 -bin
+		#     -o HL-31_H1{get_input: input_yaml_cfg}.msh'
                 nodes: 1
                 tasks: 1
                 tasks_per_node: 1
@@ -116,6 +169,7 @@ node_templates:
                 inputs:
                     - '${STORE}/Singularity/' # boostrap, revert scripts arg $1
                     - 'feelpp_salome-mso4sc.simg' # bootstrap, revert scripts arg $2
+		    - '${STORE}/HIFIMAGNET/demos/HL-dble'
 
         relationships:
             - type: job_contained_in_hpc
@@ -139,8 +193,8 @@ node_templates:
                     - '${STORE}/HIFIMAGNET/demos/HL-dble:/data`
                 command: { concat:[
                     'feelpp_mesh_partitioner
-                     --ifile /data/HL-31_H1.msh
-                     --odir /data
+                     --ifile ', { get_input: input_cad_cfg}, '.msh
+                     --nochdir
                      --part ', { get_property: [job_thermoelectricmodel, job_options ,tasks] }] }
                 nodes: 1
                 tasks: 1
@@ -173,13 +227,11 @@ node_templates:
                 volumes:
                     - '/scratch'
                     - '${LUSTRE}/feel:/feel'
-		    - '${STORE}/HIFIMAGNET/demos/HL-dble:/xxx`
-                command: { concat: ['feelpp_hfm_thermoelectric_model_3D_V1T1_N1
-                   --config-file /xxx/HL-31_H1-dble_32_json.cfg']}
-                nodes: 1
-                tasks: 32
-                tasks_per_node: 32
-                max_time: '00:15:00'
+                command: { concat: [{get_input: input_compute_exec},' --config-file ',{get_input: input_compute_cfg},'.cfg']}
+                nodes: { get_input: parallel_nodes }
+                tasks: { get_input: parallel_tasks }
+                tasks_per_node: { get_input: parallel_tasks_per_nodes }
+                max_time: { get_input: max_time }
                 image: '${STORE}/Singularity/feelpp_hifimagnet-mso4sc.simg'
             deployment:
                 bootstrap: 'scripts/bootstrap.sh'
@@ -187,6 +239,7 @@ node_templates:
                 inputs:
                     - '${STORE}/Singularity' # boostrap, revert scripts arg $1
                     - 'feelpp_hifimagnet-mso4sc.simg' # bootstrap, revert scripts arg $2
+		    - '${STORE}/HIFIMAGNET/demos/HL-dble'
 
         relationships:
             - type: job_contained_in_hpc

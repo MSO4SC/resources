@@ -18,3 +18,21 @@ if [ ! -f $1/$2 ]; then
 else
     echo "Bootstrap will use $1/$2 singularity image!"
 fi
+
+# Get Simulation directory name
+
+WORKDIR=$3
+if [ -d $WORKDIR ]; then
+    ln -sf $WORKDIR .
+    #cp -r $WORKDIR .
+fi
+   
+# REMOTE_URL=$4
+# wget $REMOTE_URL
+# ARCHIVE=$(basename $REMOTE_URL)
+# tar zxvf $ARCHIVE
+# DIRNAME=$(basename $ARCHIVE .tgz)
+# DECK=$(ls $DIRNAME/*.DATA)
+# cat << EOF > run_generated.param
+# deck_filename=$(readlink -m $WORKDIR)/$DECK
+# EOF

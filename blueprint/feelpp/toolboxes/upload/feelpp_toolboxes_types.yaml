@@ -1,0 +1,200 @@
+########
+# Copyright (c) 2017 MSO4SC
+# Author(s) guillaume.dolle@cemosis.fr
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+tosca_definitions_version: cloudify_dsl_1_3
+
+imports:
+    - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-manager/17.10.19/resources/rest-service/cloudify/types/types.yaml
+    - http://raw.githubusercontent.com/MSO4SC/cloudify-hpc-plugin/master/plugin.yaml
+
+node_types:
+    hpc.nodes.feelpp.mesh.create:
+        derived_from: hpc.nodes.singularity_job
+        properties:
+            app_options:
+                description: Feel++ mesh create config
+                default:
+                    geofile:
+                        description: Geometry geo file
+                        default: '/usr/local/share/feelpp/testcases/CSM/torsionbar/torsionbar.geo'
+                        type: string
+                    mshfile:
+                        description: Generated mesh file
+                        default: '/feel/torsionbar.msh'
+                        type: string
+                    dim:
+                        description: Topological dimension
+                        default: 3
+                        type: integer
+                    opts:
+                        description: Options geometry
+                        default: ""
+                        type: string
+            job_options:
+                default:
+                    #modules:
+                    #    - gcc/6.1.0
+                    #    - openmpi/1.10.2
+                    #    - singularity/2.4.2
+                    #partition: 'thin-shared'
+                    modules:
+                        - gcc/6.4.0
+                        - openmpi/1.10.7_gcc640
+                    partition: 'public'
+                    home: '${HOME}:/home/${USER}'
+                    volumes:
+                        - '/scratch'
+                        - '${LUSTRE}/feel:/feel'
+                    image: '${LUSTRE}/singularity_images/feelpp_feelpp-toolboxes-latest.simg'
+                    command: { concat:[
+                        'gmsh -', { get_property:[ SELF, app_options, dim ] },
+                        ' -bin -o ', { get_property:[ SELF, app_options, mshfile ] },' ',
+                        { get_property:[ SELF, app_options, opts ] },' ',
+                        { get_property:[ SELF, app_options, geofile] }
+                        ]}
+                    nodes: 1
+                    tasks: 1
+                    tasks_per_node: 1
+                    max_time: '00:10:00'
+            deployment:
+                default:
+                    bootstrap: 'scripts/bootstrap.sh'
+                    revert: 'scripts/revert.sh'
+                    inputs:
+                        - '${LUSTRE}/singularity_images/' # boostrap, revert scripts arg $1
+                        - 'feelpp_feelpp-toolboxes-latest.simg' # bootstrap, revert scripts arg $2
+                        - '5a4fa90ab0e9571f842931e5' # Girder folder ID
+                        - 'NO_REVERT' # Avoid removing the local singularity image (NO_REVERT)
+
+    hpc.nodes.feelpp.mesh.part:
+        derived_from: hpc.nodes.singularity_job
+        properties:
+            app_options:
+                description: Feel++ mesh partitionner config
+                default:
+                    mshfile:
+                        description: Mesh file to be partionned
+                        default: '/feel/torsionbar.msh'
+                        type: string
+                    part:
+                        description: Number of partition (number of tasks for the toolbox app)
+                        default: 4
+                        type: integer
+                    opts:
+                        description: Misc feelpp partitionner option
+                        default: ""
+                        type: string
+            job_options:
+                default:
+                    #modules:
+                    #    - gcc/6.1.0
+                    #    - openmpi/1.10.2
+                    #    - singularity/2.4.2
+                    #partition: 'thin-shared'
+                    modules:
+                        - gcc/6.4.0
+                        - openmpi/1.10.7_gcc640
+                    partition: 'public'
+                    home: '${HOME}:/home/${USER}'
+                    volumes:
+                        - '/scratch'
+                        - '${LUSTRE}/feel:/feel'
+                    image: '${LUSTRE}/singularity_images/feelpp_feelpp-toolboxes-latest.simg'
+                    command: { concat:[
+                        'feelpp_mesh_partitioner --ifile ', { get_property:[ SELF, app_options, mshfile ] },
+                        ' --odir /feel/mesh_partitioned/ ',
+                        ' --part ', { get_property:[ SELF, app_options, part ] },' ',
+                        { get_property:[ SELF, app_options, opts ] }
+                    ]}
+                    nodes: 1
+                    tasks: 1
+                    tasks_per_node: 1
+                    max_time: '00:10:00'
+            deployment:
+                default:
+                    bootstrap: 'scripts/bootstrap.sh'
+                    revert: 'scripts/revert.sh'
+                    inputs:
+                        - '${LUSTRE}/singularity_images/' # boostrap, revert scripts arg $1
+                        - 'feelpp_feelpp-toolboxes-latest.simg' # bootstrap, revert scripts arg $2
+                        - '5a4fa90ab0e9571f842931e5' # Girder folder ID
+                        - 'NO_REVERT' # Avoid removing the local singularity image (NO_REVERT)
+
+    hpc.nodes.feelpp.toolboxes:
+        derived_from: hpc.nodes.singularity_job
+        properties:
+            app_options:
+                description: Feel++ toolboxes config
+                default:
+                    toolbox:
+                        description: Name of the toolbox (feelpp_toolbox_solid_3d, feelpp_toolbox_fluid_2d, ...)
+                        default: 'feelpp_toolbox_solid_3d'
+                        type: string
+                    cfg:
+                        description: Path to Feel++ config file (Default testcase are available in the container /usr/local/share/feelpp/testcases)
+                        default: '/usr/local/share/feelpp/testcases/CSM/torsionbar/torsionbar.cfg'
+                        type: string
+                    opts:
+                        description: feelpp config file
+                        default: ""
+                        type: string
+                    nprocs:
+                        description: Number of processor
+                        default: 4
+                        type: integer
+                    ntasks:
+                        description: Number of tasks
+                        default: 4
+                        type: integer
+                    nnodes:
+                        description: Number of nodes
+                        default: 1
+                        type: integer
+            job_options:
+                default:
+                    #modules:
+                    #    - gcc/6.1.0
+                    #    - openmpi/1.10.2
+                    #    - singularity/2.4.2
+                    #partition: 'thin-shared'
+                    modules:
+                        - gcc/6.4.0
+                        - openmpi/1.10.7_gcc640
+                    partition: 'public'
+                    home: '${HOME}:/home/${USER}'
+                    volumes:
+                        - '/scratch'
+                        - '${LUSTRE}/feel:/feel'
+                    image: '${LUSTRE}/singularity_images/feelpp_feelpp-toolboxes-latest.simg'
+                    command: { concat: [
+                        { get_property:[SELF, app_options, toolbox] },
+                        ' --config-file ', { get_property:[SELF, app_options, cfg] },' ',
+                        ' --solid.mshfile /feel/mesh_partitioned/torsionbar_p', { get_attribute:[ SELF, tasks] }, '.json ',
+                        { get_property:[SELF, app_options, opts] }
+                    ]}
+                    nodes: { get_property:[ SELF, app_options, nnodes] }
+                    tasks: { get_property:[ SELF, app_options, ntasks] }
+                    tasks_per_node: { get_property:[ SELF, app_options, ntasks_per_nodes] }
+                    max_time: '03:00:00'
+            deployment:
+                default:
+                    bootstrap: 'scripts/bootstrap.sh'
+                    revert: 'scripts/revert.sh'
+                    inputs:
+                        - '${LUSTRE}/singularity_images/' # boostrap, revert scripts arg $1
+                        - 'feelpp_feelpp-toolboxes-latest.simg' # bootstrap, revert scripts arg $2
+                        - '5a4fa90ab0e9571f842931e5' # Girder folder ID
+                        - 'NO_REVERT' # Avoid removing the local singularity image (NO_REVERT)

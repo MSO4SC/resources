@@ -17,7 +17,7 @@ tosca_definitions_version: cloudify_dsl_1_3
 
 imports:
     # to speed things up, it is possible to download this file,
-    - http://www.getcloudify.org/spec/cloudify/4.1/types.yaml
+    - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-manager/17.10.19/resources/rest-service/cloudify/types/types.yaml
     # HPC pluging
     - http://raw.githubusercontent.com/MSO4SC/cloudify-hpc-plugin/master/plugin.yaml
 
@@ -25,52 +25,39 @@ inputs:
     # Monitor
     monitor_entrypoint:
         description: Monitor entrypoint IP
-        default: "127.0.0.1"
+        default: "193.144.35.146"
         type: string
 
     # Job prefix name
     job_prefix:
         description: Job name prefix in HPCs
-        default: "mso4sc"
+        default: "mso_"
         type: string
 
     # CESGA FTII parameters
     mso4sc_hpc_primary:
-        description: FTII connection credentials
+        description: Configuration for the primary HPC to be used
         default: {}
     
     # SZE test infrastructure parameters
     mso4sc_hpc_secondary:
-        description: SZE test infrastructure credentials
+        description: Configuration for the secondary HPC to be used
         default: {}
 
-    parallel_tasks:
-        description: number of tasks/processes to run in parallel
-        default: 1
-
-    max_time:
-        description: maximum allowed time for run (minutes and seconds)
-        default: '30:00'
-        
-    input_url:
-        description: url to retrieve for case file
-        default: {}
-
-    workdir:
-        description: Working directory
-        default: "$LUSTRE"
+    mso4sc_dataset_model:
+        description: Model dataset
+        default: ""
 
     singularity_image_uri:
         description: URI pointing to the singularity image
-        default: "shub://sregistry.srv.cesga.es/mso4sc/opm:2017.10.1"
+        default: "shub://sregistry.srv.cesga.es/mso4sc/example:latest"
 
     singularity_image_filename:
         description: Filename of the singularity image
-        default: "mso4sc-opm-2017.10.1.simg"
-
+        default: "mso4sc-example-latest.simg"
 
 node_templates:
-    ft2_node:
+    primary_hpc:
         type: hpc.nodes.Compute
         properties:
             config: { get_input: mso4sc_hpc_primary }
@@ -79,38 +66,33 @@ node_templates:
             job_prefix: { get_input: job_prefix }
 #            simulate: True  # COMMENT to test against a real HPC
 
-    opm_flow_single_job:
+    single_job:
         type: hpc.nodes.singularity_job
         properties:
-            job_options:
+            job_options: 
                 modules:
                     - gcc/5.3.0
                     - openmpi/1.10.2
                     - singularity/2.4.2
                 partition: 'thin-shared'
-                image: { concat: [ '$LUSTRE', '/', { get_input: singularity_image_filename } ] }
+                image: { get_input: singularity_image_filename }
                 home: '$HOME:/home/$USER'
-                volumes:
-                    - '/scratch '
-                    - '/mnt'
-                command: { concat: [ 'flow', ' ', { get_input: workdir }, '/', 'run_generated.param', ' ', 'output_dir=', { get_input: workdir }, '/', 'simoutput' ] }
+                command: ' bash -c "fortune | cowsay | lolcat" &> command.log'
                 nodes: 1
-                tasks: { get_input: parallel_tasks }
-                tasks_per_node: { get_input: parallel_tasks }
-                max_time: { get_input: max_time }
+                tasks: 1
+                tasks_per_node: 1
+                max_time: '00:01:00'
             deployment:
-                bootstrap: 'scripts/singularity_bootstrap_run-flow-generic.sh'
-                revert: 'scripts/singularity_revert_run-flow-generic.sh'
+                bootstrap: 'scripts/singularity_bootstrap_example.sh'
+                revert: 'scripts/singularity_revert_example.sh'
                 inputs:
-                    - { get_input: workdir }
-                    - { get_input: input_url }
                     - { get_input: singularity_image_uri }
                     - { get_input: singularity_image_filename }
         relationships:
             - type: job_contained_in_hpc
-              target: ft2_node
+              target: primary_hpc
 
 outputs:
     single_job_name:
         description: single job name in the HPC
-        value: { get_attribute: [opm_flow_single_job, job_name] }
+        value: { get_attribute: [single_job, job_name] }
