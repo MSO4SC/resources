@@ -100,6 +100,12 @@ inputs:
         default: '/opt/mysqldump_affinity_zib.de.sqlite'
         type: string
     
+    # ZA db script name
+    za_db_script:
+        description: ZA database query script name
+        default: 'za_db_target.sh'
+        type: string
+     
     # ZA number of cores    !!!!! HPC-dependent
     za_mpi_nt:
         description: ZA number of cores
@@ -356,10 +362,12 @@ node_templates:
                     - singularity/2.4.2
                 partition: 'cola-corta' #'thin-shared'
                 image: { concat: [ { get_input: za_work_path },'/',{ get_input: za_image } ]}
+                home: '$HOME:/home/$USER'
                 volumes:
                     - '/mnt'
 ###             return output to mso portal and let user select a target
-                command: { concat: ['za_db_target.sh',' ',{ get_input: mso4sc_dataset_tar },' ',{ get_input: za_work_path },'/',{ get_input: za_db },' ',{ get_input: za_work_path },' ',]}
+                command: { concat: [' ', { get_input: za_db_script },' ',{ get_input: mso4sc_dataset_tar },' ',{ get_input: za_work_path },'/',{ get_input: za_db },' ',{ get_input: za_work_path },' ',]}
+#                command: { concat: ['/usr/bin/sqlite3',' ',{ get_input: za_db },' ','"SELECT name FROM targets" | while read target; do echo "target molecule $target" >> ',' ',{ get_input: za_sim_path },'/sim_dir/targets.txt; done']}
                 nodes: 1
                 tasks: 1
                 tasks_per_node: 1
@@ -388,6 +396,7 @@ node_templates:
                     - singularity/2.4.2
 #                partition: 'cola-corta' #'thin-shared'
                 image: { concat: [ { get_input: za_work_path },'/',{ get_input: za_image } ]}
+                home: '$HOME:/home/$USER'
                 volumes:
                     - '/mnt'
                 command: { concat: [' ', { get_input: za_work_path }, '/', { get_input: za_prep_slurm }] }
@@ -514,6 +523,7 @@ node_templates:
                     - openmpi/1.10.2
                     - singularity/2.4.2
                 image: { concat: [ { get_input: za_work_path },'/',{ get_input: za_image } ]}
+                home: '$HOME:/home/$USER'
                 volumes:
                     - '/mnt'
                 command: { concat: [' ', { get_input: za_work_path }, '/', { get_input: za_prep_nvt_slurm }] }
@@ -639,6 +649,7 @@ node_templates:
                     - openmpi/1.10.2
                     - singularity/2.4.2
                 image: { concat: [ { get_input: za_work_path },'/',{ get_input: za_image } ]}
+                home: '$HOME:/home/$USER'
                 volumes:
                     - '/mnt'
                 command: { concat: [' ', { get_input: za_work_path }, '/', { get_input: za_prep_npt_slurm }] }
@@ -764,6 +775,7 @@ node_templates:
                     - openmpi/1.10.2
                     - singularity/2.4.2
                 image: { concat: [ { get_input: za_work_path },'/',{ get_input: za_image } ]}
+                home: '$HOME:/home/$USER'
                 volumes:
                     - '/mnt'
                 command: { concat: [' ', { get_input: za_work_path }, '/', { get_input: za_prep_md_slurm }] }
@@ -889,6 +901,7 @@ node_templates:
                     - openmpi/1.10.2
                     - singularity/2.4.2
                 image: { concat: [ { get_input: za_work_path },'/',{ get_input: za_image } ]}
+                home: '$HOME:/home/$USER'
                 volumes:
                     - '/mnt'
                 command: { concat: [' ', { get_input: za_work_path }, '/', { get_input: za_prep_rerun_slurm }] }
@@ -1015,6 +1028,7 @@ node_templates:
                     - openmpi/1.10.2
                     - singularity/2.4.2
                 image: { concat: [ { get_input: za_work_path },'/',{ get_input: za_image } ]}
+                home: '$HOME:/home/$USER'
                 volumes:
                     - '/mnt'
                 command: { concat: [' ', { get_input: za_work_path }, '/', { get_input: za_post_rerun_slurm }] }
@@ -1051,6 +1065,7 @@ node_templates:
                     - openmpi/1.10.2
                     - singularity/2.4.2
                 image: { concat: [ { get_input: za_work_path },'/',{ get_input: za_image } ]}
+                home: '$HOME:/home/$USER'
                 volumes:
                     - '/mnt'
                 command: { concat: [' ', { get_input: za_work_path }, '/', { get_input: za_post_slurm }] }
