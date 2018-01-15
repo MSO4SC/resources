@@ -35,21 +35,21 @@ inputs:
         type: string
 
     # CESGA FTII parameters
-    ft2_config:
+    mso4sc_hpc_ft2:
         description: FTII connection credentials
         default: {}
 
     # SZE test infrastructure parameters
-    sze_config:
+    mso4sc_hpc_sze:
         description: SZE test infrastructure credentials
         default: {}
 
 node_templates:
-    ft2_node:
+    ft2_hpc:
         type: hpc.nodes.Compute
         properties:
-            config: { get_input: ft2_config }
-            monitor_entrypoint: { get_input: monitor_entrypoint }
+            config: { get_input: mso4sc_hpc_ft2 }
+            external_monitor_entrypoint: { get_input: monitor_entrypoint }
             monitor_orchestrator_available: True
             job_prefix: { get_input: job_prefix }
 #            simulate: True  # COMMENT to test against a real HPC
@@ -83,7 +83,7 @@ node_templates:
 
         relationships:
             - type: job_contained_in_hpc
-              target: ft2_node
+              target: ft2_hpc
 
 outputs:
     job_eye2brain:
