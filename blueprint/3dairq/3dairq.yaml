@@ -31,12 +31,12 @@ inputs:
         description: 3DairqualityPred
         default: "mso4sc"
         type: string
-    
-	monitor_entrypoint:
+
+    monitor_entrypoint:
         description: Monitor entrypoint IP
         default: "127.0.0.1"
         type: string
-			
+
   # Second HPC configuration
     mso4sc_hpc_secondary:
         description: Configuration for the secondary HPC to be used
@@ -187,7 +187,6 @@ node_templates:
                     - type: job_depends_on
                       target: emission
 
-					  
 outputs:
     traffic_:
         description: 3D AirQuality Prediction on SZE cluster
