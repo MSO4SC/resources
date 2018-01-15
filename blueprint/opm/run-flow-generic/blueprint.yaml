@@ -25,24 +25,20 @@ inputs:
     # Monitor
     monitor_entrypoint:
         description: Monitor entrypoint IP
-        default: "127.0.0.1"
+        default: "193.144.35.146"
         type: string
 
     # Job prefix name
     job_prefix:
         description: Job name prefix in HPCs
-        default: "mso4sc"
+        default: "mso_"
         type: string
 
-    # CESGA FTII parameters
+    # Main HPC
     mso4sc_hpc_primary:
         description: FTII connection credentials
         default: {}
-    
-    # SZE test infrastructure parameters
-    mso4sc_hpc_secondary:
-        description: SZE test infrastructure credentials
-        default: {}
+
 
     parallel_tasks:
         description: number of tasks/processes to run in parallel
@@ -50,11 +46,11 @@ inputs:
 
     max_time:
         description: maximum allowed time for run (minutes and seconds)
-        default: '30:00'
+        default: '00:30:00'
         
-    input_url:
+    mso4sc_dataset_input_url:
         description: url to retrieve for case file
-        default: {}
+        default: ""
 
     workdir:
         description: Working directory
@@ -70,12 +66,11 @@ inputs:
 
 
 node_templates:
-    ft2_node:
+    main_hpc_node:
         type: hpc.nodes.Compute
         properties:
             config: { get_input: mso4sc_hpc_primary }
-            monitor_entrypoint: { get_input: monitor_entrypoint }
-            monitor_orchestrator_available: True
+            external_monitor_entrypoint: { get_input: monitor_entrypoint }
             job_prefix: { get_input: job_prefix }
 #            simulate: True  # COMMENT to test against a real HPC
 
@@ -103,12 +98,12 @@ node_templates:
                 revert: 'scripts/singularity_revert_run-flow-generic.sh'
                 inputs:
                     - { get_input: workdir }
-                    - { get_input: input_url }
+                    - { get_input: mso4sc_dataset_input_url }
                     - { get_input: singularity_image_uri }
                     - { get_input: singularity_image_filename }
         relationships:
             - type: job_contained_in_hpc
-              target: ft2_node
+              target: main_hpc_node
 
 outputs:
     single_job_name:
