@@ -31,7 +31,12 @@ inputs:
         description: 3DairqualityPred
         default: "mso4sc"
         type: string
-
+    
+	monitor_entrypoint:
+        description: Monitor entrypoint IP
+        default: "127.0.0.1"
+        type: string
+			
   # Second HPC configuration
     mso4sc_hpc_secondary:
         description: Configuration for the secondary HPC to be used
@@ -77,8 +82,7 @@ node_templates:
         type: hpc.nodes.Compute
         properties:
             config: {get_input: sze_config}
-            monitor_entrypoint: 127.0.0.1
-            monitor_orchestrator_available: False
+            external_monitor_entrypoint: { get_input: monitor_entrypoint }
             job_prefix: hpc_SZE_
 
 
