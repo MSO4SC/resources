@@ -5,15 +5,14 @@ ZA_SLURM="${4}/${6}"
 cat > $ZA_SLURM <<- EOM
 #!/bin/bash -l
 
-#SBATCH -p cola-corta #thin-shared
+#SBATCH -p $9 #thin-shared
 #SBATCH -N 1
 #SBATCH --ntasks-per-node=1
 #SBATCH -t 00:15:00
 
 cd $4
 
-mpirun singularity exec -B /mnt:/mnt,/scratch:/scratch $7 /bin/bash $8 $1 $2 $3 $4 $5 
-
+mpirun singularity exec -H \\$HOME:/home/\\$USER -B /mnt:/mnt,/scratch:/scratch $7 /bin/bash $8 $1 $2 $3 $4 $5 
 
 # $1: za_lig
 # $2: za_tar
