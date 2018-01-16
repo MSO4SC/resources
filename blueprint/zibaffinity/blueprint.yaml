@@ -44,10 +44,10 @@ inputs:
         default: {}
         
     # Data catalogue
-#    mso4sc_dataset_input_uri:
-#        description: ZA Data catalogue
-#        default: '$HOME:/home/$USER'
-#        type: string
+    mso4sc_dataset_input_uri:
+        description: ZA Data catalogue
+        default: 'bla'
+        type: string
     
     # ZA home directory
     za_home_dir:
