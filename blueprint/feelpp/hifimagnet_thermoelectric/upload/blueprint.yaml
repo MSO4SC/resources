@@ -70,7 +70,7 @@ inputs:
 
     singularity_image_filename:
         description: Filename of the singularity image
-        default: ""
+        default: "feelpp_hifimagnet-mso4sc.simg"
 
 node_templates:
     primary_hpc:
