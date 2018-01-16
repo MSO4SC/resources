@@ -74,11 +74,11 @@ inputs:
         type: string
     
     # $2 - ZA target path    !!!!! USER selection from DB output
-    za_tar:
-        description: ZA target path
-        default: { concat: [ { get_input: za_work_path },'/',{ get_input: mso4sc_dataset_tar } ]}
+#    za_tar:
+#        description: ZA target path
+#        default: { concat: [ { get_input: za_work_path },'/',{ get_input: mso4sc_dataset_tar } ]}
 #        default: '$LUSTRE/data_4_javier/zibaffinity_tosca/input/erAlpha-1gwr'
-        type: string
+#        type: string
     
     # $3 - ZA formal ligand charge    !!!!! USER input
     za_charge:
