@@ -1,4 +1,4 @@
-= Torsionbar TOSCA
+= Hifimagnet Testcase TOSCA
 
 The "upload" is uploaded on the orchestrator
 
