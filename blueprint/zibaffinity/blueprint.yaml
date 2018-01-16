@@ -44,10 +44,10 @@ inputs:
         default: {}
         
     # Data catalogue
-    mso4sc_dataset_input_uri:
-        description: ZA Data catalogue
-        default: '$HOME:/home/$USER'
-        type: string
+#    mso4sc_dataset_input_uri:
+#        description: ZA Data catalogue
+#        default: '$HOME:/home/$USER'
+#        type: string
     
     # ZA home directory
     za_home_dir:
@@ -67,8 +67,14 @@ inputs:
         default: '$LUSTRE/data_4_javier/zibaffinity_tosca'
         type: string
     
+#    # ZA target name    !!!!! USER selection from catalogue corresponding to DB table
+#    mso4sc_dataset_tar:
+#        description: ZA target (path)
+#        default: 'erAlpha-1gwr'
+#        type: string
+    
     # ZA target name    !!!!! USER selection from catalogue corresponding to DB table
-    mso4sc_dataset_tar:
+    za_tar:
         description: ZA target (path)
         default: 'erAlpha-1gwr'
         type: string
@@ -373,8 +379,8 @@ node_templates:
                 home: { get_input: za_home_dir }
                 volumes:
                     - '/mnt'
-                command: { concat: [' ', { get_input: za_db_script },' ',{ get_input: mso4sc_dataset_tar },' ',{ get_input: za_db },' ',{ get_input: za_work_path },' ',]}
-
+                command: { concat: [' ', { get_input: za_db_script },' ',{ get_input: za_tar },' ',{ get_input: za_db },' ',{ get_input: za_work_path },' ',]}
+#                command: { concat: [' ', { get_input: za_db_script },' ',{ get_input: mso4sc_dataset_tar },' ',{ get_input: za_db },' ',{ get_input: za_work_path },' ',]}
                 nodes: 1
                 tasks: 1
                 tasks_per_node: 1
@@ -417,7 +423,8 @@ node_templates:
                 revert: 'scripts/za_prep_revert.sh'
                 inputs:
                     - { get_input: za_lig }
-                    - { get_input: mso4sc_dataset_tar }
+                    - { get_input: za_tar }
+#                    - { get_input: mso4sc_dataset_tar }
                     - { get_input: za_charge }
                     - { get_input: za_work_path }
                     - { get_input: za_mail }
