@@ -1,4 +1,4 @@
-= Torsionbar TOSCA
+= Hifimagnet basic workflow TOSCA
 
 The "upload" is uploaded on the orchestrator
 
@@ -7,14 +7,48 @@ WARNING: Don't put your local in the upload directory to not upload your user/pa
 You can copy the singularity image in your ${LUSTRE} folder if it's not available
 the ${SINGULARITY_REPO} directory. (module load singularity on ft2)
 
-Connect to the cloudify client via docker.
-See https://github.com/MSO4SC/MSOOrchestrator-CLI/blob/master/README.adoc
+First clone the `resources` git MSO4SC repository
+[source]
+----
+git pull MSO4SC/resources
+----
 
 Set your local blueprint file (user/password) at the root of the cloned repository
 named "local-blueprint-inputs.yaml" (It is ignored by git, then you won't risk to push
 it on the remote repository)
 See http://book.mso4sc.cemosis.fr/#mso4sc_tosca_modelling_and_execution
 
+You also need to configure a few key:
+
+Key                        |  Description  | Default | Optional
+---------------------------|---------------|---------|----------
+singularity_image_filename |               |         |
+singularity_image_uri      |               |         |
+cfgfile                    |               |         |
+execfile                   |               |         |
+workdir                    |               |         |
+mso4sc_dataset_input_url   |               |         |
+max_time                   |               |         |
+parallel_tasks             |               |         |
+mso4sc_hpc_primary         |               |         |
+monitor_entrypoint         |               |         |
+---------------------------|---------------|---------|----------
+
+Connect to the cloudify client via docker:
+[source]
+----
+docker pull mso4sc/msoorchestrator-cli
+docker run -it --rm -v $HOME/MSO4SC/resources:/resources mso4sc/msoorchestrator-cli
+----
+See https://github.com/MSO4SC/MSOOrchestrator-CLI/blob/master/README.adoc for details
+
+Within the docker:
+[source]
+----
+cfy profiles use  ORCHESTRATOR_IP -t  default_tenant -u USER -p PASSWD
+----
+
+Then you can simply deploy your application using:
 [source]
 ----
 ./deploy up
@@ -30,3 +64,4 @@ to deploy on the orchestrator
 NOTE: If the application fails during one step of the deploy up process, you'll have to
 force cancel execution by hands. `cfy executions list`, `cfy executions cancel -f <id>`
 in the orchestrator client (*docker).
+

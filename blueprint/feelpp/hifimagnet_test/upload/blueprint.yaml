@@ -26,7 +26,7 @@ inputs:
     # Monitor
     monitor_entrypoint:
         description: Monitor entrypoint IP
-        default: "127.0.0.1"
+        default: "193.144.35.146"
         type: string
 
     # Job prefix name
@@ -40,128 +40,80 @@ inputs:
         description: FTII connection credentials
         default: {}
 
-    # SZE test infrastructure parameters
-    mso4sc_hpc_secondary:
-        description: SZE test infrastructure credentials
-        default: {}
+    parallel_tasks:
+        description: number of tasks/processes to run in parallel
+        default: 2
+
+    max_time:
+        description: maximum allowed time for run (minutes and seconds)
+        default: '00:30:00'
+
+    mso4sc_dataset_input_url:
+        description: url to retrieve for case file
+        default: ""
+
+    workdir:
+        description: Working directory
+        default: "${LUSTRE}/singularity_images"
+
+    execfile:
+        description: executable file
+        default: "feelpp_hfm_thermoelectric_model_3D_V1T1_N1"
+
+    cfgfile:
+        description: configuration file
+        default: "/usr/local/share/hifimagnet/ThermoElectricModel/thermoelectric_3D_V1T1_N1_cvg.cfg"
+
+    singularity_image_uri:
+        description: URI pointing to the singularity image
+        default: "shub://sregistry.srv.cesga.es/mso4sc/hifimagnet:tag"
+
+    singularity_image_filename:
+        description: Filename of the singularity image
+        default: "feelpp_hifimagnet-mso4sc.simg"
 
 node_templates:
     primary_hpc:
         type: hpc.nodes.Compute
         properties:
             config: { get_input: mso4sc_hpc_primary }
-            monitor_entrypoint: { get_input: monitor_entrypoint }
-            monitor_orchestrator_available: True
+            external_monitor_entrypoint: { get_input: monitor_entrypoint }
+            # monitor_orchestrator_available: True
             job_prefix: { get_input: job_prefix }
 #            simulate: True  # COMMENT to test against a real HPC
 
-    create_geometry:
+    job_test:
         type: hpc.nodes.singularity_job
         properties:
             job_options:
                 modules:
                     - gcc/6.1.0
                     - openmpi/1.10.2
-                    - singularity/2.3.2
-                partition: 'thin-shared'
+                    - singularity/2.4.2
+                partition: 'thinnodes'
+                reservation: 'MSO4SC'
                 home: '${HOME}:/home/${USER}'
                 volumes:
                     - '/scratch'
                     - '${LUSTRE}/feel:/feel'
-                command: 'gmsh -3 -clscale 1 -bin
-                     -o /feel/torsionbar.msh
-                    /opt/feelpp/Testcases/CSM/torsionbar/torsionbar.geo'
-                nodes: 1
-                tasks: 1
-                tasks_per_node: 1
-                max_time: '00:05:00'
-                image: '${LUSTRE}/singularity_images/feelpp_feelpp-toolboxes-mso4sc.simg'
+                command: { concat: [ { get_input: execfile }, ' --config-file ', { get_input: cfgfile } ] }
+                # nodes: { get_input: parallel_nodes }
+                tasks: { get_input: parallel_tasks }
+                # tasks_per_node: { get_input: parallel_tasks_per_node }
+                max_time: { get_input: max_time }
+                image: { concat: [ { get_input: workdir }, '/', { get_input: singularity_image_filename } ] }
             deployment:
                 bootstrap: 'scripts/bootstrap.sh'
                 revert: 'scripts/revert.sh'
                 inputs:
-                    - '${LUSTRE}/singularity_images/' # boostrap, revert scripts arg $1
-                    - 'feelpp_feelpp-toolboxes-mso4sc.simg' # bootstrap, revert scripts arg $2
+                    - { get_input: workdir }
+                    - { get_input: singularity_image_filename }
 
         relationships:
             - type: job_contained_in_hpc
               target: primary_hpc
-
-    partition_mesh:
-        type: hpc.nodes.singularity_job
-        properties:
-            job_options:
-                modules:
-                    - gcc/6.1.0
-                    - openmpi/1.10.2
-                    - singularity/2.3.2
-                partition: 'thin-shared'
-                home: '${HOME}:/home/${USER}'
-                volumes:
-                    - '/scratch'
-                    - '${LUSTRE}/feel:/feel'
-                command: { concat:[
-                    'feelpp_mesh_partitioner
-                     --ifile /feel/torsionbar.msh
-                     --odir /feel/mesh_partitioned/
-                     --part ', { get_property: [job_torsionbar, job_options ,tasks] }] }
-                nodes: 1
-                tasks: 1
-                tasks_per_node: 1
-                max_time: '00:05:00'
-                image: '${LUSTRE}/singularity_images/feelpp_feelpp-toolboxes-mso4sc.simg'
-            deployment:
-                bootstrap: 'scripts/bootstrap.sh'
-                revert: 'scritps/revert.sh'
-                inputs:
-                    - '${LUSTRE}/singularity_images' # boostrap, revert scripts arg $1
-                    - 'feelpp_feelpp-toolboxes-mso4sc.simg' # bootstrap, revert scripts arg $2
-
-        relationships:
-            - type: job_contained_in_hpc
-              target: primary_hpc
-            - type: job_depends_on
-              target: create_geometry
-
-    job_torsionbar:
-        type: hpc.nodes.singularity_job
-        properties:
-            job_options:
-                modules:
-                    - gcc/6.1.0
-                    - openmpi/1.10.2
-                    - singularity/2.3.2
-                partition: 'thin-shared'
-                home: '${HOME}:/home/${USER}'
-                volumes:
-                    - '/scratch'
-                    - '${LUSTRE}/feel:/feel'
-                command: { concat: ['feelpp_toolbox_solid_3d
-                   --config-file /usr/local/share/feelpp/testcases/CSM/torsionbar/torsionbar.cfg
-                   --solid.mshfile /feel/mesh_partitioned/torsionbar_p', { get_property:[SELF, job_options, tasks] }, '.json
-                   --solid.pc-type gamg
-                   --solid.pc-view 1
-                   --ts.restart 0
-                   --solid.scalability-save 1']}
-                nodes: 1
-                tasks: 16
-                tasks_per_node: 16
-                max_time: '00:30:00'
-                image: '${LUSTRE}/singularity_images/feelpp_feelpp-toolboxes-mso4sc.simg'
-            deployment:
-                bootstrap: 'scripts/bootstrap.sh'
-                revert: 'scripts/revert.sh'
-                inputs:
-                    - '${LUSTRE}/singularity_images' # boostrap, revert scripts arg $1
-                    - 'feelpp_feelpp-toolboxes-mso4sc.simg' # bootstrap, revert scripts arg $2
-
-        relationships:
-            - type: job_contained_in_hpc
-              target: primary_hpc
-            - type: job_depends_on
-              target: partition_mesh
 
 outputs:
-    job_torsionbar:
-        description: feelpp_torsionbar results
-        value: { get_attribute: [job_torsionbar, job_name] }
+    job_test:
+        description: feelpp_hfm_test results
+        value: { get_attribute: [job_test, job_name] }

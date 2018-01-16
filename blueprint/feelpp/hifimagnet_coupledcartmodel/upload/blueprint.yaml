@@ -26,7 +26,7 @@ inputs:
     # Monitor
     monitor_entrypoint:
         description: Monitor entrypoint IP
-        default: "127.0.0.1"
+        default: "193.144.35.146"
         type: string
 
     # Job prefix name
@@ -35,15 +35,38 @@ inputs:
         default: "mso4sc"
         type: string
 
+    parallel_tasks:
+        description: number of tasks/processes to run in parallel
+        default: 2
+
+    max_time:
+        description: maximum allowed time for run (minutes and seconds)
+        default: '00:15:00'
+        
     # CESGA FTII parameters
     mso4sc_hpc_primary:
         description: FTII connection credentials
         default: {}
 
-    # SZE test infrastructure parameters
-    mso4sc_hpc_secondary:
-        description: SZE test infrastructure credentials
-        default: {}
+    mso4sc_dataset_input_url:
+        description: url to retrieve for case file
+        default: ""
+
+    # cfgfile:
+    #     description: name of the cfg file
+    #     default: "/usr/local/share/hifimagnet/CoupledCartModel/coupledcart_bmap_3D_P1_N1_cvg.cfg"
+
+    workdir:
+        description: Working directory
+        default: "$LUSTRE"
+
+    singularity_image_uri:
+        description: URI pointing to the singularity image
+        default: "shub://sregistry.srv.cesga.es/mso4sc/hifimagnet:tag"
+
+    singularity_image_filename:
+        description: Filename of the singularity image
+        default: "mso4sc-hifimagnet-tag.simg"
 
 node_templates:
     primary_hpc:
@@ -51,11 +74,10 @@ node_templates:
         properties:
             config: { get_input: mso4sc_hpc_primary }
             external_monitor_entrypoint: { get_input: monitor_entrypoint }
-#            monitor_orchestrator_available: True
             job_prefix: { get_input: job_prefix }
 #            simulate: True  # COMMENT to test against a real HPC
 
-    job_test_coupledcartmodel:
+    job_coupledcartmodel:
         type: hpc.nodes.singularity_job
         properties:
             job_options:
@@ -71,22 +93,22 @@ node_templates:
                 command: { concat: ['feelpp_hfm_coupledcartmodel_3DP1N1
                    --config-file /usr/local/share/hifimagnet/CoupledCartModel/coupledcart_bmap_3D_P1_N1_cvg.cfg']}
                 nodes: 1
-                tasks: 6
-                tasks_per_node: 6
+                tasks: 2
+                tasks_per_node: 2
                 max_time: '00:05:00'
                 image: '${LUSTRE}/singularity_images/feelpp_hifimagnet-mso4sc.simg'
             deployment:
                 bootstrap: 'scripts/bootstrap.sh'
                 revert: 'scripts/revert.sh'
                 inputs:
-                    - '${LUSTRE}/singularity_images' # boostrap, revert scripts arg $1
-                    - 'feelpp_hifimagnet-mso4sc.simg' # bootstrap, revert scripts arg $2
+                    - '${LUSTRE}/singularity_images' #{ get_input: workdir }
+                    - { get_input: singularity_image_filename }
 
         relationships:
             - type: job_contained_in_hpc
               target: primary_hpc
 
 outputs:
-    job_test_coupledcartmodel:
+    job_coupledcartmodel:
         description: feelpp_hfm_coupledcartmodel_3DP1N1 results
-        value: { get_attribute: [job_test_coupledcartmodel, job_name] }
+        value: { get_attribute: [job_coupledcartmodel, job_name] }
