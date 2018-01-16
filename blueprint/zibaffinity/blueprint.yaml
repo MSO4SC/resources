@@ -89,7 +89,7 @@ inputs:
     # $3 - ZA formal ligand charge    !!!!! USER input
     za_charge:
         description: ZA formal ligand charge
-        default: "0"
+        default: "abc"
         type: string
     
     # $5 - ZA user mail address    !!!!! USER input
@@ -429,7 +429,7 @@ node_templates:
                     - { get_input: za_work_path }
                     - { get_input: za_mail }
                     - { get_input: za_prep_slurm }
-#                    - { concat: [ { get_input: za_work_path },'/',{ get_input: za_image } ]}
+                    - { concat: [ { get_input: za_work_path },'/',{ get_input: za_image } ]}
                     - { get_input: za_prep_script }
                     - { get_input: za_hpc_partition }
         relationships:
