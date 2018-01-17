@@ -44,10 +44,10 @@ inputs:
         default: {}
         
     # Data catalogue
-    mso4sc_dataset_input_uri:
-        description: ZA Data catalogue
-        default: 'bla'
-        type: string
+#    mso4sc_dataset_input_uri:
+#        description: ZA Data catalogue
+#        default: 'bla'
+#        type: string
     
     # ZA home directory
     za_home_dir:
@@ -67,16 +67,16 @@ inputs:
         default: '$LUSTRE/data_4_javier/zibaffinity_tosca'
         type: string
     
-#    # ZA target name    !!!!! USER selection from catalogue corresponding to DB table
-#    mso4sc_dataset_tar:
-#        description: ZA target (path)
-#        default: 'erAlpha-1gwr'
-#        type: string
+    # ZA target name    !!!!! USER selection from catalogue corresponding to DB table
+    mso4sc_dataset_tar:
+        description: ZA target (path)
+        default: 'erAlpha-1gwr'
+        type: string
     
     # ZA target name    !!!!! USER selection from catalogue corresponding to DB table
     za_tar:
         description: ZA target (path)
-        default: 'erAlpha-1gwr'
+        default: { get_input: mso4sc_dataset_tar } #'erAlpha-1gwr'
         type: string
     
     # $2 - ZA target path    !!!!! USER selection from DB output
@@ -432,6 +432,7 @@ node_templates:
                     - { concat: [ { get_input: za_work_path },'/',{ get_input: za_image } ]}
                     - { get_input: za_prep_script }
                     - { get_input: za_hpc_partition }
+                    - { get_input: mso4sc_dataset_tar }
         relationships:
             - type: job_contained_in_hpc
               target: ft2_node

@@ -23,5 +23,6 @@ mpirun singularity exec -H \\$HOME:/home/\\$USER -B /mnt:/mnt,/scratch:/scratch 
 # $7: za_image
 # $8: za_prep_script -> za_prep_sim.sh (in container)
 # $9: za_hpc_cluster -> cola-corta
+# ${10}: mso4sc_dataset_tar
 
 EOM

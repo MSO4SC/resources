@@ -1,7 +1,7 @@
 #!/bin/bash -l
 
 
-if [ ! -f $2/$3 ]; then
+#if [ ! -f $2/$3 ]; then
 
     module purge
     module load $4
@@ -13,6 +13,6 @@ if [ ! -f $2/$3 ]; then
     #cp $SINGULARITY_REPO/$3 $2/
     
     module unload $4
-fi
+#fi
 
 
