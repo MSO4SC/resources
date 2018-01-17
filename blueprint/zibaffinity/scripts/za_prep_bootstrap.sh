@@ -2,6 +2,8 @@
 
 ZA_SLURM="${4}/${6}"
 
+za_tar=$(echo ${10} | sed 's#http://##g')
+
 cat > $ZA_SLURM <<- EOM
 #!/bin/bash -l
 
@@ -24,5 +26,6 @@ mpirun singularity exec -H \\$HOME:/home/\\$USER -B /mnt:/mnt,/scratch:/scratch 
 # $8: za_prep_script -> za_prep_sim.sh (in container)
 # $9: za_hpc_cluster -> cola-corta
 # ${10}: mso4sc_dataset_tar
+# $za_tar: mso4sc_dataset_tar
 
 EOM
