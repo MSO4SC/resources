@@ -44,10 +44,10 @@ inputs:
         default: {}
         
     # Data catalogue
-    mso4sc_dataset_input_uri:
-        description: ZA Data catalogue
-        default: '$HOME:/home/$USER'
-        type: string
+#    mso4sc_dataset_input_uri:
+#        description: ZA Data catalogue
+#        default: 'bla'
+#        type: string
     
     # ZA home directory
     za_home_dir:
@@ -70,15 +70,21 @@ inputs:
     # ZA target name    !!!!! USER selection from catalogue corresponding to DB table
     mso4sc_dataset_tar:
         description: ZA target (path)
+        default: 'bla'
+        type: string
+    
+    # ZA target name    !!!!! USER selection from catalogue corresponding to DB table
+    za_tar:
+        description: ZA target (path)
         default: 'erAlpha-1gwr'
         type: string
     
     # $2 - ZA target path    !!!!! USER selection from DB output
-    za_tar:
-        description: ZA target path
-        default: { concat: [ { get_input: za_work_path },'/',{ get_input: mso4sc_dataset_tar } ]}
+#    za_tar:
+#        description: ZA target path
+#        default: { concat: [ { get_input: za_work_path },'/',{ get_input: mso4sc_dataset_tar } ]}
 #        default: '$LUSTRE/data_4_javier/zibaffinity_tosca/input/erAlpha-1gwr'
-        type: string
+#        type: string
     
     # $3 - ZA formal ligand charge    !!!!! USER input
     za_charge:
@@ -372,9 +378,9 @@ node_templates:
                 image: { concat: [ { get_input: za_work_path },'/',{ get_input: za_image } ]}
                 home: { get_input: za_home_dir }
                 volumes:
-                    - '/mnt'
-                command: { concat: [' ', { get_input: za_db_script },' ',{ get_input: mso4sc_dataset_tar },' ',{ get_input: za_db },' ',{ get_input: za_work_path },' ',]}
-
+                    - '/mnt:/mnt'
+                command: { concat: [' ', { get_input: za_db_script },' ',{ get_input: za_tar },' ',{ get_input: za_db },' ',{ get_input: za_work_path },' ',]}
+#                command: { concat: [' ', { get_input: za_db_script },' ',{ get_input: mso4sc_dataset_tar },' ',{ get_input: za_db },' ',{ get_input: za_work_path },' ',]}
                 nodes: 1
                 tasks: 1
                 tasks_per_node: 1
@@ -417,7 +423,8 @@ node_templates:
                 revert: 'scripts/za_prep_revert.sh'
                 inputs:
                     - { get_input: za_lig }
-                    - { get_input: mso4sc_dataset_tar }
+                    - { get_input: za_tar }
+#                    - { get_input: mso4sc_dataset_tar }
                     - { get_input: za_charge }
                     - { get_input: za_work_path }
                     - { get_input: za_mail }
@@ -425,6 +432,7 @@ node_templates:
                     - { concat: [ { get_input: za_work_path },'/',{ get_input: za_image } ]}
                     - { get_input: za_prep_script }
                     - { get_input: za_hpc_partition }
+                    - { get_input: mso4sc_dataset_tar }
         relationships:
             - type: job_contained_in_hpc
               target: ft2_node
