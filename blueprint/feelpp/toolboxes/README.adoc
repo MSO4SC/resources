@@ -1,17 +1,8 @@
 = Torsionbar TOSCA
 
+== Command-line usage
+
 The "upload" is uploaded on the orchestrator
-File prefixed with "local" are configuration scripts loaded during deployment step.
-You have to configure them beforehand (login/passwd) and the toolbox (This step will
-be done via the portal at the end of the project.)
-
-[source, bash]
-----
-cp local.yaml.example local.yaml
-cp local_app.yaml.example local_app.yaml
-
-#edit
-----
 
 WARNING: Don't put your local in the upload directory to not upload your user/pass
 
@@ -28,10 +19,11 @@ See http://book.mso4sc.cemosis.fr/#mso4sc_tosca_modelling_and_execution
 
 [source]
 ----
-./deploy up
+./deploy up <config>
 ----
 
-to deploy on the orchestrator
+to deploy on the orchestrator. <config> is one of the base **upload/config/<config>.yaml**
+file.
 
 [source]
 ----
@@ -41,3 +33,15 @@ to deploy on the orchestrator
 NOTE: If the application fails during one step of the deploy up process, you'll have to
 force cancel execution by hands. `cfy executions list`, `cfy executions cancel -f <id>`
 in the orchestrator client (*docker).
+
+== Portal
+
+To use this blueprint with the portal, you need to archive the application upload
+on the data management tool (CKAN) or any others tool available (zenodo, girder for example).
+When you create a new catalog entry in the marketplace, you need to provide the
+path to this archive via the _BLUEPRINT_PATH_ variable set as a *characteristic*
+
+[source]
+----
+./deploy pkg
+----

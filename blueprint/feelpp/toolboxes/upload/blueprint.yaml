@@ -34,22 +34,12 @@ inputs:
     # Job prefix name
     job_prefix:
         description: Job name prefix in HPCs
-        default: "mso4sc"
+        default: "mso_"
         type: string
 
     # CESGA FTII parameters
-    mso4sc_hpc_ft2:
+    mso4sc_hpc_primary:
         description: FTII connection credentials
-        default: {}
-
-    # SZE test infrastructure parameters
-    mso4sc_hpc_sze:
-        description: SZE test infrastructure credentials
-        default: {}
-
-    # SZE test infrastructure parameters
-    mso4sc_hpc_atlas:
-        description: Unistra atlas infrastructure credentials
         default: {}
 
     #############################################################
@@ -68,40 +58,33 @@ inputs:
         default: {}
 
 node_templates:
-    #ft2_hpc:
-    #    type: hpc.nodes.Compute
-    #    properties:
-    #        config: { get_input: mso4sc_hpc_ft2 }
-    #        monitor_entrypoint: { get_input: monitor_entrypoint }
-    #        monitor_orchestrator_available: True
-    #        job_prefix: { get_input: job_prefix }
-    #        #simulate: True  # COMMENT to test against a real HPC
 
-    atlas_hpc:
+    main_hpc:
         type: hpc.nodes.Compute
         properties:
-            config: { get_input: mso4sc_hpc_atlas }
-            monitor_entrypoint: { get_input: monitor_entrypoint }
-            monitor_orchestrator_available: True
+            config: { get_input: mso4sc_hpc_primary }
+            external_monitor_entrypoint: { get_input: monitor_entrypoint }
+#            monitor_orchestrator_available: True
             job_prefix: { get_input: job_prefix }
+    #        #simulate: True  # COMMENT to test against a real HPC
 
     feelpp_mesh_create:
         type: hpc.nodes.feelpp.mesh.create
         properties:
             app_options: { get_input: feelpp_mesh_create }
-            avoid_cleanup: True # debug keep bash scripts
+#            avoid_cleanup: True # debug keep bash scripts
         relationships:
             - type: job_contained_in_hpc
-              target: atlas_hpc
+              target: main_hpc
 
     feelpp_mesh_part:
         type: hpc.nodes.feelpp.mesh.part
         properties:
             app_options: { get_input: feelpp_mesh_part }
-            avoid_cleanup: True # debug keep bash scripts
+#            avoid_cleanup: True # debug keep bash scripts
         relationships:
             - type: job_contained_in_hpc
-              target: atlas_hpc
+              target: main_hpc
             - type: job_depends_on
               target: feelpp_mesh_create
     
@@ -109,10 +92,10 @@ node_templates:
         type: hpc.nodes.feelpp.toolboxes
         properties:
             app_options: { get_input: feelpp_toolboxes }
-            avoid_cleanup: True # debug keep bash scripts
+#            avoid_cleanup: True # debug keep bash scripts
         relationships:
             - type: job_contained_in_hpc
-              target: atlas_hpc
+              target: main_hpc
             - type: job_depends_on
               target: feelpp_mesh_part
 

@@ -128,12 +128,18 @@ inputs:
         default: '/opt/zibaffinity_target_database.sqlite'
         type: string
     
-    # ZA db script name
+    # ZA db script name  za_db_slurm
     za_db_script:
         description: ZA database query script name
         default: 'za_db_target.sh'
         type: string
      
+    # ZA db batch script name    !!!!! name of slurm here script created outside container
+    za_db_slurm:
+        description: ZA database batch script name
+        default: "za_db.slurm"
+        type: string
+    
     # ZA HPC singularity module   !!!!! HPC-dependent (cola-corta, thin-shared)
     za_module_sing:
         description: ZA HPC singularity module 
@@ -367,24 +373,26 @@ node_templates:
             job_prefix: { get_input: job_prefix }
 
     za_db_job:
-        type: hpc.nodes.singularity_job
+#        type: hpc.nodes.singularity_job
+        type: hpc.nodes.job
         properties:
             job_options: 
+                type: 'SBATCH'
                 modules:
                     - { get_input: za_module_gcc }
                     - { get_input: za_module_mpi }
                     - { get_input: za_module_sing }
-                partition: { get_input: za_hpc_partition }
-                image: { concat: [ { get_input: za_work_path },'/',{ get_input: za_image } ]}
-                home: { get_input: za_home_dir }
+#                partition: { get_input: za_hpc_partition }
+#                image: { concat: [ { get_input: za_work_path },'/',{ get_input: za_image } ]}
+#                home: { get_input: za_home_dir }
                 volumes:
-                    - '/mnt:/mnt'
-                command: { concat: [' ', { get_input: za_db_script },' ',{ get_input: za_tar },' ',{ get_input: za_db },' ',{ get_input: za_work_path },' ',]}
+                    - '/mnt'
+                command: { concat: [' ', { get_input: za_work_path }, '/', { get_input: za_db_slurm }] }
 #                command: { concat: [' ', { get_input: za_db_script },' ',{ get_input: mso4sc_dataset_tar },' ',{ get_input: za_db },' ',{ get_input: za_work_path },' ',]}
-                nodes: 1
-                tasks: 1
-                tasks_per_node: 1
-                max_time: '00:01:00'
+#                nodes: 1
+#                tasks: 1
+#                tasks_per_node: 1
+#                max_time: '00:01:00'
             deployment:
                 bootstrap: 'scripts/za_db_bootstrap.sh'
                 revert: 'scripts/za_db_revert.sh'
@@ -393,10 +401,15 @@ node_templates:
                     - { get_input: za_work_path }
                     - { get_input: za_image }
                     - { get_input: za_module_sing }
+                    - { get_input: za_db_script }
+                    - { get_input: za_db_slurm }
+                    - { get_input: mso4sc_dataset_tar }
+                    - { get_input: za_db }
+                    - { get_input: za_hpc_partition }
         relationships:
             - type: job_contained_in_hpc
               target: ft2_node
-    
+ 
     za_prep_job:
 #        type: hpc.nodes.singularity_job
         type: hpc.nodes.job
