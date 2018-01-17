@@ -2,6 +2,8 @@
 
 ZA_SLURM="${4}/${6}"
 
+za_tar=$(echo ${2} | sed 's#http://##g')
+
 cat > $ZA_SLURM <<- EOM
 #!/bin/bash -l
 
@@ -12,7 +14,7 @@ cat > $ZA_SLURM <<- EOM
 
 cd $4
 
-mpirun singularity exec -H \\$HOME:/home/\\$USER -B /mnt:/mnt,/scratch:/scratch $7 /bin/bash $8 $1 $2 $3 $4 $5 
+mpirun singularity exec -H \\$HOME:/home/\\$USER -B /mnt:/mnt,/scratch:/scratch $7 /bin/bash $8 $1 $za_tar $3 $4 $5 
 
 # $1: za_lig
 # $2: za_tar
