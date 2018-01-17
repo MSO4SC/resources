@@ -43,13 +43,24 @@ node_types:
                         description: Options geometry
                         default: ""
                         type: string
+                    job_tasks:
+                        description: Number of tasks
+                        default: 1
+                        type: integer
+                    job_tasks_per_nodes:
+                        description: Number of tasks
+                        default: 1
+                        type: integer
+                    job_nodes:
+                        description: Number of nodes
+                        default: 1
+                        type: integer
+                    job_max_time:
+                        description: Max time
+                        default: "00:10:00"
+                        type: string
             job_options:
                 default:
-                    #modules:
-                    #    - gcc/6.1.0
-                    #    - openmpi/1.10.2
-                    #    - singularity/2.4.2
-                    #partition: 'thin-shared'
                     modules:
                         - gcc/6.4.0
                         - openmpi/1.10.7_gcc640
@@ -65,10 +76,10 @@ node_types:
                         { get_property:[ SELF, app_options, opts ] },' ',
                         { get_property:[ SELF, app_options, geofile] }
                         ]}
-                    nodes: 1
-                    tasks: 1
-                    tasks_per_node: 1
-                    max_time: '00:10:00'
+                    nodes: { get_property:[ SELF, app_options, job_nodes] }
+                    tasks: { get_property:[ SELF, app_options, job_tasks] }
+                    tasks_per_node: { get_property:[ SELF, app_options, job_tasks_per_nodes] }
+                    max_time: { get_property:[ SELF, app_options, job_max_time] }
             deployment:
                 default:
                     bootstrap: 'scripts/bootstrap.sh'
@@ -76,8 +87,6 @@ node_types:
                     inputs:
                         - '${LUSTRE}/singularity_images/' # boostrap, revert scripts arg $1
                         - 'feelpp_feelpp-toolboxes-latest.simg' # bootstrap, revert scripts arg $2
-                        - '5a4fa90ab0e9571f842931e5' # Girder folder ID
-                        - 'NO_REVERT' # Avoid removing the local singularity image (NO_REVERT)
 
     hpc.nodes.feelpp.mesh.part:
         derived_from: hpc.nodes.singularity_job
@@ -97,13 +106,24 @@ node_types:
                         description: Misc feelpp partitionner option
                         default: ""
                         type: string
+                    job_tasks:
+                        description: Number of tasks
+                        default: 1
+                        type: integer
+                    job_tasks_per_nodes:
+                        description: Number of tasks
+                        default: 1
+                        type: integer
+                    job_nodes:
+                        description: Number of nodes
+                        default: 1
+                        type: integer
+                    job_max_time:
+                        description: Max time
+                        default: "00:10:00"
+                        type: string
             job_options:
                 default:
-                    #modules:
-                    #    - gcc/6.1.0
-                    #    - openmpi/1.10.2
-                    #    - singularity/2.4.2
-                    #partition: 'thin-shared'
                     modules:
                         - gcc/6.4.0
                         - openmpi/1.10.7_gcc640
@@ -119,10 +139,10 @@ node_types:
                         ' --part ', { get_property:[ SELF, app_options, part ] },' ',
                         { get_property:[ SELF, app_options, opts ] }
                     ]}
-                    nodes: 1
-                    tasks: 1
-                    tasks_per_node: 1
-                    max_time: '00:10:00'
+                    nodes: { get_property:[ SELF, app_options, job_nodes] }
+                    tasks: { get_property:[ SELF, app_options, job_tasks] }
+                    tasks_per_node: { get_property:[ SELF, app_options, job_tasks_per_nodes] }
+                    max_time: { get_property:[ SELF, app_options, job_max_time] }
             deployment:
                 default:
                     bootstrap: 'scripts/bootstrap.sh'
@@ -130,8 +150,6 @@ node_types:
                     inputs:
                         - '${LUSTRE}/singularity_images/' # boostrap, revert scripts arg $1
                         - 'feelpp_feelpp-toolboxes-latest.simg' # bootstrap, revert scripts arg $2
-                        - '5a4fa90ab0e9571f842931e5' # Girder folder ID
-                        - 'NO_REVERT' # Avoid removing the local singularity image (NO_REVERT)
 
     hpc.nodes.feelpp.toolboxes:
         derived_from: hpc.nodes.singularity_job
@@ -151,25 +169,24 @@ node_types:
                         description: feelpp config file
                         default: ""
                         type: string
-                    nprocs:
-                        description: Number of processor
-                        default: 4
-                        type: integer
-                    ntasks:
+                    job_tasks:
                         description: Number of tasks
                         default: 4
                         type: integer
-                    nnodes:
+                    job_tasks_per_nodes:
+                        description: Number of tasks
+                        default: 4
+                        type: integer
+                    job_nodes:
                         description: Number of nodes
                         default: 1
                         type: integer
+                    job_max_time:
+                        description: Max time
+                        default: "00:30:00"
+                        type: string
             job_options:
                 default:
-                    #modules:
-                    #    - gcc/6.1.0
-                    #    - openmpi/1.10.2
-                    #    - singularity/2.4.2
-                    #partition: 'thin-shared'
                     modules:
                         - gcc/6.4.0
                         - openmpi/1.10.7_gcc640
@@ -185,10 +202,10 @@ node_types:
                         ' --solid.mshfile /feel/mesh_partitioned/torsionbar_p', { get_attribute:[ SELF, tasks] }, '.json ',
                         { get_property:[SELF, app_options, opts] }
                     ]}
-                    nodes: { get_property:[ SELF, app_options, nnodes] }
-                    tasks: { get_property:[ SELF, app_options, ntasks] }
-                    tasks_per_node: { get_property:[ SELF, app_options, ntasks_per_nodes] }
-                    max_time: '03:00:00'
+                    nodes: { get_property:[ SELF, app_options, job_nodes] }
+                    tasks: { get_property:[ SELF, app_options, job_tasks] }
+                    tasks_per_node: { get_property:[ SELF, app_options, job_tasks_per_nodes] }
+                    max_time: { get_property:[ SELF, app_options, job_max_time] }
             deployment:
                 default:
                     bootstrap: 'scripts/bootstrap.sh'
@@ -196,5 +213,3 @@ node_types:
                     inputs:
                         - '${LUSTRE}/singularity_images/' # boostrap, revert scripts arg $1
                         - 'feelpp_feelpp-toolboxes-latest.simg' # bootstrap, revert scripts arg $2
-                        - '5a4fa90ab0e9571f842931e5' # Girder folder ID
-                        - 'NO_REVERT' # Avoid removing the local singularity image (NO_REVERT)
