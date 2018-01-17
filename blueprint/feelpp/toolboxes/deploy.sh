@@ -11,7 +11,7 @@ UPLOAD_DIR=${SCRIPT_DIR}/upload
 TOSCA=blueprint.yaml
 LOCAL=local-blueprint-inputs.yaml
 LOCAL_DIR=../../../../
-LOCAL_APP_DIR=../config
+LOCAL_APP_DIR=./config
 LOCAL_APP=torsionbar
 
 usage()
@@ -43,7 +43,7 @@ case $arg in
             if [ -f ${LOCAL_APP_DIR}/$2.yaml ]; then
                 LOCAL_APP=$2
             else
-                echo "$2 file does not exist!"
+                echo "$2 config file does not exist!"
                 exit 1
             fi
         fi
@@ -67,6 +67,13 @@ case $arg in
         cfy deployments delete "${JOB}"
         echo "Deleting blueprint ${JOB}..."
         cfy blueprints delete "${JOB}"
+        ;;
+
+    "pkg")
+        cd ${SCRIPT_DIR}
+        echo "Creating package..."
+        export COPYFILE_DISABLE=1
+        tar --transform s/^upload/${APP}/ -cvzf "${APP}.tar" upload
         ;;
     *)
         usage
