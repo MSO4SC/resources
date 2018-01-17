@@ -405,7 +405,7 @@ node_templates:
                     - { get_input: za_db_slurm }
                     - { get_input: mso4sc_dataset_tar }
                     - { get_input: za_db }
-                    - { get_input: za_hpc_cluster }
+                    - { get_input: za_hpc_partition }
         relationships:
             - type: job_contained_in_hpc
               target: ft2_node
