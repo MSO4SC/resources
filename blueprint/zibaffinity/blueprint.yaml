@@ -70,13 +70,13 @@ inputs:
     # ZA target name    !!!!! USER selection from catalogue corresponding to DB table
     mso4sc_dataset_tar:
         description: ZA target (path)
-        default: 'erAlpha-1gwr'
+        default: 'bla'
         type: string
     
     # ZA target name    !!!!! USER selection from catalogue corresponding to DB table
     za_tar:
         description: ZA target (path)
-        default: { get_input: mso4sc_dataset_tar } #'erAlpha-1gwr'
+        default: 'erAlpha-1gwr'
         type: string
     
     # $2 - ZA target path    !!!!! USER selection from DB output
