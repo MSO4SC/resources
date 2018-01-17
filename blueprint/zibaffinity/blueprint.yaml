@@ -89,7 +89,7 @@ inputs:
     # $3 - ZA formal ligand charge    !!!!! USER input
     za_charge:
         description: ZA formal ligand charge
-        default: "abc"
+        default: "0"
         type: string
     
     # $5 - ZA user mail address    !!!!! USER input
