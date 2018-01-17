@@ -20,19 +20,66 @@ See http://book.mso4sc.cemosis.fr/#mso4sc_tosca_modelling_and_execution
 
 You also need to configure a few key:
 
-Key                        |  Description  | Default | Optional
----------------------------|---------------|---------|----------
-singularity_image_filename |               |         |
-singularity_image_uri      |               |         |
-cfgfile                    |               |         |
-execfile                   |               |         |
-workdir                    |               |         |
-mso4sc_dataset_input_url   |               |         |
-max_time                   |               |         |
-parallel_tasks             |               |         |
-mso4sc_hpc_primary         |               |         |
-monitor_entrypoint         |               |         |
----------------------------|---------------|---------|----------
+.Table List of keys to be defined
+|===
+| Key
+| Description
+| Default
+| Optional
+
+|===
+
+| singularity_image_filename
+|
+|
+|
+
+| singularity_image_uri
+|
+|
+|
+
+| cfgfile
+|
+|
+|
+
+| execfile
+|
+|
+|
+
+| workdir
+|
+|
+|
+
+| mso4sc_dataset_input_url
+|
+|
+| Mandatory???
+
+| max_time
+|
+|
+|
+
+| parallel_tasks
+|
+|
+|
+
+| mso4sc_hpc_primary
+|
+|
+|
+
+| monitor_entrypoint
+|
+|
+|
+
+|===
 
 Connect to the cloudify client via docker:
 [source]

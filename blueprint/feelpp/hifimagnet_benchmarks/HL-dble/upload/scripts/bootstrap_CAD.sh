@@ -19,3 +19,12 @@ else
     echo "Bootstrap will use $1/$2 singularity image!"
 fi
 
+# Get Simulation directory name
+
+DATADIR=$3
+cd $DATADIR
+REMOTE_URL=$4
+wget $REMOTE_URL
+ARCHIVE=$(basename $REMOTE_URL)
+# tar zxvf $ARCHIVE
+# DIRNAME=$(basename $ARCHIVE .tgz)
