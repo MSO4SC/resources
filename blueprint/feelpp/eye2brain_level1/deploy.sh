@@ -8,19 +8,39 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/" && pwd )"
 ROOT_DIR=${SCRIPT_DIR}/../../../
 UPLOAD_DIR=${SCRIPT_DIR}/upload
 JOB=feelpp_e2b_level1
+APP=feelpp_e2b_level1
 TOSCA=blueprint.yaml
 LOCAL=local-blueprint-inputs.yaml
 LOCAL_DIR=../../../../
+
+usage()
+{
+    echo "usage: $0 [CMD] config_name"
+    echo ""
+    echo "options:"
+    echo "      up     send to orchestrator"
+    echo "    down     remove from orchestrator"
+    echo "     pkg     create a package for marketplace (For portal usage)"
+    echo ""
+    echo "config_name:"
+    echo "    Base name of the config available in config directory."
+    echo "    torsionbar example is used by default."
+    echo ""
+    echo "Example: ./deploy up"
+    echo "         ./deploy down"
+    echo "         ./deploy pkg"
+}
+
 
 if [ ! -f "${ROOT_DIR}/${LOCAL}" ]; then
     echo "${ROOT_DIR}/${LOCAL} does not exist! See doc or blueprint examples!"
     exit 1
 fi
 
-cd ${UPLOAD_DIR}
 
 case $arg in
     "up" )
+        cd ${UPLOAD_DIR}
         cfy blueprints upload -b "${JOB}" "${TOSCA}"
         read -n 1 -s -p "Press any key to continue"
         echo ''
@@ -34,6 +54,7 @@ case $arg in
         ;;
 
     "down" )
+        cd ${UPLOAD_DIR}
         echo "Uninstalling deployment ${JOB}..."
         cfy executions start -d "${JOB}" uninstall
         echo "Deleting deployment ${JOB}..."
@@ -41,12 +62,15 @@ case $arg in
         echo "Deleting blueprint ${JOB}..."
         cfy blueprints delete "${JOB}"
         ;;
+
+    "pkg")
+        cd ${SCRIPT_DIR}
+        echo "Creating package..."
+        export COPYFILE_DISABLE=1
+        tar --transform s/^upload/${APP}/ -cvzf "${APP}.tar" upload
+        ;;
+
     *)
-        echo "usage: $0 [option]"
-        echo ""
-        echo "options:"
-        echo "      up     send to orchestrator"
-        echo "    down     remove from orchestrator"
-        echo ""
+        usage
         ;;
 esac
