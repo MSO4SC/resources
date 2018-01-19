@@ -46,6 +46,10 @@ path to this archive via the _BLUEPRINT_PATH_ variable set as a *characteristic*
 ./deploy pkg
 ----
 
+The archive is uploaded on https://girder.math.unistra.fr/#folder/5a6261a1b0e9570150cb23ef
+and used in the BLUEPRINT_PATH characteristic in the market place for the
+eye2brain product.
+
 == Debug
 
 === Blueprint

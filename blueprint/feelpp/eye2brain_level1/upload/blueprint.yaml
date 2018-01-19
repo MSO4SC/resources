@@ -61,7 +61,11 @@ inputs:
         description: FTII connection credentials
         default: {} # required
         
-    mso4sc_hpc_primary_workdir:
+    mso4sc_dataset_input_url:
+        description: url to retrieve for case file
+        default: ""
+
+    workdir:
         description: Workdir for the bootstrap script
         default: '${LUSTRE}/singularity_images'
         type: string
@@ -78,7 +82,7 @@ inputs:
 
     girder_folder_id:
         description: Girder folder ID containing the image
-        default: "5a4fae9cb0e9571f842931f8"
+        default: "5a627108b0e9570150cb23f5"
         type: string
 
     feelpp_config_file:
@@ -128,13 +132,13 @@ node_templates:
                 tasks: { get_input: job_tasks }
                 tasks_per_node: { get_input: job_tasks }
                 max_time: { get_input: job_max_time }
-                image: { concat: [ { get_input: mso4sc_hpc_primary_workdir }, '/', { get_input: singularity_image_file } ] }
+                image: { concat: [ { get_input: workdir }, '/', { get_input: singularity_image_file } ] }
                 avoid_cleanup: { get_input: avoid_cleanup } # debug keep bash scripts
             deployment:
                 bootstrap: 'scripts/bootstrap.sh'
                 revert: 'scripts/revert.sh'
                 inputs:
-                    - { get_input: mso4sc_hpc_primary_workdir } # boostrap, revert scripts arg $1
+                    - { get_input: workdir } # boostrap, revert scripts arg $1
                     - { get_input: singularity_image_file } # bootstrap, revert scripts arg $2
                     - { get_input: girder_repo_url }
                     - { get_input: girder_folder_id }
