@@ -30,7 +30,7 @@ cat > $ZA_SLURM <<- EOM
 
 cd $2
 
-mpirun singularity exec -H \\$HOME:/home/\\$USER -B /mnt:/mnt,/scratch:/scratch $3 /bin/bash $5 $za_tar $8 $2
+mpirun singularity exec -H \$HOME:/home/\$USER -B /mnt:/mnt,/scratch:/scratch $3 /bin/bash $5 $za_tar $8 $2
 
 # $1 { get_input: za_image_path }
 # $2 { get_input: za_work_path }

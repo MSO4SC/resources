@@ -423,8 +423,8 @@ node_templates:
                     - { get_input: za_module_sing }
 #                partition: { get_input: za_hpc_partition } #'thin-shared'
 #                image: { concat: [ { get_input: za_work_path },'/',{ get_input: za_image } ]}
-                volumes:
-                    - '/mnt'
+#                volumes:
+#                    - '/mnt'
                 command: { concat: [' ', { get_input: za_work_path }, '/', { get_input: za_prep_slurm }] }
 #                command: { get_input: za_prep_script }
 #                nodes: 1
@@ -522,8 +522,8 @@ node_templates:
                     - { get_input: za_module_gcc }
                     - { get_input: za_module_mpi }
                     - { get_input: za_module_sing }
-                volumes:
-                    - '/mnt'
+#                volumes:
+#                    - '/mnt'
                 command: { concat: [' ', { get_input: za_work_path }, '/', { get_input: za_prep_nvt_slurm }] }
             deployment:
                 bootstrap: 'scripts/za_prep_nvt_bootstrap.sh'
@@ -617,8 +617,8 @@ node_templates:
                     - { get_input: za_module_gcc }
                     - { get_input: za_module_mpi }
                     - { get_input: za_module_sing }
-                volumes:
-                    - '/mnt'
+#                volumes:
+#                    - '/mnt'
                 command: { concat: [' ', { get_input: za_work_path }, '/', { get_input: za_prep_npt_slurm }] }
             deployment:
                 bootstrap: 'scripts/za_prep_npt_bootstrap.sh'
@@ -713,8 +713,8 @@ node_templates:
                     - { get_input: za_module_mpi }
                     - { get_input: za_module_sing }
 #                image: { concat: [ { get_input: za_work_path },'/',{ get_input: za_image } ]}
-                volumes:
-                    - '/mnt'
+#                volumes:
+#                    - '/mnt'
                 command: { concat: [' ', { get_input: za_work_path }, '/', { get_input: za_prep_md_slurm }] }
             deployment:
                 bootstrap: 'scripts/za_prep_md_bootstrap.sh'
@@ -809,8 +809,8 @@ node_templates:
                     - { get_input: za_module_mpi }
                     - { get_input: za_module_sing }
 #                image: { concat: [ { get_input: za_work_path },'/',{ get_input: za_image } ]}
-                volumes:
-                    - '/mnt'
+#                volumes:
+#                    - '/mnt'
                 command: { concat: [' ', { get_input: za_work_path }, '/', { get_input: za_prep_rerun_slurm }] }
             deployment:
                 bootstrap: 'scripts/za_prep_rerun_bootstrap.sh'
@@ -906,8 +906,8 @@ node_templates:
                     - { get_input: za_module_mpi }
                     - { get_input: za_module_sing }
 #                image: { concat: [ { get_input: za_work_path },'/',{ get_input: za_image } ]}
-                volumes:
-                    - '/mnt'
+#                volumes:
+#                    - '/mnt'
                 command: { concat: [' ', { get_input: za_work_path }, '/', { get_input: za_post_rerun_slurm }] }
             deployment:
                 bootstrap: 'scripts/za_post_rerun_bootstrap.sh'
@@ -941,8 +941,8 @@ node_templates:
                     - { get_input: za_module_mpi }
                     - { get_input: za_module_sing }
 #                image: { concat: [ { get_input: za_work_path },'/',{ get_input: za_image } ]}
-                volumes:
-                    - '/mnt'
+#                volumes:
+#                    - '/mnt'
                 command: { concat: [' ', { get_input: za_work_path }, '/', { get_input: za_post_slurm }] }
             deployment:
                 bootstrap: 'scripts/za_post_bootstrap.sh'
