@@ -23,7 +23,16 @@ See http://book.mso4sc.cemosis.fr/#mso4sc_tosca_modelling_and_execution
 ----
 
 to deploy on the orchestrator. <config> is one of the base **upload/config/<config>.yaml**
-file.
+file. Default config are available in config directory. You have to set a girder API key
+to access private images. You can create one if you have an account on the server.
+
+For example you can use default proposed script
+[source]
+----
+./deploy up cantilever
+./deploy up torsionbar
+----
+
 
 [source]
 ----
