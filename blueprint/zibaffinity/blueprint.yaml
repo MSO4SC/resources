@@ -70,7 +70,7 @@ inputs:
     # ZA target name    !!!!! USER selection from catalogue corresponding to DB table
     mso4sc_dataset_tar:
         description: ZA target (path)
-        default: 'bla'
+#        default: 'bla'
         type: string
     
     # ZA target name    !!!!! USER selection from catalogue corresponding to DB table
@@ -89,7 +89,7 @@ inputs:
     # $3 - ZA formal ligand charge    !!!!! USER input
     za_charge:
         description: ZA formal ligand charge
-        default: "0"
+        default: "'0'"
         type: string
     
     # $5 - ZA user mail address    !!!!! USER input
@@ -101,13 +101,13 @@ inputs:
     # ZA image file name    !!!!! HPC-dependent
     za_image:
         description: ZA image file name
-        default: 'zibaffinity-latest.simg'
+        default: "zibaffinity-latest.simg"
         type: string
      
     # ZA image path    !!!!! HPC-dependent
     za_image_path:
         description: ZA image path
-        default: 'shub://sregistry.srv.cesga.es/mso4sc/zibaffinity:latest'
+        default: "shub://sregistry.srv.cesga.es/mso4sc/zibaffinity:latest"
         type: string
      
 #   # ZA image file    !!!!! HPC-dependent
@@ -125,13 +125,13 @@ inputs:
      # ZA target DB file    !!!!! -dependent
     za_db:
         description: ZA target DB file
-        default: '/opt/zibaffinity_target_database.sqlite'
+        default: "/opt/zibaffinity_target_database.sqlite"
         type: string
     
     # ZA db script name  za_db_slurm
     za_db_script:
         description: ZA database query script name
-        default: 'za_db_target.sh'
+        default: "za_db_target.sh"
         type: string
      
     # ZA db batch script name    !!!!! name of slurm here script created outside container
@@ -143,43 +143,43 @@ inputs:
     # ZA HPC singularity module   !!!!! HPC-dependent (cola-corta, thin-shared)
     za_module_sing:
         description: ZA HPC singularity module 
-        default: 'singularity/2.4.2'
+        default: "singularity/2.4.2"
         type: string
      
     # ZA HPC gcc module   !!!!! HPC-dependent (cola-corta, thin-shared)
     za_module_gcc:
         description: ZA HPC gcc module 
-        default: 'gcc/5.3.0'
+        default: "gcc/5.3.0"
         type: string
      
     # ZA HPC gcc module   !!!!! HPC-dependent (cola-corta, thin-shared)
     za_module_mpi:
         description: ZA HPC mpi module 
-        default: 'openmpi/1.10.2'
+        default: "openmpi/1.10.2"
         type: string
      
     # ZA HPC cluster partition   !!!!! HPC-dependent (cola-corta, thin-shared)
     za_hpc_partition:
         description: ZA HPC cluster partition 
-        default: 'cola-corta'
+        default: "cola-corta"
         type: string
      
     # ZA number of cores    !!!!! HPC-dependent
     za_mpi_nt:
         description: ZA number of cores
-        default: '24'
+        default: '"24"'
         type: string
      
     # ZA number of cores for rerun    !!!!! HPC-dependent
     za_mpi_nt_rerun:
         description: ZA number of cores for rerun
-        default: '6'
+        default: "'6'"
         type: string
      
     # ZA prep script name    !!!!! ZA prep script executed sequentially
     za_prep_script:
         description: ZA prep script name
-        default: 'za_prep_sim.sh'
+        default: "za_prep_sim.sh"
         type: string
      
     # ZA prep batch script name    !!!!! name of slurm here script created outside container
@@ -191,7 +191,7 @@ inputs:
     # ZA energy minimization script name    !!!!! ZA main script executed using mpirun (currently OpenMPI)
     za_mpi_em_script:
         description: ZA energy minimization script name
-        default: 'za_mpi_em.sh'
+        default: "za_mpi_em.sh"
         type: string
      
     # ZA energy minimization batch script name    !!!!! name of slurm here script created outside container
@@ -209,7 +209,7 @@ inputs:
     # ZA nvt preparation script name    !!!!! ZA prep script executed sequentially
     za_prep_nvt_script:
         description: ZA nvt preparation script name
-        default: 'za_prep_nvt.sh'
+        default: "za_prep_nvt.sh"
         type: string
      
     # ZA nvt preparation batch script name    !!!!! name of slurm here script created outside container
@@ -221,7 +221,7 @@ inputs:
     # ZA temperature equilibration script name    !!!!! ZA main script executed using mpirun (currently OpenMPI)
     za_mpi_nvt_script:
         description: ZA temperature equilibration script name
-        default: 'za_mpi_nvt.sh'
+        default: "za_mpi_nvt.sh"
         type: string
      
     # ZA temperature equilibration batch script name    !!!!! name of slurm here script created outside container
@@ -239,7 +239,7 @@ inputs:
     # ZA npt preparation script name    !!!!! ZA prep script executed sequentially
     za_prep_npt_script:
         description: ZA npt preparation script name
-        default: 'za_prep_npt.sh'
+        default: "za_prep_npt.sh"
         type: string
      
     # ZA npt preparation batch script name    !!!!! name of slurm here script created outside container
@@ -251,7 +251,7 @@ inputs:
     # ZA pressure equilibration script name    !!!!! ZA main script executed using mpirun (currently OpenMPI)
     za_mpi_npt_script:
         description: ZA pressure equilibration script name
-        default: 'za_mpi_npt.sh'
+        default: "za_mpi_npt.sh"
         type: string
      
     # ZA pressure equilibration batch script name    !!!!! name of slurm here script created outside container
@@ -269,7 +269,7 @@ inputs:
     # ZA md preparation script name    !!!!! ZA prep script executed sequentially
     za_prep_md_script:
         description: ZA md preparation script name
-        default: 'za_prep_md.sh'
+        default: "za_prep_md.sh"
         type: string
      
     # ZA md preparation batch script name    !!!!! name of slurm here script created outside container
@@ -281,7 +281,7 @@ inputs:
     # ZA production run script name    !!!!! ZA main script executed using mpirun (currently OpenMPI)
     za_mpi_md_script:
         description: ZA production run script name
-        default: 'za_mpi_md.sh'
+        default: "za_mpi_md.sh"
         type: string
      
     # ZA production run batch script name    !!!!! name of slurm here script created outside container
@@ -299,7 +299,7 @@ inputs:
     # ZA rerun preparation script name    !!!!! ZA prep script executed sequentially
     za_prep_rerun_script:
         description: ZA rerun preparation script name
-        default: 'za_prep_rerun.sh'
+        default: "za_prep_rerun.sh"
         type: string
      
     # ZA rerun preparation batch script name    !!!!! name of slurm here script created outside container
@@ -311,7 +311,7 @@ inputs:
     # ZA energy rerun script name    !!!!! ZA main script executed using mpirun (currently OpenMPI)
     za_mpi_rerun_script:
         description: ZA production run script name
-        default: 'za_mpi_rerun.sh'
+        default: "za_mpi_rerun.sh"
         type: string
      
     # ZA energy rerun batch script name    !!!!! name of slurm here script created outside container
@@ -329,7 +329,7 @@ inputs:
     # ZA post rerun script name    !!!!! ZA prep script executed sequentially
     za_post_rerun_script:
         description: ZA post rerun script name
-        default: 'za_post_rerun.sh'
+        default: "za_post_rerun.sh"
         type: string
      
     # ZA post rerun batch script name    !!!!! name of slurm here script created outside container
@@ -341,7 +341,7 @@ inputs:
     # ZA post script name    !!!!! ZA prep script executed sequentially
     za_post_script:
         description: ZA prep script name
-        default: 'za_post_sim.sh'
+        default: "za_post_sim.sh"
         type: string
      
     # ZA post batch script name    !!!!! name of slurm here script created outside container
@@ -353,13 +353,13 @@ inputs:
     # ZA mpi input 0  !!!! test
     za_mpi_inp_0:
         description: ZA mpi input 0
-        default: "0"
+        default: "'0'"
         type: string
     
     # ZA mpi input 1  !!!! test
     za_mpi_inp_1:
         description: ZA mpi input 1
-        default: "1"
+        default: "'1'"
         type: string
     
      
@@ -385,8 +385,8 @@ node_templates:
 #                partition: { get_input: za_hpc_partition }
 #                image: { concat: [ { get_input: za_work_path },'/',{ get_input: za_image } ]}
 #                home: { get_input: za_home_dir }
-                volumes:
-                    - '/mnt'
+#                volumes:
+#                    - '/mnt'
                 command: { concat: [' ', { get_input: za_work_path }, '/', { get_input: za_db_slurm }] }
 #                command: { concat: [' ', { get_input: za_db_script },' ',{ get_input: mso4sc_dataset_tar },' ',{ get_input: za_db },' ',{ get_input: za_work_path },' ',]}
 #                nodes: 1
