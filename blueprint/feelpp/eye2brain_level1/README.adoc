@@ -19,7 +19,7 @@ See http://book.mso4sc.cemosis.fr/#mso4sc_tosca_modelling_and_execution
 
 [source]
 ----
-./deploy up <config>
+./deploy up
 ----
 
 to deploy on the orchestrator. <config> is one of the base upload/config/<config>.yaml
@@ -47,8 +47,36 @@ path to this archive via the _BLUEPRINT_PATH_ variable set as a *characteristic*
 ----
 
 The archive is uploaded on https://girder.math.unistra.fr/#folder/5a6261a1b0e9570150cb23ef
-and used in the BLUEPRINT_PATH characteristic in the market place for the
+and used in the _BLUEPRINT_PATH_ characteristic in the market place for the
 eye2brain product.
+
+=== HPC select.
+
+Currently, bluescripts are not adapted to several HPC and might changes in the future.
+You can add in the portal a new HPC, for example Finit Terrae II, or for unistra users
+Atlas (be careful to use the specific user, ask to admins associated to the project).
+
+Once done, you can set particular machine inputs depending on the machine.
+
+====  FT2
+
+[source]
+----
+job_hpc_modules: ['gcc/6.1.0','openmpi/1.10.2','singularity/2.4.2']
+job_hpc_partition: "thin-shared"
+job_hpc_workdir: "${HOME}/mso4sc_orchestrator"
+job_hpc_simg_mount: ['/data', '/mnt', '${HOME}/mso4sc_orchestrator/feel:/feel']
+----
+
+==== atlas
+
+[source]
+----
+job_hpc_modules: ['gcc/6.4.0','openmpi/1.10.7_gcc640']
+job_hpc_partition: "public"
+job_hpc_workdir: "${HOME}/mso4sc_orchestrator"
+job_hpc_simg_mount: ['/data', '/mnt', '${HOME}/mso4sc_orchestrator/feel:/feel']
+----
 
 == Debug
 
