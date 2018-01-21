@@ -141,8 +141,7 @@ node_templates:
                 home: '${HOME}:/home/${USER}'
                 volumes: { get_input: job_hpc_simg_mount }
                 command: { concat: [ ' feelpp_e2b_level1 ',
-                    ' --config-file ', { get_input: feelpp_config_file },
-                    ' --directory ', { get_input: job_hpc_workdir }, '/feel/' 
+                    ' --config-file ', { get_input: feelpp_config_file }
                     ] }
                 nodes: { get_input: job_nodes }
                 tasks: { get_input: job_tasks }
