@@ -11,7 +11,7 @@ UPLOAD_DIR=${SCRIPT_DIR}/upload
 TOSCA=blueprint.yaml
 LOCAL=local-blueprint-inputs.yaml
 LOCAL_DIR=../../../../
-LOCAL_APP_DIR=./config
+LOCAL_APP_DIR=../config
 LOCAL_APP=torsionbar
 
 usage()
@@ -51,13 +51,13 @@ case $arg in
         cfy blueprints upload -b "${JOB}" "${TOSCA}"
         read -n 1 -s -p "Press any key to continue"
         echo ''
-        cfy deployments create -b "${JOB}" -i "${LOCAL_DIR}/${LOCAL}" -i "${LOCAL_APP_DIR}/${LOCAL_APP}.yaml" --skip-plugins-validation ${JOB}
+        cfy deployments -v create -v -b "${JOB}" -i "${LOCAL_DIR}/${LOCAL}" -i "${LOCAL_APP_DIR}/${LOCAL_APP}.yaml" --skip-plugins-validation ${JOB}
         read -n 1 -s -p "Press any key to continue"
         echo ''
-        cfy executions start -d "${JOB}" install
+        cfy executions -v start -v -d "${JOB}" install
         read -n 1 -s -p "Press any key to continue"
         echo ''
-        cfy executions start -d "${JOB}" run_jobs
+        cfy executions -v start -v -d "${JOB}" run_jobs
         ;;
 
     "down" )

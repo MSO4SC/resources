@@ -1,7 +1,6 @@
 ########
 # Copyright (c) 2017 MSO4SC
-# Author(s) javier.carnero@atos.net
-#           guillaume.dolle@cemosis.fr
+# Author(s) guillaume.dolle@cemosis.fr
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -43,22 +42,21 @@ inputs:
         default: {}
 
     #############################################################
-    # Feel++ Application config
+    # Feel++ Application options for each jobs
     #############################################################
     feelpp_mesh_create:
         description: Application configuration
         default: {}
-        
+            
     feelpp_mesh_part:
         description: Application configuration
         default: {}
-
+    
     feelpp_toolboxes:
         description: Application configuration
         default: {}
 
 node_templates:
-
     main_hpc:
         type: hpc.nodes.Compute
         properties:
@@ -72,7 +70,6 @@ node_templates:
         type: hpc.nodes.feelpp.mesh.create
         properties:
             app_options: { get_input: feelpp_mesh_create }
-#            avoid_cleanup: True # debug keep bash scripts
         relationships:
             - type: job_contained_in_hpc
               target: main_hpc
@@ -81,7 +78,6 @@ node_templates:
         type: hpc.nodes.feelpp.mesh.part
         properties:
             app_options: { get_input: feelpp_mesh_part }
-#            avoid_cleanup: True # debug keep bash scripts
         relationships:
             - type: job_contained_in_hpc
               target: main_hpc
@@ -92,7 +88,6 @@ node_templates:
         type: hpc.nodes.feelpp.toolboxes
         properties:
             app_options: { get_input: feelpp_toolboxes }
-#            avoid_cleanup: True # debug keep bash scripts
         relationships:
             - type: job_contained_in_hpc
               target: main_hpc

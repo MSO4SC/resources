@@ -27,6 +27,10 @@ node_types:
             app_options:
                 description: Feel++ mesh create config
                 default:
+                    enable:
+                        description: Number of tasks
+                        default: True
+                        type: boolean
                     geofile:
                         description: Geometry geo file
                         default: '/usr/local/share/feelpp/testcases/CSM/torsionbar/torsionbar.geo'
@@ -59,17 +63,54 @@ node_types:
                         description: Max time
                         default: "00:10:00"
                         type: string
+                    job_hpc_partition:
+                        description: slurm partition to choose depending on the targeted machine
+                        default: 'thin-shared'
+                        type: string               
+                    job_hpc_modules:
+                        description: modules to load depending on the targeted machine
+                        default:
+                            - gcc/6.1.0
+                            - openmpi/1.10.2
+                            - singularity/2.4.2
+                    job_hpc_workdir:
+                        description: Workdir for the bootstrap script
+                        default: '${LUSTRE}/singularity_images'
+                        type: string
+                    girder_repo_url:
+                        description: Girder repository
+                        default: "https://girder.math.unistra.fr"
+                        type: string
+                    girder_api_key:
+                        description: Girder api key to access private data
+                        default: "" # Required
+                        type: string
+                    girder_folder_id:
+                        description: Girder folder ID containing the image
+                        default: "5a627108b0e9570150cb23f5"
+                        type: string
+                    singularity_image_file:
+                        description: Feel++ singularity image for eye2brain project
+                        default: "feelpp_feelpp-toolboxes-mso4sc.simg"
+                        type: string
+                    revert_no_erase:
+                        description: cleanup singularity image files (be careful, future image won't redownload updated updated image version!).
+                        default: 'False'
+                        type: string
+                    avoid_cleanup:
+                        description: Avoid cleanup temporary orchestrator files (debug)
+                        default: False
+                        type: string
             job_options:
                 default:
-                    modules:
-                        - gcc/6.4.0
-                        - openmpi/1.10.7_gcc640
-                    partition: 'public'
+                    modules: { get_property:[SELF, app_options, job_hpc_modules] }
+                    partition: { get_property:[SELF, app_options, job_hpc_partition] }
                     home: '${HOME}:/home/${USER}'
                     volumes:
                         - '/scratch'
+                        - '/mnt'
                         - '${LUSTRE}/feel:/feel'
-                    image: '${LUSTRE}/singularity_images/feelpp_feelpp-toolboxes-latest.simg'
+                    image: { concat:[ get_property:[SELF, app_options, job_hpc_workdir], get_property:[SELF, app_options, singularity_image_file] ] }
                     command: { concat:[
                         'gmsh -', { get_property:[ SELF, app_options, dim ] },
                         ' -bin -o ', { get_property:[ SELF, app_options, mshfile ] },' ',
@@ -80,13 +121,25 @@ node_types:
                     tasks: { get_property:[ SELF, app_options, job_tasks] }
                     tasks_per_node: { get_property:[ SELF, app_options, job_tasks_per_nodes] }
                     max_time: { get_property:[ SELF, app_options, job_max_time] }
+                    avoid_cleanup: { get_property:[ SELF, app_options, avoid_cleanup ] }
+                    #enable: { get_property:[SELF, app_options, enable] }
             deployment:
                 default:
                     bootstrap: 'scripts/bootstrap.sh'
                     revert: 'scripts/revert.sh'
                     inputs:
-                        - '${LUSTRE}/singularity_images/' # boostrap, revert scripts arg $1
-                        - 'feelpp_feelpp-toolboxes-latest.simg' # bootstrap, revert scripts arg $2
+                        - { get_attribute:[SELF, app_options, job_hpc_workdir] } # boostrap, revert scripts arg $1
+                        - { get_attribute:[SELF, app_options, singularity_image_file] } # bootstrap, revert scripts arg $2
+                        - { get_attribute:[SELF, app_options, girder_repo_url] }
+                        - { get_attribute:[SELF, app_options, girder_folder_id] }
+                        - { get_attribute:[SELF, app_options, girder_api_key] }
+                        - { get_attribute:[SELF, app_options, revert_no_erase] } # NO_ERASE to not remove singularity image
+                        #                        - '${LUSTRE}/singularity_images/'
+                        #                        - "feelpp_feelpp-toolboxes-mso4sc.simg"
+                        #                        - "https://girder.math.unistra.fr"
+                        #                        - "5a627108b0e9570150cb23f5"
+                        #                        - "OmDiPO4eoAnvf9JkHHYk1LeFpSUuN6efCgqPIYbs"
+                        #                        - 'True'
 
     hpc.nodes.feelpp.mesh.part:
         derived_from: hpc.nodes.singularity_job
@@ -94,9 +147,17 @@ node_types:
             app_options:
                 description: Feel++ mesh partitionner config
                 default:
-                    mshfile:
-                        description: Mesh file to be partionned
+                    enable:
+                        description: Number of tasks
+                        default: True
+                        type: boolean
+                    ifile:
+                        description: Input mesh file to be partioned
                         default: '/feel/torsionbar.msh'
+                        type: string
+                    mesh_parted_name:
+                        description: Ouput mesh to be partitioned file base name
+                        default: 'torsionbar_parted'
                         type: string
                     part:
                         description: Number of partition (number of tasks for the toolbox app)
@@ -122,34 +183,78 @@ node_types:
                         description: Max time
                         default: "00:10:00"
                         type: string
+                    job_hpc_partition:
+                        description: slurm partition to choose depending on the targeted machine
+                        default: 'thin-shared'
+                        type: string               
+                    job_hpc_modules:
+                        description: modules to load depending on the targeted machine
+                        default:
+                            - gcc/6.1.0
+                            - openmpi/1.10.2
+                            - singularity/2.4.2
+                    job_hpc_workdir:
+                        description: Workdir for the bootstrap script
+                        default: '${LUSTRE}/singularity_images'
+                        type: string
+                    girder_repo_url:
+                        description: Girder repository
+                        default: "https://girder.math.unistra.fr"
+                        type: string
+                    girder_api_key:
+                        description: Girder api key to access private data
+                        default: "" # Required
+                        type: string
+                    girder_folder_id:
+                        description: Girder folder ID containing the image
+                        default: "5a627108b0e9570150cb23f5"
+                        type: string
+                    singularity_image_file:
+                        description: Feel++ singularity image for eye2brain project
+                        default: "feelpp_feelpp-toolboxes-mso4sc.simg"
+                        type: string
+                    revert_no_erase:
+                        description: cleanup singularity image files (be careful, future image won't redownload updated updated image version!).
+                        default: 'False'
+                        type: string
+                    avoid_cleanup:
+                        description: Avoid cleanup temporary orchestrator files (debug)
+                        default: False
+                        type: string
             job_options:
                 default:
-                    modules:
-                        - gcc/6.4.0
-                        - openmpi/1.10.7_gcc640
-                    partition: 'public'
+                    modules: { get_property:[SELF, app_options, job_hpc_modules] }
+                    partition: { get_property:[SELF, app_options, job_hpc_partition] }
                     home: '${HOME}:/home/${USER}'
                     volumes:
                         - '/scratch'
+                        - '/mnt'
                         - '${LUSTRE}/feel:/feel'
-                    image: '${LUSTRE}/singularity_images/feelpp_feelpp-toolboxes-latest.simg'
+                    image: { concat:[ get_property:[SELF, app_options, job_hpc_workdir], get_property:[SELF, app_options, singularity_image_file] ] }
                     command: { concat:[
-                        'feelpp_mesh_partitioner --ifile ', { get_property:[ SELF, app_options, mshfile ] },
-                        ' --odir /feel/mesh_partitioned/ ',
-                        ' --part ', { get_property:[ SELF, app_options, part ] },' ',
+                        'feelpp_mesh_partitioner ',
+                        ' --ifile ', { get_property:[ SELF, app_options, ifile ] },
+                        ' --ofile ', '/feel/mesh_partitioned/', { get_property:[SELF, app_options, mesh_parted_name] }, '.msh',
+                        ' --part ', { get_property:[ SELF, app_options, part ] },
                         { get_property:[ SELF, app_options, opts ] }
                     ]}
-                    nodes: { get_property:[ SELF, app_options, job_nodes] }
-                    tasks: { get_property:[ SELF, app_options, job_tasks] }
-                    tasks_per_node: { get_property:[ SELF, app_options, job_tasks_per_nodes] }
-                    max_time: { get_property:[ SELF, app_options, job_max_time] }
+                    nodes: { get_property:[SELF, app_options, job_nodes] }
+                    tasks: { get_property:[SELF, app_options, job_tasks] }
+                    tasks_per_node: { get_property:[SELF, app_options, job_tasks_per_nodes] }
+                    max_time: { get_property:[SELF, app_options, job_max_time] }
+                    avoid_cleanup: { get_property:[SELF, app_options, avoid_cleanup] }
+                    #enable: { get_property:[SELF, app_options, enable] }
             deployment:
                 default:
                     bootstrap: 'scripts/bootstrap.sh'
                     revert: 'scripts/revert.sh'
                     inputs:
-                        - '${LUSTRE}/singularity_images/' # boostrap, revert scripts arg $1
-                        - 'feelpp_feelpp-toolboxes-latest.simg' # bootstrap, revert scripts arg $2
+                        - { get_attribute:[SELF, app_options, job_hpc_workdir] } # boostrap, revert scripts arg $1
+                        - { get_attribute:[SELF, app_options, singularity_image_file] } # bootstrap, revert scripts arg $2
+                        - { get_attribute:[SELF, app_options, girder_repo_url] }
+                        - { get_attribute:[SELF, app_options, girder_folder_id] }
+                        - { get_attribute:[SELF, app_options, girder_api_key] }
+                        - { get_attribute:[SELF, app_options, revert_no_erase] } # NO_ERASE to not remove singularity image
 
     hpc.nodes.feelpp.toolboxes:
         derived_from: hpc.nodes.singularity_job
@@ -157,10 +262,22 @@ node_types:
             app_options:
                 description: Feel++ toolboxes config
                 default:
+                    enable:
+                        description: Number of tasks
+                        default: True
+                        type: boolean
                     toolbox:
                         description: Name of the toolbox (feelpp_toolbox_solid_3d, feelpp_toolbox_fluid_2d, ...)
-                        default: 'feelpp_toolbox_solid_3d'
+                        default: 'solid'
                         type: string
+                    dim:
+                        description: Topological dimension for the problem
+                        default: 3
+                        type: integer
+                    mesh_parted_name:
+                        description: Parted mesh base name
+                        default: 'torsionbar_parted'
+                        type: integer
                     cfg:
                         description: Path to Feel++ config file (Default testcase are available in the container /usr/local/share/feelpp/testcases)
                         default: '/usr/local/share/feelpp/testcases/CSM/torsionbar/torsionbar.cfg'
@@ -185,31 +302,74 @@ node_types:
                         description: Max time
                         default: "00:30:00"
                         type: string
+                    job_hpc_partition:
+                        description: slurm partition to choose depending on the targeted machine
+                        default: 'thin-shared'
+                        type: string               
+                    job_hpc_modules:
+                        description: modules to load depending on the targeted machine
+                        default:
+                            - gcc/6.1.0
+                            - openmpi/1.10.2
+                            - singularity/2.4.2
+                    job_hpc_workdir:
+                        description: Workdir for the bootstrap script
+                        default: '${LUSTRE}/singularity_images'
+                        type: string
+                    girder_repo_url:
+                        description: Girder repository
+                        default: "https://girder.math.unistra.fr"
+                        type: string
+                    girder_api_key:
+                        description: Girder api key to access private data
+                        default: "" # Required
+                        type: string
+                    girder_folder_id:
+                        description: Girder folder ID containing the image
+                        default: "5a627108b0e9570150cb23f5"
+                        type: string
+                    singularity_image_file:
+                        description: Feel++ singularity image for eye2brain project
+                        default: "feelpp_feelpp-toolboxes-mso4sc.simg"
+                        type: string
+                    revert_no_erase:
+                        description: cleanup singularity image files (be careful, future image won't redownload updated updated image version!).
+                        default: 'False'
+                        type: string
+                    avoid_cleanup:
+                        description: Avoid cleanup temporary orchestrator files (debug)
+                        default: False
+                        type: string
             job_options:
                 default:
-                    modules:
-                        - gcc/6.4.0
-                        - openmpi/1.10.7_gcc640
-                    partition: 'public'
+                    modules: { get_property:[SELF, app_options, job_hpc_modules] }
+                    partition: { get_property:[SELF, app_options, job_hpc_partition] }
                     home: '${HOME}:/home/${USER}'
                     volumes:
                         - '/scratch'
+                        - '/mnt'
                         - '${LUSTRE}/feel:/feel'
-                    image: '${LUSTRE}/singularity_images/feelpp_feelpp-toolboxes-latest.simg'
+                    image: { concat:[ get_property:[SELF, app_options, workdir], get_property:[SELF, app_options, singularity_image_file] ] }
                     command: { concat: [
-                        { get_property:[SELF, app_options, toolbox] },
-                        ' --config-file ', { get_property:[SELF, app_options, cfg] },' ',
-                        ' --solid.mshfile /feel/mesh_partitioned/torsionbar_p', { get_attribute:[ SELF, tasks] }, '.json ',
+                        'feelpp_toolbox_', { get_property:[SELF, app_options, toolbox] }, '_', { get_property:[SELF, app_options, dim] }, 'd',
+                        ' --config-file ', { get_property:[SELF, app_options, cfg] },
+                        ' --', { get_property: app_options, toolbox }, '.mshfile /feel/mesh_partitioned/', { get_property:[SELF, app_options, mesh_parted_name] }, '.json ',
                         { get_property:[SELF, app_options, opts] }
                     ]}
                     nodes: { get_property:[ SELF, app_options, job_nodes] }
                     tasks: { get_property:[ SELF, app_options, job_tasks] }
                     tasks_per_node: { get_property:[ SELF, app_options, job_tasks_per_nodes] }
                     max_time: { get_property:[ SELF, app_options, job_max_time] }
+                    avoid_cleanup: { get_property:[ SELF, app_options, avoid_cleanup ] }
+                    #enable: { get_property:[SELF, app_options, enable] }
             deployment:
                 default:
                     bootstrap: 'scripts/bootstrap.sh'
                     revert: 'scripts/revert.sh'
                     inputs:
-                        - '${LUSTRE}/singularity_images/' # boostrap, revert scripts arg $1
-                        - 'feelpp_feelpp-toolboxes-latest.simg' # bootstrap, revert scripts arg $2
+                        - { get_attribute:[SELF, app_options, workdir] } # boostrap, revert scripts arg $1
+                        - { get_attribute:[SELF, app_options, singularity_image_file] } # bootstrap, revert scripts arg $2
+                        - { get_attribute:[SELF, app_options, girder_repo_url] }
+                        - { get_attribute:[SELF, app_options, girder_folder_id] }
+                        - { get_attribute:[SELF, app_options, girder_api_key] }
+                        - { get_attribute:[SELF, app_options, revert_no_erase] } # NO_ERASE to not remove singularity image
