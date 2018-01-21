@@ -81,25 +81,16 @@ inputs:
         type: string
 
     cadcfg:
-        description: name of the yaml CAD config file 
+        description: name of the yaml CAD config file without extension 
         default: "HL-31_H1.yaml"
         type: string
 
-    cadh5:
-        description: name of the hdf5 mesh file 
-        default: "HL-31_H1_h5.json"
-
-    # cadmeshcfg:
-    #     description: name of the yaml mesh config file 
-    #     default: "HL-31_H1_meshdata.yaml"
-    #     type: string
-
     cadmsh:
-        description: name of the mesh file 
+        description: name of the mesh file without extension 
         default: "HL-31_H1.msh"
 
     cadmed:
-        description: name of the mesh file
+        description: name of the mesh file without extension 
         default: "HL-31_H1.med"
 
     mso4sc_dataset_input_url:
@@ -119,8 +110,8 @@ inputs:
         default: "feelpp_hfm_thermoelectric_model_3D_V1T1_N1"
 
     cfgfile:
-        description: Hifimagnet configuration file
-        default: "HL-31_H1.cfg"
+        description: configuration file
+        default: "/usr/local/share/hifimagnet/ThermoElectricModel/thermoelectric_3D_V1T1_N1_cvg.cfg"
 
     singularity_image_uri:
         description: URI pointing to the singularity image
@@ -169,7 +160,7 @@ node_templates:
                 nodes: 1
                 tasks: 1
                 tasks_per_node: 1
-                max_time: '00:45:00'
+                max_time: '00:30:00'
                 image:  { concat: [ { get_input: workdir }, '/', { get_input: singularity_salome_filename } ] }
             deployment:
                 bootstrap: 'scripts/bootstrap.sh'
@@ -235,9 +226,8 @@ node_templates:
                 command: { concat:[
                     'feelpp_mesh_partitioner
                      --ifile ', { get_input: cadmsh},
-		     --ofile ', { get_input: cad},
                      --nochdir
-                     --part ', { get_property: [job_runmodel, job_options , tasks] }] }
+                     --part ', { get_property: [job_thermoelectricmodel, job_options , tasks] }] }
                 nodes: 1
                 tasks: 1
                 tasks_per_node: 1
@@ -256,7 +246,7 @@ node_templates:
             - type: job_depends_on
               target: create_mesh
 
-    job_runmodel:
+    job_thermoelectricmodel:
         type: hpc.nodes.singularity_job
         properties:
             job_options:
@@ -291,6 +281,6 @@ node_templates:
               target: partition_mesh
 
 outputs:
-    job_runmodel:
-        description: "create CAD, mesh geometry and run Simulation"
-        value: { get_attribute: [job_runmodel, job_name] }
+    job_thermoelectricmodel:
+        description: feelpp_hfm_thermoelectric_model_3D_V1T1_N1 results
+        value: { get_attribute: [job_thermoelectricmodel, job_name] }
