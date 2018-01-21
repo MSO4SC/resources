@@ -3,11 +3,13 @@
 # Possible argument {up,down}
 
 arg=$1
+upload=${2:-"upload"}
+echo "upload=$upload"
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/" && pwd )"
 ROOT_DIR=${SCRIPT_DIR}/../../../
 JOB=hfm_benchmark_HL-dble
-UPLOAD_DIR=${SCRIPT_DIR}/upload
+UPLOAD_DIR=${SCRIPT_DIR}/$upload
 TOSCA=blueprint.yaml
 LOCAL=local-blueprint-inputs.yaml
 LOCAL_DIR=../../../../

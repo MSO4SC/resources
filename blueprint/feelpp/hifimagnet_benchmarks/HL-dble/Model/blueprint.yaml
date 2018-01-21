@@ -150,39 +150,6 @@ node_templates:
             external_monitor_entrypoint: { get_input: monitor_entrypoint }
             job_prefix: { get_input: job_prefix }
 
-    create_geometry:
-        type: hpc.nodes.singularity_job
-        properties:
-            job_options:
-                modules:
-                    - gcc/6.1.0
-                    - openmpi/1.10.2
-                    - singularity/2.4.2
-                partition: {get_input: mso4sc_hpc_partition}
-                reservation: {get_input: mso4sc_hpc_reservation}
-                home: '${HOME}/HL-dble:/home/$USER'
-                volumes:
-                    - '/scratch'
-                    - '${LUSTRE}/feel:/feel'
-                    - '${STORE}/Distene:/opt/DISTENE/DLim'
-                command: { concat: [ 'salome -t ', {get_input: salome_hifimagnet_plugin}, '/bin/salome/HIFIMAGNET_Cmd.py args:--', {get_input: cadtype},'=', {get_input: cadcfg},',--mesh' ] }
-                nodes: 1
-                tasks: 1
-                tasks_per_node: 1
-                max_time: '00:45:00'
-                image:  { concat: [ { get_input: workdir }, '/', { get_input: singularity_salome_filename } ] }
-            deployment:
-                bootstrap: 'scripts/bootstrap.sh'
-                revert: 'scripts/revert.sh'
-                inputs:
-                    - { get_input: workdir }
-                    - { get_input: singularity_salome_filename }
-                    - { get_input: datadir }
-
-        relationships:
-            - type: job_contained_in_hpc
-              target: primary_hpc
-
     create_mesh:
         type: hpc.nodes.singularity_job
         properties:
@@ -215,8 +182,6 @@ node_templates:
         relationships:
             - type: job_contained_in_hpc
               target: primary_hpc
-            - type: job_depends_on
-              target: create_geometry
 
     partition_mesh:
         type: hpc.nodes.singularity_job
@@ -235,7 +200,7 @@ node_templates:
                 command: { concat:[
                     'feelpp_mesh_partitioner
                      --ifile ', { get_input: cadmsh},
-		     --ofile ', { get_input: cad},
+                     --ofile ', { get_input: cadh5},
                      --nochdir
                      --part ', { get_property: [job_runmodel, job_options , tasks] }] }
                 nodes: 1
