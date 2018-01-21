@@ -18,6 +18,11 @@ GIRDER_FOLDER_ID=$4
 GIRDER_API_KEY=$5
 NO_ERASE=$6
 
+# Prepare directories if they do not exists.
+mkdir -p ${WORK_DIR}/feel
+mkdir -p ${WORK_DIR}/singularity_images
+WORK_DIR=${WORK_DIR}/singularity_images
+
 # Download jq JSON parsing tool (if not available) to parse HTTP request response
 # if not available on the machine.
 jq_parser()
