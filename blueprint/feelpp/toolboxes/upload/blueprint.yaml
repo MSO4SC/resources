@@ -158,6 +158,7 @@ node_templates:
             job_options:
                 modules: { get_input: job_hpc_modules }
                 partition: { get_input: job_hpc_partition }
+                reservation: { get_input: job_hpc_reservation }
                 home: '${HOME}:/home/${USER}'
                 volumes: { get_input: job_hpc_volumes }
                 command: { concat: [
