@@ -1,6 +1,7 @@
 ########
 # Copyright (c) 2017 MSO4SC
-# Author(s) guillaume.dolle@cemosis.fr
+# Author(s) javier.carnero@atos.net
+#           guillaume.dolle@cemosis.fr
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,18 +18,15 @@
 tosca_definitions_version: cloudify_dsl_1_3
 
 imports:
-    - feelpp_toolboxes_types.yaml
+    - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-manager/17.10.19/resources/rest-service/cloudify/types/types.yaml
+    - http://raw.githubusercontent.com/MSO4SC/cloudify-hpc-plugin/master/plugin.yaml
 
 inputs:
     # Monitor
     monitor_entrypoint:
         description: Monitor entrypoint IP
-        default: "127.0.0.1"
+        default: "127.0.0.1" # Required
         type: string
-
-    #############################################################
-    # HPC clusters config
-    #############################################################
 
     # Job prefix name
     job_prefix:
@@ -36,25 +34,113 @@ inputs:
         default: "mso_"
         type: string
 
+    job_nodes:
+        description: number of tasks/processes to run in parallel
+        default: 1
+        type: integer
+
+    job_tasks:
+        description: number of tasks/processes to run in parallel
+        default: 1
+        type: integer
+
+    job_tasks_per_node:
+        description: number of tasks/processes to run in parallel
+        default: 1
+        type: integer
+
+    job_max_time:
+        description: maximum allowed time for run (minutes and seconds)
+        default: '00:30:00'
+        type: string
+
+    job_hpc_partition:
+        description: slurm partition to choose depending on the targeted machine
+        default: 'thin-shared'
+        type: string
+
+    job_hpc_reservation:
+        description: slurm partition to choose depending on the targeted machine
+        default: ''
+        type: string
+
+    job_hpc_modules:
+        description: modules to load depending on the targeted machine
+        default:
+            - gcc/6.1.0
+            - openmpi/1.10.2
+            - singularity/2.4.2
+
+    job_hpc_workdir:
+        description: Workdir for the bootstrap script
+        default: '${LUSTRE}/mso4sc_orchestrator'
+        type: string
+
+    job_hpc_volumes:
+        description: mount point in singularity image
+        default:
+            - '/scratch'
+            - '/mnt'
+            - '${LUSTRE}/mso4sc_orchestrator/feel:/feel'
+
     # CESGA FTII parameters
     mso4sc_hpc_primary:
         description: FTII connection credentials
-        default: {}
+        default: {} # required
+        
+    mso4sc_dataset_input_url:
+        description: url to retrieve for case file
+        default: "" #"/usr/local/share/feelpp/testcases/eye2brain/level1/lc3d.cfg"
 
-    #############################################################
-    # Feel++ Application options for each jobs
-    #############################################################
-    feelpp_mesh_create:
-        description: Application configuration
-        default: {}
-            
-    feelpp_mesh_part:
-        description: Application configuration
-        default: {}
-    
-    feelpp_toolboxes:
-        description: Application configuration
-        default: {}
+    girder_repo_url:
+        description: Girder repository
+        default: "https://girder.math.unistra.fr"
+        type: string
+
+    girder_api_key:
+        description: Girder api key to access private data
+        default: "" # Required
+        type: string
+
+    girder_folder_id:
+        description: Girder folder ID containing the image
+        default: "5a627108b0e9570150cb23f5"
+        type: string
+
+    feelpp_toolbox_type:
+        description: Feel++ toolbox type (solid, fluid, ...)
+        default: "solid"
+        type: string
+
+    feelpp_dim:
+        description: Topological dimension
+        default: 3
+        type: integer
+
+    feelpp_config_file:
+        description: Feel++ config file loaded from the singularity container
+        default: "/usr/local/share/feelpp/testcases/CSM/cantilever/cantilever.cfg"
+        type: string
+
+    feelpp_opts:
+        description: Feel++ config file loaded from the singularity container
+        default: "--fe-approximation=P1"
+        type: string
+
+    singularity_image_file:
+        description: Feel++ singularity image for eye2brain project
+        default: "feelpp_feelpp-toolboxes-mso4sc.simg"
+        type: string
+
+    revert_no_erase:
+        description: cleanup singularity image files (be careful, future image won't redownload updated updated image version!).
+        default: 'False'
+        type: string
+
+    avoid_cleanup:
+        description: erase orchestrator temporary generated files (debug).
+        default: False
+        type: boolean
 
 node_templates:
     main_hpc:
@@ -64,37 +150,42 @@ node_templates:
             external_monitor_entrypoint: { get_input: monitor_entrypoint }
 #            monitor_orchestrator_available: True
             job_prefix: { get_input: job_prefix }
-    #        #simulate: True  # COMMENT to test against a real HPC
+#            simulate: True  # COMMENT to test against a real HPC
 
-    feelpp_mesh_create:
-        type: hpc.nodes.feelpp.mesh.create
+    job_toolboxes:
+        type: hpc.nodes.singularity_job
         properties:
-            app_options: { get_input: feelpp_mesh_create }
-        relationships:
-            - type: job_contained_in_hpc
-              target: main_hpc
+            job_options:
+                modules: { get_input: job_hpc_modules }
+                partition: { get_input: job_hpc_partition }
+                home: '${HOME}:/home/${USER}'
+                volumes: { get_input: job_hpc_volumes }
+                command: { concat: [
+                        'feelpp_toolbox_', { get_input: feelpp_toolbox_type }, '_', { get_input: feelpp_dim }, 'd',
+                        ' --config-file ', { get_input: feelpp_config_file }, ' ',
+                        { get_input: feelpp_opts } ] }
+                nodes: { get_input: job_nodes }
+                tasks: { get_input: job_tasks }
+                tasks_per_node: { get_input: job_tasks_per_node }
+                max_time: { get_input: job_max_time }
+                image: { concat:[ { get_input: job_hpc_workdir }, '/singularity_images/', { get_input: singularity_image_file } ] }
+                avoid_cleanup: { get_input: avoid_cleanup } # debug keep bash scripts
+            deployment:
+                bootstrap: 'scripts/bootstrap.sh'
+                revert: 'scripts/revert.sh'
+                inputs:
+                    - { get_input: job_hpc_workdir }  # boostrap, revert scripts arg $1
+                    - { get_input: singularity_image_file } # bootstrap, revert scripts arg $2
+                    - { get_input: girder_repo_url }
+                    - { get_input: girder_folder_id }
+                    - { get_input: girder_api_key }
+                    - { get_input: revert_no_erase } # NO_ERASE to not remove singularity image
 
-    feelpp_mesh_part:
-        type: hpc.nodes.feelpp.mesh.part
-        properties:
-            app_options: { get_input: feelpp_mesh_part }
         relationships:
             - type: job_contained_in_hpc
               target: main_hpc
-            - type: job_depends_on
-              target: feelpp_mesh_create
-    
-    feelpp_simulate:
-        type: hpc.nodes.feelpp.toolboxes
-        properties:
-            app_options: { get_input: feelpp_toolboxes }
-        relationships:
-            - type: job_contained_in_hpc
-              target: main_hpc
-            - type: job_depends_on
-              target: feelpp_mesh_part
 
 outputs:
-    job_torsionbar:
+    job_toolboxes:
         description: feelpp_toolboxes results
-        value: { get_attribute: [ feelpp_simulate, job_name] }
+        value: { get_attribute: [job_toolboxes, job_name] }
