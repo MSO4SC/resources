@@ -17,11 +17,118 @@ GIRDER_REPO_URL=$3
 GIRDER_FOLDER_ID=$4
 GIRDER_API_KEY=$5
 NO_ERASE=$6
+E2B_STR=$7
 
 # Prepare directories if they do not exists.
 mkdir -p ${WORK_DIR}/feel
 mkdir -p ${WORK_DIR}/singularity_images
-WORK_DIR=${WORK_DIR}/singularity_images
+mkdir -p ${WORK_DIR}/data
+SIMG_DIR=${WORK_DIR}/singularity_images
+
+E2B_ARR=( $E2B_STR )
+
+echo "\
+{
+    \"Name\": \"HDG-Mixed-Poisson for lamina cribrosa\",
+    \"ShortName\":\"MP_LC\",
+    \"Model\":\"hdg\",
+    \"Materials\":
+    {
+        \"Lamina\":
+        {
+            \"name\":\"tissue\",
+            \"k\": \"${E2B_ARR[1]}\",
+            \"CRAflow_k\":\"4.157516880767877e3\",
+            \"CRVflow_k\":\"3.029719321202052e3\" 
+        }
+    },
+    \"BoundaryConditions\":
+    {
+        \"potential\":
+        {
+            \"InitialSolution\":
+            {
+                \"Lamina\":
+                {
+                    \"expr\":\"0.25\"
+                }
+            },
+            \"SourceTerm\":
+            {
+                \"Lamina\":
+                {
+                    \"expr\":\"0.0\" 
+                }
+            },
+            \"Dirichlet\":
+            {
+                \"Hole\":
+                {
+                     \"type\":\"file\",
+                     \"filetype\":\"csv\",
+                     \"filename\":\"${E2B_ARR[0]}\",
+                     \"abscissa\":\"time\",
+                     \"ordinate\":\"gain1.y\"
+                }
+            },
+            \"Neumann\":
+            {
+                \"Lamina_Retina\":
+                {
+                     \"expr\":\"0.0\"
+                },
+                \"Out\":
+                {
+                     \"expr\":\"0.0\"
+                }
+            }
+        },
+        \"flux\":
+        {
+            \"Integral\":
+            {
+                \"Lamina_Sclera\":
+                {
+                    \"type\":\"file\",
+                    \"filetype\":\"csv\",
+                    \"filename\":\"${E2B_ARR[0]}\",
+                    \"abscissa\":\"time\",
+                    \"ordinate\":\"lcR.p.i\"
+                }
+            }
+        },
+        \"Other quantities\":
+        {
+            \"CRAflow\":
+            {
+                \"Lamina_Sclera\":
+                {
+                    \"type\":\"file\",
+                    \"filetype\":\"csv\",
+                    \"filename\":\"${E2B_ARR[0]}\",
+                    \"abscissa\":\"time\",
+                    \"ordinate\":\"R1a.p2.i\"
+                }
+            },
+            \"CRVflow\":
+            {
+                \"Lamina_Sclera\":
+                {
+                    \"type\":\"file\",
+                    \"filetype\":\"csv\",
+                    \"filename\":\"${E2B_ARR[0]}\",
+                    \"abscissa\":\"time\",
+                    \"ordinate\":\"R5a.n2.i\"
+                }
+            }
+        }
+    },
+    \"PostProcess\":
+    {
+        \"Fields\":[\"potential\",\"flux\",\"CRVflow\",\"CRAflow\"]
+    }
+}" > ${WORK_DIR}/data/model_template.json
+
 
 # Download jq JSON parsing tool (if not available) to parse HTTP request response
 # if not available on the machine.
@@ -105,7 +212,7 @@ girder_simg_download()
         --header 'Accept: application/json' \
         --header "Girder-Token: ${GIRDER_TOKEN}" \
         "${GIRDER_REST_URL}" \
-        -o ${WORK_DIR}/${SIMG} 2>> ${LOG_FILE}
+        -o ${SIMG_DIR}/${SIMG} 2>> ${LOG_FILE}
 }
 
 debug_test()
@@ -118,7 +225,7 @@ date >> ${LOG_FILE}
 printf '*%.0s' {1..60} >> ${LOG_FILE}
 echo "" >> ${LOG_FILE}
 
-if [ ! -f ${WORK_DIR}/${SIMG} ]; then
+if [ ! -f ${SIMG_DIR}/${SIMG} ]; then
     jq_parser
     echo "GIRDER create token" >> ${LOG_FILE}
 #    debug_test
@@ -132,5 +239,5 @@ if [ ! -f ${WORK_DIR}/${SIMG} ]; then
     echo "GIRDER logout" >> ${LOG_FILE}
     girder_logout
 else
-    echo "Bootstrap will use ${WORK_DIR}/${SIMG} singularity image!" >> ${LOG_FILE}
+    echo "Bootstrap will use ${SIMG_DIR}/${SIMG} singularity image!" >> ${LOG_FILE}
 fi

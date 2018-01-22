@@ -59,6 +59,11 @@ inputs:
         default: 'thin-shared'
         type: string
 
+    job_hpc_reservation:
+        description: slurm partition to choose depending on the targeted machine
+        default: ''
+        type: string
+
     job_hpc_modules:
         description: modules to load depending on the targeted machine
         default:
@@ -71,7 +76,7 @@ inputs:
         default: '${LUSTRE}/mso4sc_orchestrator'
         type: string
 
-    job_hpc_simg_mount:
+    job_hpc_volumes:
         description: mount point in singularity image
         default:
             - '/scratch'
@@ -107,6 +112,21 @@ inputs:
         default: "/usr/local/share/feelpp/testcases/eye2brain/level1/lc3d.cfg"
         type: string
 
+    feelpp_opts:
+        description: Feel++ config file loaded from the singularity container
+        default: ""
+        type: string
+
+    param_porosity:
+        description: Porosity coefficient
+        default: "0.015192"
+        type: string
+
+    param_omdata:
+        description: Porosity coefficient
+        default: "\\$cfgdir/data.csv"
+        type: string
+
     singularity_image_file:
         description: Feel++ singularity image for eye2brain project
         default: "feelpp_eye2brain-mso4sc.simg"
@@ -138,10 +158,13 @@ node_templates:
             job_options:
                 modules: { get_input: job_hpc_modules }
                 partition: { get_input: job_hpc_partition }
+                reservation: { get_input: job_hpc_reservation }
                 home: '${HOME}:/home/${USER}'
-                volumes: { get_input: job_hpc_simg_mount }
+                volumes: { get_input: job_hpc_volumes }
                 command: { concat: [ ' feelpp_e2b_level1 ',
-                    ' --config-file ', { get_input: feelpp_config_file }
+                    ' --config-file ', { get_input: feelpp_config_file },
+                    ' --mixedpoisson.filename ', { get_input: job_hpc_workdir}, '/data/model_template.json',
+                    { get_input: feelpp_opts }
                     ] }
                 nodes: { get_input: job_nodes }
                 tasks: { get_input: job_tasks }
@@ -159,6 +182,7 @@ node_templates:
                     - { get_input: girder_folder_id }
                     - { get_input: girder_api_key }
                     - { get_input: revert_no_erase } # NO_ERASE to not remove singularity image
+                    - { concat:[ '"', { get_input: param_omdata }, ' ', { get_input: param_porosity }, '"' ] }
 
         relationships:
             - type: job_contained_in_hpc
