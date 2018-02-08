@@ -49,6 +49,9 @@ node_templates:
             monitor_entrypoint: { get_input: monitor_entrypoint }
             monitor_orchestrator_available: True
             job_prefix: { get_input: job_prefix }
+            base_dir: "$HOME"
+            workdir_prefix: "pilot"
+            skip_cleanup: True
 #            simulate: True  # COMMENT to test against a real HPC
     
     first_iter:
@@ -59,6 +62,7 @@ node_templates:
 #                file: 'scripts/deploy.sh'
 #                inputs:
 #                    - 'test'
+            skip_cleanup: True
         relationships:
             - type: job_contained_in_hpc
               target: first_hpc
@@ -68,6 +72,7 @@ node_templates:
         properties:
             iter_number: '00'
             file: 'velocity'
+            skip_cleanup: True
         relationships:
             - type: job_contained_in_hpc
               target: first_hpc
@@ -79,6 +84,7 @@ node_templates:
         properties:
             iter_number: '00'
             file: 'pressure'
+            skip_cleanup: True
         relationships:
             - type: job_contained_in_hpc
               target: first_hpc
@@ -89,6 +95,7 @@ node_templates:
         type: hpc.nodes.fenics_iter
         properties:
             iter_number: '01'
+            skip_cleanup: True
         relationships:
             - type: job_contained_in_hpc
               target: first_hpc
@@ -100,6 +107,7 @@ node_templates:
         properties:
             iter_number: '01'
             file: 'velocity'
+            skip_cleanup: True
         relationships:
             - type: job_contained_in_hpc
               target: first_hpc
@@ -111,6 +119,7 @@ node_templates:
         properties:
             iter_number: '01'
             file: 'pressure'
+            skip_cleanup: True
         relationships:
             - type: job_contained_in_hpc
               target: first_hpc

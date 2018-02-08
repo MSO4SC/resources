@@ -25,7 +25,7 @@ inputs:
     # Monitor
     monitor_entrypoint:
         description: Monitor entrypoint IP
-        default: "127.0.0.1"
+        default: "193.144.35.146"
         type: string
 
     # Job prefix name
@@ -38,20 +38,51 @@ inputs:
     mso4sc_hpc_primary:
         description: Configuration for the primary HPC to be used
         default: {}
+            
+    input_list:
+        description: Test input of a list
+        default:
+            - one
+            - two
+            - three
+            - four
+            
+    input_dict:
+        description: Test input of a dict
+        default:
+            credentials:
+                host: "ft2.cesga.es"
+                user: "otarijci"
+                password: "blahblah"
+            country_tz: "Europe/Madrid"
+            workload_manager: "SLURM"
     
-    # Second HPC configuration
-    mso4sc_hpc_secondary:
-        description: Configuration for the secondary HPC to be used
-        default: {}
+    input_string:
+        description: Test input string
+        default: "hello"
+        type: string
+    
+    input_integer:
+        description: Test input integer
+        default: 3
+        type: integer
+    
+    input_boolean:
+        description: Test input boolean
+        default: True
+        type: boolean
+    
 
 node_templates:
     first_hpc:
         type: hpc.nodes.Compute
         properties:
             config: { get_input: mso4sc_hpc_primary }
-            monitor_entrypoint: { get_input: monitor_entrypoint }
-            monitor_orchestrator_available: True
+            external_monitor_entrypoint: { get_input: monitor_entrypoint }
             job_prefix: { get_input: job_prefix }
+            base_dir: "$HOME"
+            workdir_prefix: "single_srun"
+            skip_cleanup: True
 #            simulate: True  # COMMENT to test against a real HPC
 
     single_job:
@@ -70,8 +101,8 @@ node_templates:
             deployment:
                 bootstrap: 'scripts/bootstrap_example.sh'
                 revert: 'scripts/revert_example.sh'
-                inputs:
-                    - 'single'
+                inputs: { get_input: input_list }
+            skip_cleanup: True
         relationships:
             - type: job_contained_in_hpc
               target: first_hpc

@@ -52,6 +52,9 @@ node_templates:
             monitor_entrypoint: { get_input: monitor_entrypoint }
             monitor_orchestrator_available: True
             job_prefix: { get_input: job_prefix }
+            base_dir: "$HOME"
+            workdir_prefix: "four_singularity"
+            skip_cleanup: True
 #            simulate: True  # COMMENT to test against a real HPC
 
     first_job:
@@ -78,6 +81,7 @@ node_templates:
                 inputs:
                     - '$LUSTRE'
                     - 'openmpi_1.10.7_ring.img'
+            skip_cleanup: True
         relationships:
             - type: job_contained_in_hpc
               target: first_hpc
@@ -107,6 +111,7 @@ node_templates:
                 inputs:
                     - '$LUSTRE'
                     - 'openmpi_1.10.7_ring.img'
+            skip_cleanup: True
         relationships:
             - type: job_contained_in_hpc
               target: first_hpc
@@ -138,6 +143,7 @@ node_templates:
                 inputs:
                     - '$LUSTRE'
                     - 'openmpi_1.10.7_ring.img'
+            skip_cleanup: True
         relationships:
             - type: job_contained_in_hpc
               target: first_hpc
@@ -169,6 +175,7 @@ node_templates:
                 inputs:
                     - '$LUSTRE'
                     - 'openmpi_1.10.7_ring.img'
+            skip_cleanup: True
         relationships:
             - type: job_contained_in_hpc
               target: first_hpc
