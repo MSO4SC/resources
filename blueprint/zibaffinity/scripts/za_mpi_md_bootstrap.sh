@@ -2,20 +2,22 @@
 
 ZA_SLURM="${4}/${6}"
 
+za_tar=$(echo ${2} | sed 's#http://##g')
+
 cat > $ZA_SLURM <<- EOM
 #!/bin/bash -l
 
-#SBATCH -p cola-corta #thin-shared
+#SBATCH -p $9 #thin-shared
 #SBATCH -N 1
-#SBATCH -n $9
+#SBATCH -n ${10}
 #SBATCH -t 00:45:00
 
 #declare +x OMP_NUM_THREADS
 
 cd $4
 
-mpirun -np $9 singularity exec -B /mnt:/mnt,/scratch:/scratch $7 /bin/bash $8 $1 $2 $3 $4 $5 ${10} $9
-#mpirun -np $9 singularity exec -B /mnt:/mnt,/scratch:/scratch $7 /bin/bash $8 $1 $2 $3 $4 $5 \\$SLURM_ARRAY_TASK_ID $9
+mpirun -np ${10} singularity exec -H \$HOME:/home/\$USER -B /mnt:/mnt,/scratch:/scratch $7 /bin/bash $8 $1 $za_tar $3 $4 $5 ${11} ${10}
+#mpirun -np $9 singularity exec -B /mnt:/mnt,/scratch:/scratch $7 /bin/bash $8 $1 $2 $3 $4 $5 \$SLURM_ARRAY_TASK_ID $9
 
 
 # $1: za_lig
@@ -26,6 +28,8 @@ mpirun -np $9 singularity exec -B /mnt:/mnt,/scratch:/scratch $7 /bin/bash $8 $1
 # $6: za_mpi_em_slurm -> slurm script (here as here doc)
 # $7: za_image
 # $8: za_mpi_md_script -> za_mpi_md.sh (in container)
-# $9: za_nt  -> not really required in child scripts
+# $9: za_hpc_cluster -> cola-corta
+# $10: za_nt  -> not really required in child scripts
+# $11: za_slurm_idx  -> manual slurm array index
 
 EOM

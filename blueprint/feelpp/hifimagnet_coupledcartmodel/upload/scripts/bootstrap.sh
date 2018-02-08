@@ -5,16 +5,24 @@
 
 module load singularity/2.4.2
 
-# Copy singularity image only if the user has not put an image on lustre with
-# the same name.
-if [ ! -f $1/$2 ]; then
-    if [ ! -f ${SINGULARITY_REPO}/$2 ]; then
-        echo "You should download a Feel++ singularity and place it in $1/ first!"
-        exit 1
-    else
-        echo "Copying singularity file $SINGULARITY_REPO/$2 to $1"
-        cp $SINGULARITY_REPO/$2 $1
-    fi
-else
-    echo "Bootstrap will use $1/$2 singularity image!"
+WORKDIR=$1
+REMOTE_URL=$2
+IMAGE_URI=$3
+IMAGE_NAME=$4
+#CFGFILE=$5
+
+# Get singularity images
+cd $WORKDIR/singularity_images
+if [ ! -f $IMAGE_NAME ]; then
+    singularity pull --name $IMAGE_NAME $IMAGE_URI
 fi
+
+cd $WORKDIR
+# # Fetch data if REMOTE_URL is declared
+# if  [ "$REMOTE_URL" != "" ]; then
+#     wget $REMOTE_URL
+#     ARCHIVE=$(basename $REMOTE_URL)
+#     tar zxvf $ARCHIVE
+
+#     # should check if CFGFILE exist
+# fi 

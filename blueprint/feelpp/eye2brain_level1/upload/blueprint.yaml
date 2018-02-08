@@ -25,32 +25,130 @@ inputs:
     # Monitor
     monitor_entrypoint:
         description: Monitor entrypoint IP
-        default: "127.0.0.1"
+        default: "127.0.0.1" # Required
         type: string
 
     # Job prefix name
     job_prefix:
         description: Job name prefix in HPCs
-        default: "mso4sc"
+        default: "mso_"
         type: string
 
-    # CESGA FTII parameters
-    mso4sc_hpc_ft2:
-        description: FTII connection credentials
-        default: {}
+    job_nodes:
+        description: number of tasks/processes to run in parallel
+        default: 1
+        type: integer
 
-    # SZE test infrastructure parameters
-    mso4sc_hpc_sze:
-        description: SZE test infrastructure credentials
-        default: {}
+    job_tasks:
+        description: number of tasks/processes to run in parallel
+        default: 1
+        type: integer
+
+    job_tasks_per_node:
+        description: number of tasks/processes to run in parallel
+        default: 1
+        type: integer
+
+    job_max_time:
+        description: maximum allowed time for run (minutes and seconds)
+        default: '00:30:00'
+        type: string
+
+    job_hpc_partition:
+        description: slurm partition to choose depending on the targeted machine
+        default: 'thin-shared'
+        type: string
+
+    job_hpc_reservation:
+        description: slurm partition to choose depending on the targeted machine
+        default: ''
+        type: string
+
+    job_hpc_modules:
+        description: modules to load depending on the targeted machine
+        default:
+            - gcc/6.1.0
+            - openmpi/1.10.2
+            - singularity/2.4.2
+
+    job_hpc_workdir:
+        description: Workdir for the bootstrap script
+        default: '${LUSTRE}/mso4sc_orchestrator'
+        type: string
+
+    job_hpc_volumes:
+        description: mount point in singularity image
+        default:
+            - '/scratch'
+            - '/mnt'
+            - '${LUSTRE}/mso4sc_orchestrator/feel:/feel'
+
+    # CESGA FTII parameters
+    mso4sc_hpc_primary:
+        description: FTII connection credentials
+        default: {} # required
+        
+    mso4sc_dataset_input_url:
+        description: url to retrieve for case file
+        default: "" #"/usr/local/share/feelpp/testcases/eye2brain/level1/lc3d.cfg"
+
+    girder_repo_url:
+        description: Girder repository
+        default: "https://girder.math.unistra.fr"
+        type: string
+
+    girder_api_key:
+        description: Girder api key to access private data
+        default: "" # Required
+        type: string
+
+    girder_folder_id:
+        description: Girder folder ID containing the image
+        default: "5a627108b0e9570150cb23f5"
+        type: string
+
+    feelpp_config_file:
+        description: Feel++ config file loaded from the singularity container
+        default: "/usr/local/share/feelpp/testcases/eye2brain/level1/lc3d.cfg"
+        type: string
+
+    feelpp_opts:
+        description: Feel++ config file loaded from the singularity container
+        default: ""
+        type: string
+
+    param_porosity:
+        description: Porosity coefficient
+        default: "0.015192"
+        type: string
+
+    param_omdata:
+        description: Porosity coefficient
+        default: "\\$cfgdir/data.csv"
+        type: string
+
+    singularity_image_file:
+        description: Feel++ singularity image for eye2brain project
+        default: "feelpp_eye2brain-mso4sc.simg"
+        type: string
+
+    revert_no_erase:
+        description: cleanup singularity image files (be careful, future image won't redownload updated updated image version!).
+        default: 'False'
+        type: string
+
+    avoid_cleanup:
+        description: erase orchestrator temporary generated files (debug).
+        default: False
+        type: boolean
 
 node_templates:
-    ft2_hpc:
+    main_hpc:
         type: hpc.nodes.Compute
         properties:
-            config: { get_input: mso4sc_hpc_ft2 }
+            config: { get_input: mso4sc_hpc_primary }
             external_monitor_entrypoint: { get_input: monitor_entrypoint }
-            monitor_orchestrator_available: True
+#            monitor_orchestrator_available: True
             job_prefix: { get_input: job_prefix }
 #            simulate: True  # COMMENT to test against a real HPC
 
@@ -58,32 +156,37 @@ node_templates:
         type: hpc.nodes.singularity_job
         properties:
             job_options:
-                modules:
-                    - gcc/6.1.0
-                    - openmpi/1.10.2
-                    - singularity/2.4.2
-                partition: 'thin-shared'
+                modules: { get_input: job_hpc_modules }
+                partition: { get_input: job_hpc_partition }
+                reservation: { get_input: job_hpc_reservation }
                 home: '${HOME}:/home/${USER}'
-                volumes:
-                    - '/scratch'
-                    - '${LUSTRE}/feel:/feel'
-                command: 'feelpp_e2b_level1
-                   --config-file /usr/local/share/feelpp/testcases/hdg/eye2brain_level1/lc3d.cfg'
-                nodes: 1
-                tasks: 1
-                tasks_per_node: 1
-                max_time: '00:12:00'
-                image: '${LUSTRE}/singularity_images/feelpp_eye2brain-mso4sc.simg'
+                volumes: { get_input: job_hpc_volumes }
+                command: { concat: [ ' feelpp_e2b_level1 ',
+                    ' --config-file ', { get_input: feelpp_config_file },
+                    ' --mixedpoisson.filename ', { get_input: job_hpc_workdir}, '/data/model_template.json',
+                    { get_input: feelpp_opts }
+                    ] }
+                nodes: { get_input: job_nodes }
+                tasks: { get_input: job_tasks }
+                tasks_per_node: { get_input: job_tasks_per_node }
+                max_time: { get_input: job_max_time }
+                image: { concat:[ { get_input: job_hpc_workdir }, '/singularity_images/', { get_input: singularity_image_file } ] }
+                avoid_cleanup: { get_input: avoid_cleanup } # debug keep bash scripts
             deployment:
                 bootstrap: 'scripts/bootstrap.sh'
                 revert: 'scripts/revert.sh'
                 inputs:
-                    - '${LUSTRE}/singularity_images' # boostrap, revert scripts arg $1
-                    - 'feelpp_eye2brain-mso4sc.simg' # bootstrap, revert scripts arg $2
+                    - { get_input: job_hpc_workdir }  # boostrap, revert scripts arg $1
+                    - { get_input: singularity_image_file } # bootstrap, revert scripts arg $2
+                    - { get_input: girder_repo_url }
+                    - { get_input: girder_folder_id }
+                    - { get_input: girder_api_key }
+                    - { get_input: revert_no_erase } # NO_ERASE to not remove singularity image
+                    - { concat:[ '"', { get_input: param_omdata }, ' ', { get_input: param_porosity }, '"' ] }
 
         relationships:
             - type: job_contained_in_hpc
-              target: ft2_hpc
+              target: main_hpc
 
 outputs:
     job_eye2brain:

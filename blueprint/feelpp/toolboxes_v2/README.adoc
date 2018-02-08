@@ -1,0 +1,56 @@
+= Torsionbar TOSCA
+
+== Command-line usage
+
+The "upload" is uploaded on the orchestrator
+
+WARNING: Don't put your local in the upload directory to not upload your user/pass
+
+You can copy the singularity image in your ${LUSTRE} folder if it's not available
+the ${SINGULARITY_REPO} directory. (module load singularity on ft2)
+
+Connect to the cloudify client via docker.
+See https://github.com/MSO4SC/MSOOrchestrator-CLI/blob/master/README.adoc
+
+Set your local blueprint file (user/password) at the root of the cloned repository
+named "local-blueprint-inputs.yaml" (It is ignored by git, then you won't risk to push
+it on the remote repository)
+See http://book.mso4sc.cemosis.fr/#mso4sc_tosca_modelling_and_execution
+
+[source]
+----
+./deploy up <config>
+----
+
+to deploy on the orchestrator. <config> is one of the base **upload/config/<config>.yaml**
+file. Default config are available in config directory. You have to set a girder API key
+to access private images. You can create one if you have an account on the server.
+
+For example you can use default proposed script
+[source]
+----
+./deploy up cantilever
+./deploy up torsionbar
+----
+
+
+[source]
+----
+./deploy down
+----
+
+NOTE: If the application fails during one step of the deploy up process, you'll have to
+force cancel execution by hands. `cfy executions list`, `cfy executions cancel -f <id>`
+in the orchestrator client (*docker).
+
+== Portal
+
+To use this blueprint with the portal, you need to archive the application upload
+on the data management tool (CKAN) or any others tool available (zenodo, girder for example).
+When you create a new catalog entry in the marketplace, you need to provide the
+path to this archive via the _BLUEPRINT_PATH_ variable set as a *characteristic*
+
+[source]
+----
+./deploy pkg
+----

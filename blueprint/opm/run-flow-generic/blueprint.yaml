@@ -82,8 +82,9 @@ node_templates:
                     - gcc/5.3.0
                     - openmpi/1.10.2
                     - singularity/2.4.2
-                partition: 'thin-shared'
-                image: { concat: [ '$LUSTRE', '/', { get_input: singularity_image_filename } ] }
+                partition: 'thinnodes'
+                reservation: MSO4SC
+                image: { concat: [ { get_input: workdir }, '/', { get_input: singularity_image_filename } ] }
                 home: '$HOME:/home/$USER'
                 volumes:
                     - '/scratch '

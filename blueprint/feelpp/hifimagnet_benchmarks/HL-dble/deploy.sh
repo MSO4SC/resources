@@ -3,17 +3,19 @@
 # Possible argument {up,down}
 
 arg=$1
+upload=${2:-"upload"}
+echo "upload=$upload"
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/" && pwd )"
 ROOT_DIR=${SCRIPT_DIR}/../../../
-JOB=feelpp_hfm_benchmark_HL-dble
-UPLOAD_DIR=${SCRIPT_DIR}/upload
+JOB=hfm_benchmark_HL-dble
+UPLOAD_DIR=${SCRIPT_DIR}/$upload
 TOSCA=blueprint.yaml
 LOCAL=local-blueprint-inputs.yaml
 LOCAL_DIR=../../../../
 
-if [ ! -f "${ROOT_DIR}/${LOCAL}" ]; then
-    echo "${ROOT_DIR}/${LOCAL} does not exist! See doc or blueprint examples!"
+if [ ! -f "${SCRIPT_DIR}/${LOCAL}" ]; then
+    echo "${SCRIPT_DIR}/${LOCAL} does not exist! See doc or blueprint examples!"
     exit 1
 fi
 
@@ -24,7 +26,7 @@ case $arg in
         cfy blueprints upload -b "${JOB}" "${TOSCA}"
         read -n 1 -s -p "Press any key to continue"
         echo ''
-        cfy deployments create -b "${JOB}" -i "${LOCAL_DIR}/${LOCAL}" --skip-plugins-validation ${JOB}
+        cfy deployments create -b "${JOB}" -i "${SCRIPT_DIR}/${LOCAL}" --skip-plugins-validation ${JOB}
         read -n 1 -s -p "Press any key to continue"
         echo ''
         cfy executions start -d "${JOB}" install
