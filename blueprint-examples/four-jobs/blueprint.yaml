@@ -25,13 +25,13 @@ inputs:
     # Monitor
     monitor_entrypoint:
         description: Monitor entrypoint IP
-        default: "127.0.0.1"
+        default: ""
         type: string
 
     # Job prefix name
     job_prefix:
         description: Job name prefix in HPCs
-        default: "mso4sc"
+        default: "cfyhpc"
         type: string
 
     # First HPC configuration
@@ -49,15 +49,37 @@ node_templates:
         type: hpc.nodes.Compute
         properties:
             config: { get_input: mso4sc_hpc_primary }
-            monitor_entrypoint: { get_input: monitor_entrypoint }
-            monitor_orchestrator_available: True
+            external_monitor_entrypoint: { get_input: monitor_entrypoint }
             job_prefix: { get_input: job_prefix }
-            base_dir: "$HOME"
+            base_dir: "$LUSTRE"
             workdir_prefix: "four"
             skip_cleanup: True
 #            simulate: True  # COMMENT to test against a real HPC
-
+    
     first_job:
+        type: hpc.nodes.job
+        properties:
+            job_options: 
+                type: 'SRUN'
+                modules:
+                    - gcc/5.3.0
+                partition: 'thin-shared'
+                command: 'touch fourth_example_1.test'
+                nodes: 1
+                tasks: 1
+                tasks_per_node: 1
+                max_time: '00:01:00'
+            deployment:
+                bootstrap: 'scripts/bootstrap_example.sh'
+                revert: 'scripts/revert_example.sh'
+                inputs:
+                    - 'first_job'
+            skip_cleanup: True
+        relationships:
+            - type: job_contained_in_hpc
+              target: first_hpc
+
+    second_parallel_job:
         type: hpc.nodes.singularity_job
         properties:
             job_options:
@@ -70,7 +92,7 @@ node_templates:
                 home: '$HOME:/home/$USER'
                 volumes:
                     - '/scratch'
-                command: 'ring > fourth_example_1.test'
+                command: 'ring > fourth_example_2.test'
                 nodes: 1
                 tasks: 1
                 tasks_per_node: 1
@@ -81,29 +103,6 @@ node_templates:
                 inputs:
                     - '$LUSTRE'
                     - 'openmpi_1.10.7_ring.img'
-            skip_cleanup: True
-        relationships:
-            - type: job_contained_in_hpc
-              target: first_hpc
-
-    second_parallel_job:
-        type: hpc.nodes.job
-        properties:
-            job_options: 
-                type: 'SRUN'
-                modules:
-                    - gcc/5.3.0
-                partition: 'thin-shared'
-                command: 'touch fourth_example_2.test'
-                nodes: 1
-                tasks: 1
-                tasks_per_node: 1
-                max_time: '00:01:00'
-            deployment:
-                bootstrap: 'scripts/bootstrap_example.sh'
-                revert: 'scripts/revert_example.sh'
-                inputs:
-                    - 'second_job'
             skip_cleanup: True
         relationships:
             - type: job_contained_in_hpc
@@ -120,8 +119,8 @@ node_templates:
                     - openmpi/1.10.2
                     - singularity/2.3.1
                 partition: 'thin-shared'
-                home: '$HOME:/home/$USER'
                 image: '$LUSTRE/openmpi_1.10.7_ring.img'
+                home: '$HOME:/home/$USER'
                 volumes:
                     - '/scratch'
                 command: 'ring > fourth_example_3.test'
