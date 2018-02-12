@@ -39,8 +39,15 @@ inputs:
         description: FTII connection credentials
         default: {}
 
-
     parallel_tasks:
+        description: number of tasks/processes to run in parallel
+        default: 1
+
+    parallel_nodes:
+        description: number of nodes on which to run
+        default: 1
+
+    parallel_tasks_per_node:
         description: number of tasks/processes to run in parallel
         default: 1
 
@@ -90,9 +97,9 @@ node_templates:
                     - '/scratch '
                     - '/mnt'
                 command: { concat: [ 'flow', ' ', { get_input: workdir }, '/', 'run_generated.param', ' ', 'output_dir=', { get_input: workdir }, '/', 'simoutput' ] }
-                nodes: 1
+                nodes: { get_input: parallel_nodes }
                 tasks: { get_input: parallel_tasks }
-                tasks_per_node: { get_input: parallel_tasks }
+                tasks_per_node: { get_input: parallel_tasks_per_node }
                 max_time: { get_input: max_time }
             deployment:
                 bootstrap: 'scripts/singularity_bootstrap_run-flow-generic.sh'
