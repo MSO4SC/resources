@@ -90,7 +90,6 @@ node_templates:
                     - openmpi/1.10.2
                     - singularity/2.4.2
                 partition: 'thinnodes'
-                reservation: MSO4SC
                 image: { concat: [ { get_input: workdir }, '/', { get_input: singularity_image_filename } ] }
                 home: '$HOME:/home/$USER'
                 volumes:
