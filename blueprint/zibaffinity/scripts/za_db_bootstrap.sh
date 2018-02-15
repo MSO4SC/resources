@@ -15,7 +15,9 @@ if [ ! -f $2/$3 ]; then
     module unload $4
 fi
 
+### the actual reason why i couldn't mae use of "hpc.node.singularity_job" type:
 za_tar=$(echo ${7} | sed 's#http://##g')
+
 
 ZA_SLURM="${2}/${6}"
 
