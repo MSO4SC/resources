@@ -17,7 +17,7 @@ tosca_definitions_version: cloudify_dsl_1_3
 
 imports:
     # to speed things up, it is possible to download this file,
-    - http://www.getcloudify.org/spec/cloudify/4.1/types.yaml
+    - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-manager/17.10.19/resources/rest-service/cloudify/types/types.yaml
     # HPC pluging
     - http://raw.githubusercontent.com/MSO4SC/cloudify-hpc-plugin/master/plugin.yaml
 
@@ -25,7 +25,7 @@ inputs:
     # Monitor
     monitor_entrypoint:
         description: Monitor entrypoint IP
-        default: "193.144.35.146"
+        default: ""
         type: string
 
     # Job prefix name
@@ -34,9 +34,14 @@ inputs:
         default: "mso_"
         type: string
 
-    # Main HPC
+    # First HPC configuration
     mso4sc_hpc_primary:
-        description: FTII connection credentials
+        description: Configuration for the primary HPC to be used
+        default: {}
+    
+    # Second HPC configuration
+    mso4sc_hpc_secondary:
+        description: Configuration for the secondary HPC to be used
         default: {}
 
     parallel_tasks:
@@ -57,9 +62,9 @@ inputs:
         
     mso4sc_dataset_input_url:
         description: url to retrieve for case file
-        default: ""
+        default: "https://gitlab.srv.cesga.es/atgeirr/OPM-public-testing-data/raw/master/spe1.tgz"
 
-    workdir:
+    base_dir:
         description: Working directory
         default: "$LUSTRE"
 
@@ -78,6 +83,8 @@ node_templates:
         properties:
             config: { get_input: mso4sc_hpc_primary }
             external_monitor_entrypoint: { get_input: monitor_entrypoint }
+            base_dir: { get_input: base_dir }
+            workdir_prefix: "opm"
             job_prefix: { get_input: job_prefix }
 #            simulate: True  # COMMENT to test against a real HPC
 
@@ -90,12 +97,12 @@ node_templates:
                     - openmpi/1.10.2
                     - singularity/2.4.2
                 partition: 'thinnodes'
-                image: { concat: [ { get_input: workdir }, '/', { get_input: singularity_image_filename } ] }
+                image: { concat: [ '$CURRENT_WORKDIR/', { get_input: singularity_image_filename } ] }
                 home: '$HOME:/home/$USER'
                 volumes:
                     - '/scratch '
                     - '/mnt'
-                command: { concat: [ 'flow', ' ', { get_input: workdir }, '/', 'run_generated.param', ' ', 'output_dir=', { get_input: workdir }, '/', 'simoutput' ] }
+                command: 'flow $CURRENT_WORKDIR/run_generated.param output_dir=$CURRENT_WORKDIR/simoutput'
                 nodes: { get_input: parallel_nodes }
                 tasks: { get_input: parallel_tasks }
                 tasks_per_node: { get_input: parallel_tasks_per_node }
@@ -104,7 +111,6 @@ node_templates:
                 bootstrap: 'scripts/singularity_bootstrap_run-flow-generic.sh'
                 revert: 'scripts/singularity_revert_run-flow-generic.sh'
                 inputs:
-                    - { get_input: workdir }
                     - { get_input: mso4sc_dataset_input_url }
                     - { get_input: singularity_image_uri }
                     - { get_input: singularity_image_filename }

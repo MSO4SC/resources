@@ -1,11 +1,10 @@
 #!/bin/bash -l
 
-WORKDIR=$1
-REMOTE_URL=$2
-IMAGE_URI=$3
-IMAGE_NAME=$4
+REMOTE_URL=$1
+IMAGE_URI=$2
+IMAGE_NAME=$3
 
-cd $WORKDIR
+# cd $CURRENT_WORKDIR ## not needed, already started there
 rm $IMAGE_NAME
 ARCHIVE=$(basename $REMOTE_URL)
 rm $ARCHIVE
