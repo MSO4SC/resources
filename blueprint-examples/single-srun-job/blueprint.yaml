@@ -31,47 +31,18 @@ inputs:
     # Job prefix name
     job_prefix:
         description: Job name prefix in HPCs
-        default: "mso4sc"
+        default: "cfyhpc"
         type: string
 
     # First HPC configuration
     mso4sc_hpc_primary:
         description: Configuration for the primary HPC to be used
         default: {}
-            
-    input_list:
-        description: Test input of a list
-        default:
-            - one
-            - two
-            - three
-            - four
-            
-    input_dict:
-        description: Test input of a dict
-        default:
-            credentials:
-                host: "ft2.cesga.es"
-                user: "otarijci"
-                password: "blahblah"
-            country_tz: "Europe/Madrid"
-            workload_manager: "SLURM"
     
-    input_string:
-        description: Test input string
-        default: "hello"
-        type: string
-    
-    input_integer:
-        description: Test input integer
-        default: 3
-        type: integer
-    
-    input_boolean:
-        description: Test input boolean
-        default: True
-        type: boolean
-    
+    # Second HPC configuration
+    mso4sc_hpc_secondary:
+        description: Configuration for the secondary HPC to be used
+        default: {}
 
 node_templates:
     first_hpc:
@@ -80,10 +51,9 @@ node_templates:
             config: { get_input: mso4sc_hpc_primary }
             external_monitor_entrypoint: { get_input: monitor_entrypoint }
             job_prefix: { get_input: job_prefix }
-            base_dir: "$HOME"
             workdir_prefix: "single_srun"
             skip_cleanup: True
-#            simulate: True  # COMMENT to test against a real HPC
+            simulate: True  # COMMENT to test against a real HPC
 
     single_job:
         type: hpc.nodes.job
@@ -101,7 +71,8 @@ node_templates:
             deployment:
                 bootstrap: 'scripts/bootstrap_example.sh'
                 revert: 'scripts/revert_example.sh'
-                inputs: { get_input: input_list }
+                inputs:
+                    - 'single'
             skip_cleanup: True
         relationships:
             - type: job_contained_in_hpc

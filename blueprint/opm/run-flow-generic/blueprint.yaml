@@ -86,6 +86,7 @@ node_templates:
             base_dir: { get_input: base_dir }
             workdir_prefix: "opm"
             job_prefix: { get_input: job_prefix }
+            skip_cleanup: True
 #            simulate: True  # COMMENT to test against a real HPC
 
     opm_flow_single_job:
