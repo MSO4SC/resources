@@ -3,7 +3,11 @@
 # Singularity image retrieved from
 # https://www.singularity-hub.org/collections/253
 
-module load singularity/2.4.2
+# module should be optional:
+isModule=$(which module)
+if [ "$isModule" != "" ]; then
+    module load singularity/2.4.2
+fi
 
 # Copy singularity image only if the user has not put an image on lustre with
 # the same name.
@@ -18,3 +22,7 @@ if [ ! -f $1/$2 ]; then
 else
     echo "Bootstrap will use $1/$2 singularity image!"
 fi
+
+# ctx logger info "Some logging"
+# # read access
+# ctx node properties tasks

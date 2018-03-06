@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash 
 
 usage(){
    echo ""
@@ -41,6 +41,10 @@ export COPYFILE_DISABLE=true
 
 startupdir=$(echo $PWD)
 
+if [ "$DEBUG" = "1" ]; then
+    set -x
+fi
+
 if [ ! -d $DIRECTORY ]; then
     echo "no such directory: $DIRECTORY"
     exit 1
@@ -63,3 +67,9 @@ else
     echo "\t FAILED"
     exit
 fi
+
+
+if [ "$DEBUG" = "1" ]; then
+    set +x
+fi
+

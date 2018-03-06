@@ -31,11 +31,12 @@ tosca_definitions_version: cloudify_dsl_1_3
 #       result:
 #         description: expected test result
 #         type: string
-	
+
 imports:
     # to speed things up, it is possible to download this file,
-    - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-manager/17.10.19/resources/rest-service/cloudify/types/types.yaml
-    - http://raw.githubusercontent.com/MSO4SC/cloudify-hpc-plugin/master/plugin.yaml
+    - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-manager/18.1.11/resources/rest-service/cloudify/types/types.yaml
+    # - https://raw.githubusercontent.com/MSO4SC/cloudify-hpc-plugin/master/plugin.yaml
+    - https://raw.githubusercontent.com/Trophime/cloudify-hpc-plugin/master/plugin.yaml
 
 inputs:
     # Monitor
@@ -63,12 +64,21 @@ inputs:
         description: maximum allowed time for run (minutes and seconds)
         default: '00:30:00'
 
+   #  hpc_partition:
+   #      description: maximum allowed time for run (minutes and seconds)
+
+   #  hpc_reservation:
+   #      description: maximum allowed time for run (minutes and seconds)
+
+   # hpc_modules:
+   #      description: maximum allowed time for run (minutes and seconds)
+    
     mso4sc_dataset_input_url:
         description: url to retrieve for case file
         default: ""
 
-    workdir:
-        description: Working directory
+    containerdir:
+        description: Container directory
         default: "${LUSTRE}/singularity_images"
 
     execfile:
@@ -95,33 +105,38 @@ node_templates:
             external_monitor_entrypoint: { get_input: monitor_entrypoint }
             # monitor_orchestrator_available: True
             job_prefix: { get_input: job_prefix }
-#            simulate: True  # COMMENT to test against a real HPC
+            base_dir: "$HOME"
+            workdir_prefix: "fuck"
+            # simulate: True  # COMMENT to test against a real HPC
 
     job_test:
         type: hpc.nodes.singularity_job
         properties:
             job_options:
-                modules:
-                    - gcc/6.1.0
-                    - openmpi/1.10.2
-                    - singularity/2.4.2
-                partition: 'thinnodes'
-                reservation: 'MSO4SC'
+                # modules:
+                #     - gcc/6.1.0
+                #     - openmpi/1.10.2
+                #     - singularity/2.4.2
+                partition: "euler"
+                # partition: { get_attribute: [primary_hpc, hpc_partition] }
+                # reservation: 'MSO4SC'
                 home: '${HOME}:/home/${USER}'
+                # volumes:
+                #     - '/scratch'
+                #     - '${LUSTRE}/feel:/feel'
                 volumes:
-                    - '/scratch'
-                    - '${LUSTRE}/feel:/feel'
+                    - '${HOME}/feel:/feel'
                 command: { concat: [ { get_input: execfile }, ' --config-file ', { get_input: cfgfile } ] }
-                # nodes: { get_input: parallel_nodes }
                 tasks: { get_input: parallel_tasks }
-                # tasks_per_node: { get_input: parallel_tasks_per_node }
                 max_time: { get_input: max_time }
-                image: { concat: [ { get_input: workdir }, '/', { get_input: singularity_image_filename } ] }
+                image: { concat: [ { get_input: containerdir }, '/', { get_input: singularity_image_filename } ] }
+                skip_cleanup: true
+            skip_cleanup: true
             deployment:
                 bootstrap: 'scripts/bootstrap.sh'
                 revert: 'scripts/revert.sh'
                 inputs:
-                    - { get_input: workdir }
+                    - { get_input: containerdir }
                     - { get_input: singularity_image_filename }
 
         relationships:

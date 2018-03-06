@@ -10,7 +10,13 @@ JOB=hifimagnet_test_generic
 UPLOAD_DIR=${SCRIPT_DIR}/upload
 TOSCA=blueprint.yaml
 LOCAL=local-blueprint-inputs.yaml
-LOCAL_DIR=../../../../
+#LOCAL_DIR=../../../../
+LOCAL_DIR=../
+
+NO_DEBUG=""
+DEBUG=${2:-${NO_DEBUG}} # from "-v" to "-vvv"
+
+echo "DEBUG=$DEBUG"
 
 if [ ! -f "${ROOT_DIR}/${LOCAL}" ]; then
     echo "${ROOT_DIR}/${LOCAL} does not exist! See doc or blueprint examples!"
@@ -21,16 +27,28 @@ cd ${UPLOAD_DIR}
 
 case $arg in
     "up" )
-        cfy blueprints upload -b "${JOB}" "${TOSCA}"
+        cfy blueprints upload ${DEBUG} -b "${JOB}" "${TOSCA}"
+	isOK=$?
+	if [ $isOK != 0 ]; then
+	   exit 1
+	fi
+        # read -n 1 -s -p "Press any key to continue"
+        # echo ''
+        cfy deployments create ${DEBUG} -b "${JOB}" -i "${LOCAL_DIR}/${LOCAL}" --skip-plugins-validation ${JOB}
+	isOK=$?
+	if [ $isOK != 0 ]; then
+	   exit 1
+	fi
+        # read -n 1 -s -p "Press any key to continue"
+        # echo ''
+        cfy executions start ${DEBUG} -d "${JOB}" install
+	isOK=$?
+	if [ $isOK != 0 ]; then
+	   exit 1
+	fi
         read -n 1 -s -p "Press any key to continue"
         echo ''
-        cfy deployments create -b "${JOB}" -i "${LOCAL_DIR}/${LOCAL}" --skip-plugins-validation ${JOB}
-        read -n 1 -s -p "Press any key to continue"
-        echo ''
-        cfy executions start -d "${JOB}" install
-        read -n 1 -s -p "Press any key to continue"
-        echo ''
-        cfy executions start -d "${JOB}" run_jobs
+        cfy executions start ${DEBUG} -d "${JOB}" run_jobs
         ;;
 
     "down" )
@@ -42,6 +60,7 @@ case $arg in
         cfy blueprints delete "${JOB}"
         ;;
     *)
+        echo "arg: $arg"
         echo "usage: $0 [option]"
         echo ""
         echo "options:"
