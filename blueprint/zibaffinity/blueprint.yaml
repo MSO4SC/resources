@@ -55,36 +55,30 @@ inputs:
         default: '$HOME:/home/$USER'
         type: string
     
-    # $1 - ZA ligand path    !!!!! USER input
+    # $1 - ZA ligand path    !!!!! USER input still hard-coded
     za_lig:
         description: ZA ligand path
-        default: '$LUSTRE/data_4_javier/zibaffinity_tosca/input/17betaEstradiol.pdb'
+        default: { concat: [ { get_input: ft2_node.base_dir },'/17betaEstradiol.pdb' ]}
+        #default: '$LUSTRE/data_4_javier/zibaffinity_tosca/input/17betaEstradiol.pdb'
         type: string
     
     # $4 - ZA main simulation directory    !!!!! HPC-dependent
     za_work_path:
         description: ZA main simulation directory
-        default: '$LUSTRE/data_4_javier/zibaffinity_tosca'
+        default: '$CURRENT_WORKDIR'
         type: string
+    
+    # $4 - ZA main simulation directory    !!!!! HPC-dependent
+#    za_work_path:
+#        description: ZA main simulation directory
+#        default: '$LUSTRE/data_4_javier/zibaffinity_tosca'
+#        type: string
     
     # ZA target name    !!!!! USER selection from catalogue corresponding to DB table
     mso4sc_dataset_tar:
         description: ZA target (path)
-#        default: 'bla'
+        default: 'erAlpha-1gwr'
         type: string
-    
-    # ZA target name    !!!!! USER selection from catalogue corresponding to DB table
-#    za_tar:
-#        description: ZA target (path)
-#        default: 'erAlpha-1gwr'
-#        type: string
-    
-    # $2 - ZA target path    !!!!! USER selection from DB output
-#    za_tar:
-#        description: ZA target path
-#        default: { concat: [ { get_input: za_work_path },'/',{ get_input: mso4sc_dataset_tar } ]}
-#        default: '$LUSTRE/data_4_javier/zibaffinity_tosca/input/erAlpha-1gwr'
-#        type: string
     
     # $3 - ZA formal ligand charge    !!!!! USER input
     za_charge:
@@ -110,19 +104,7 @@ inputs:
         default: "shub://sregistry.srv.cesga.es/mso4sc/zibaffinity:latest"
         type: string
      
-#   # ZA image file    !!!!! HPC-dependent
-#    za_image:
-#        description: ZA image file
-#        default: 'zibaffinity.img'
-#        type: string
-#     
-#    # ZA image path    !!!!! HPC-dependent
-#    za_image_path:
-#        description: ZA image path
-#        default: '$LUSTRE/data_4_javier/zibaffinity_b4-tosca'
-#        type: string
-     
-     # ZA target DB file    !!!!! -dependent
+    # ZA target DB file    !!!!! -dependent
     za_db:
         description: ZA target DB file
         default: "/opt/zibaffinity_target_database.sqlite"
@@ -195,15 +177,9 @@ inputs:
         type: string
      
     # ZA energy minimization batch script name    !!!!! name of slurm here script created outside container
-    za_mpi_em_slurm_0:
+    za_mpi_em_slurm:
         description: ZA energy minimization batch script name
-        default: "za_mpi_em_0.slurm"
-        type: string
-    
-    # ZA energy minimization batch script name    !!!!! name of slurm here script created outside container
-    za_mpi_em_slurm_1:
-        description: ZA energy minimization batch script name
-        default: "za_mpi_em_1.slurm"
+        default: "za_mpi_em.slurm"
         type: string
     
     # ZA nvt preparation script name    !!!!! ZA prep script executed sequentially
@@ -225,15 +201,9 @@ inputs:
         type: string
      
     # ZA temperature equilibration batch script name    !!!!! name of slurm here script created outside container
-    za_mpi_nvt_slurm_0:
+    za_mpi_nvt_slurm:
         description: ZA temperature equilibration batch script name
-        default: "za_mpi_nvt_0.slurm"
-        type: string
-    
-    # ZA temperature equilibration batch script name    !!!!! name of slurm here script created outside container
-    za_mpi_nvt_slurm_1:
-        description: ZA temperature equilibration batch script name
-        default: "za_mpi_nvt_1.slurm"
+        default: "za_mpi_nvt.slurm"
         type: string
     
     # ZA npt preparation script name    !!!!! ZA prep script executed sequentially
@@ -255,15 +225,9 @@ inputs:
         type: string
      
     # ZA pressure equilibration batch script name    !!!!! name of slurm here script created outside container
-    za_mpi_npt_slurm_0:
+    za_mpi_npt_slurm:
         description: ZA pressure equilibration batch script name
-        default: "za_mpi_npt_0.slurm"
-        type: string
-    
-    # ZA pressure equilibration batch script name    !!!!! name of slurm here script created outside container
-    za_mpi_npt_slurm_1:
-        description: ZA pressure equilibration batch script name
-        default: "za_mpi_npt_1.slurm"
+        default: "za_mpi_npt.slurm"
         type: string
     
     # ZA md preparation script name    !!!!! ZA prep script executed sequentially
@@ -285,15 +249,9 @@ inputs:
         type: string
      
     # ZA production run batch script name    !!!!! name of slurm here script created outside container
-    za_mpi_md_slurm_0:
+    za_mpi_md_slurm:
         description: ZA production run batch script name
-        default: "za_mpi_md_0.slurm"
-        type: string
-    
-    # ZA production run batch script name    !!!!! name of slurm here script created outside container
-    za_mpi_md_slurm_1:
-        description: ZA production run batch script name
-        default: "za_mpi_md_1.slurm"
+        default: "za_mpi_md.slurm"
         type: string
     
     # ZA rerun preparation script name    !!!!! ZA prep script executed sequentially
@@ -315,15 +273,9 @@ inputs:
         type: string
      
     # ZA energy rerun batch script name    !!!!! name of slurm here script created outside container
-    za_mpi_rerun_slurm_0:
+    za_mpi_rerun_slurm:
         description: ZA energy rerun batch script name
-        default: "za_mpi_rerun_0.slurm"
-        type: string
-    
-    # ZA energy rerun batch script name    !!!!! name of slurm here script created outside container
-    za_mpi_rerun_slurm_1:
-        description: ZA energy rerun batch script name
-        default: "za_mpi_rerun_1.slurm"
+        default: "za_mpi_rerun.slurm"
         type: string
     
     # ZA post rerun script name    !!!!! ZA prep script executed sequentially
@@ -349,21 +301,8 @@ inputs:
         description: ZA post batch script name
         default: "za_post.slurm"
         type: string
-    
-    # ZA mpi input 0  !!!! test
-    za_mpi_inp_0:
-        description: ZA mpi input 0
-        default: "'0'"
-        type: string
-    
-    # ZA mpi input 1  !!!! test
-    za_mpi_inp_1:
-        description: ZA mpi input 1
-        default: "'1'"
-        type: string
-    
-     
-    
+
+
 node_templates:
     ft2_node:
         type: hpc.nodes.Compute
@@ -371,6 +310,9 @@ node_templates:
             config: { get_input: mso4sc_hpc_primary }
             external_monitor_entrypoint: { get_input: monitor_entrypoint }
             job_prefix: { get_input: job_prefix }
+            base_dir: "$LUSTRE/za_simdir"
+            workdir_prefix: "za"
+            skip_cleanup: true
 
     za_db_job:
 #        type: hpc.nodes.singularity_job
@@ -387,7 +329,7 @@ node_templates:
 #                home: { get_input: za_home_dir }
 #                volumes:
 #                    - '/mnt'
-                command: { concat: [' ', { get_input: za_work_path }, '/', { get_input: za_db_slurm }] }
+                command: { concat: [' $CURRENT_WORKDIR/', { get_input: za_db_slurm }] }
 #                command: { concat: [' ', { get_input: za_db_script },' ',{ get_input: mso4sc_dataset_tar },' ',{ get_input: za_db },' ',{ get_input: za_work_path },' ',]}
 #                nodes: 1
 #                tasks: 1
@@ -411,7 +353,6 @@ node_templates:
               target: ft2_node
  
     za_prep_job:
-#        type: hpc.nodes.singularity_job
         type: hpc.nodes.job
         properties:
             job_options: 
@@ -421,22 +362,12 @@ node_templates:
                     - { get_input: za_module_gcc }
                     - { get_input: za_module_mpi }
                     - { get_input: za_module_sing }
-#                partition: { get_input: za_hpc_partition } #'thin-shared'
-#                image: { concat: [ { get_input: za_work_path },'/',{ get_input: za_image } ]}
-#                volumes:
-#                    - '/mnt'
                 command: { concat: [' ', { get_input: za_work_path }, '/', { get_input: za_prep_slurm }] }
-#                command: { get_input: za_prep_script }
-#                nodes: 1
-#                tasks: 1
-#                tasks_per_node: 1
-#                max_time: '00:10'
             deployment:
                 bootstrap: 'scripts/za_prep_bootstrap.sh'
                 revert: 'scripts/za_prep_revert.sh'
                 inputs:
                     - { get_input: za_lig }
-#                    - { get_input: za_tar }
                     - { get_input: mso4sc_dataset_tar }
                     - { get_input: za_charge }
                     - { get_input: za_work_path }
@@ -451,7 +382,7 @@ node_templates:
             - type: job_depends_on
               target: za_db_job
     
-    za_mpi_em_job_0:
+    za_mpi_em_job:
         type: hpc.nodes.job
         properties:
             job_options:
@@ -460,7 +391,8 @@ node_templates:
                     - { get_input: za_module_gcc }
                     - { get_input: za_module_mpi }
                     - { get_input: za_module_sing }
-                command: { concat: [' ', { get_input: za_work_path }, '/', { get_input: za_mpi_em_slurm_0 }] }
+                command: { concat: [' ', { get_input: za_work_path }, '/', { get_input: za_mpi_em_slurm }] }
+                scale: 61
             deployment:
                 bootstrap: 'scripts/za_mpi_em_bootstrap.sh'
                 revert: 'scripts/za_mpi_em_revert.sh'
@@ -470,43 +402,11 @@ node_templates:
                     - { get_input: za_charge }
                     - { get_input: za_work_path }
                     - { get_input: za_mail }
-                    - { get_input: za_mpi_em_slurm_0 }
+                    - { get_input: za_mpi_em_slurm }
                     - { concat: [ { get_input: za_work_path },'/',{ get_input: za_image } ]}
                     - { get_input: za_mpi_em_script }
                     - { get_input: za_hpc_partition }
                     - { get_input: za_mpi_nt }
-                    - { get_input: za_mpi_inp_0 }
-        relationships:
-            - type: job_contained_in_hpc
-              target: ft2_node
-            - type: job_depends_on
-              target: za_prep_job
-
-    za_mpi_em_job_1:
-        type: hpc.nodes.job
-        properties:
-            job_options:
-                type: 'SBATCH'
-                modules:
-                    - { get_input: za_module_gcc }
-                    - { get_input: za_module_mpi }
-                    - { get_input: za_module_sing }
-                command: { concat: [' ', { get_input: za_work_path }, '/', { get_input: za_mpi_em_slurm_1 }] }
-            deployment:
-                bootstrap: 'scripts/za_mpi_em_bootstrap.sh'
-                revert: 'scripts/za_mpi_em_revert.sh'
-                inputs:
-                    - { get_input: za_lig }
-                    - { get_input: mso4sc_dataset_tar }
-                    - { get_input: za_charge }
-                    - { get_input: za_work_path }
-                    - { get_input: za_mail }
-                    - { get_input: za_mpi_em_slurm_1 }
-                    - { concat: [ { get_input: za_work_path },'/',{ get_input: za_image } ]}
-                    - { get_input: za_mpi_em_script }
-                    - { get_input: za_hpc_partition }
-                    - { get_input: za_mpi_nt }
-                    - { get_input: za_mpi_inp_1 }
         relationships:
             - type: job_contained_in_hpc
               target: ft2_node
@@ -540,11 +440,9 @@ node_templates:
             - type: job_contained_in_hpc
               target: ft2_node
             - type: job_depends_on
-              target: za_mpi_em_job_0
-            - type: job_depends_on
-              target: za_mpi_em_job_1
+              target: za_mpi_em_job
             
-    za_mpi_nvt_job_0:
+    za_mpi_nvt_job:
         type: hpc.nodes.job
         properties:
             job_options:
@@ -553,7 +451,8 @@ node_templates:
                     - { get_input: za_module_gcc }
                     - { get_input: za_module_mpi }
                     - { get_input: za_module_sing }
-                command: { concat: [' ', { get_input: za_work_path }, '/', { get_input: za_mpi_nvt_slurm_0 }] }
+                command: { concat: [' ', { get_input: za_work_path }, '/', { get_input: za_mpi_nvt_slurm }] }
+                scale: 61
             deployment:
                 bootstrap: 'scripts/za_mpi_nvt_bootstrap.sh'
                 revert: 'scripts/za_mpi_nvt_revert.sh'
@@ -563,43 +462,11 @@ node_templates:
                     - { get_input: za_charge }
                     - { get_input: za_work_path }
                     - { get_input: za_mail }
-                    - { get_input: za_mpi_nvt_slurm_0 }
+                    - { get_input: za_mpi_nvt_slurm }
                     - { concat: [ { get_input: za_work_path },'/',{ get_input: za_image } ]}
                     - { get_input: za_mpi_nvt_script }
                     - { get_input: za_hpc_partition }
                     - { get_input: za_mpi_nt }
-                    - { get_input: za_mpi_inp_0 }
-        relationships:
-            - type: job_contained_in_hpc
-              target: ft2_node
-            - type: job_depends_on
-              target: za_prep_nvt_job
-
-    za_mpi_nvt_job_1:
-        type: hpc.nodes.job
-        properties:
-            job_options:
-                type: 'SBATCH'
-                modules:
-                    - { get_input: za_module_gcc }
-                    - { get_input: za_module_mpi }
-                    - { get_input: za_module_sing }
-                command: { concat: [' ', { get_input: za_work_path }, '/', { get_input: za_mpi_nvt_slurm_1 }] }
-            deployment:
-                bootstrap: 'scripts/za_mpi_nvt_bootstrap.sh'
-                revert: 'scripts/za_mpi_nvt_revert.sh'
-                inputs:
-                    - { get_input: za_lig }
-                    - { get_input: mso4sc_dataset_tar }
-                    - { get_input: za_charge }
-                    - { get_input: za_work_path }
-                    - { get_input: za_mail }
-                    - { get_input: za_mpi_nvt_slurm_1 }
-                    - { concat: [ { get_input: za_work_path },'/',{ get_input: za_image } ]}
-                    - { get_input: za_mpi_nvt_script }
-                    - { get_input: za_hpc_partition }
-                    - { get_input: za_mpi_nt }
-                    - { get_input: za_mpi_inp_1 }
         relationships:
             - type: job_contained_in_hpc
               target: ft2_node
@@ -633,11 +500,9 @@ node_templates:
             - type: job_contained_in_hpc
               target: ft2_node
             - type: job_depends_on
-              target: za_mpi_nvt_job_0
-            - type: job_depends_on
-              target: za_mpi_nvt_job_1
+              target: za_mpi_nvt_job
             
-    za_mpi_npt_job_0:
+    za_mpi_npt_job:
         type: hpc.nodes.job
         properties:
             job_options:
@@ -646,7 +511,8 @@ node_templates:
                     - { get_input: za_module_gcc }
                     - { get_input: za_module_mpi }
                     - { get_input: za_module_sing }
-                command: { concat: [' ', { get_input: za_work_path }, '/', { get_input: za_mpi_npt_slurm_0 }] }
+                command: { concat: [' ', { get_input: za_work_path }, '/', { get_input: za_mpi_npt_slurm }] }
+                scale: 61
             deployment:
                 bootstrap: 'scripts/za_mpi_npt_bootstrap.sh'
                 revert: 'scripts/za_mpi_npt_revert.sh'
@@ -656,43 +522,11 @@ node_templates:
                     - { get_input: za_charge }
                     - { get_input: za_work_path }
                     - { get_input: za_mail }
-                    - { get_input: za_mpi_npt_slurm_0 }
+                    - { get_input: za_mpi_npt_slurm }
                     - { concat: [ { get_input: za_work_path },'/',{ get_input: za_image } ]}
                     - { get_input: za_mpi_npt_script }
                     - { get_input: za_hpc_partition }
                     - { get_input: za_mpi_nt }
-                    - { get_input: za_mpi_inp_0 }
-        relationships:
-            - type: job_contained_in_hpc
-              target: ft2_node
-            - type: job_depends_on
-              target: za_prep_npt_job
-
-    za_mpi_npt_job_1:
-        type: hpc.nodes.job
-        properties:
-            job_options:
-                type: 'SBATCH'
-                modules:
-                    - { get_input: za_module_gcc }
-                    - { get_input: za_module_mpi }
-                    - { get_input: za_module_sing }
-                command: { concat: [' ', { get_input: za_work_path }, '/', { get_input: za_mpi_npt_slurm_1 }] }
-            deployment:
-                bootstrap: 'scripts/za_mpi_npt_bootstrap.sh'
-                revert: 'scripts/za_mpi_npt_revert.sh'
-                inputs:
-                    - { get_input: za_lig }
-                    - { get_input: mso4sc_dataset_tar }
-                    - { get_input: za_charge }
-                    - { get_input: za_work_path }
-                    - { get_input: za_mail }
-                    - { get_input: za_mpi_npt_slurm_1 }
-                    - { concat: [ { get_input: za_work_path },'/',{ get_input: za_image } ]}
-                    - { get_input: za_mpi_npt_script }
-                    - { get_input: za_hpc_partition }
-                    - { get_input: za_mpi_nt }
-                    - { get_input: za_mpi_inp_1 }
         relationships:
             - type: job_contained_in_hpc
               target: ft2_node
@@ -726,11 +560,9 @@ node_templates:
             - type: job_contained_in_hpc
               target: ft2_node
             - type: job_depends_on
-              target: za_mpi_npt_job_0
-            - type: job_depends_on
-              target: za_mpi_npt_job_1
+              target: za_mpi_npt_job
             
-    za_mpi_md_job_0:
+    za_mpi_md_job:
         type: hpc.nodes.job
         properties:
             job_options:
@@ -739,7 +571,8 @@ node_templates:
                     - { get_input: za_module_gcc }
                     - { get_input: za_module_mpi }
                     - { get_input: za_module_sing }
-                command: { concat: [' ', { get_input: za_work_path }, '/', { get_input: za_mpi_md_slurm_0 }] }
+                command: { concat: [' ', { get_input: za_work_path }, '/', { get_input: za_mpi_md_slurm }] }
+                scale: 61
             deployment:
                 bootstrap: 'scripts/za_mpi_md_bootstrap.sh'
                 revert: 'scripts/za_mpi_md_revert.sh'
@@ -749,43 +582,11 @@ node_templates:
                     - { get_input: za_charge }
                     - { get_input: za_work_path }
                     - { get_input: za_mail }
-                    - { get_input: za_mpi_md_slurm_0 }
+                    - { get_input: za_mpi_md_slurm }
                     - { concat: [ { get_input: za_work_path },'/',{ get_input: za_image } ]}
                     - { get_input: za_mpi_md_script }
                     - { get_input: za_hpc_partition }
                     - { get_input: za_mpi_nt }
-                    - { get_input: za_mpi_inp_0 }
-        relationships:
-            - type: job_contained_in_hpc
-              target: ft2_node
-            - type: job_depends_on
-              target: za_prep_md_job
-
-    za_mpi_md_job_1:
-        type: hpc.nodes.job
-        properties:
-            job_options:
-                type: 'SBATCH'
-                modules:
-                    - { get_input: za_module_gcc }
-                    - { get_input: za_module_mpi }
-                    - { get_input: za_module_sing }
-                command: { concat: [' ', { get_input: za_work_path }, '/', { get_input: za_mpi_md_slurm_1 }] }
-            deployment:
-                bootstrap: 'scripts/za_mpi_md_bootstrap.sh'
-                revert: 'scripts/za_mpi_md_revert.sh'
-                inputs:
-                    - { get_input: za_lig }
-                    - { get_input: mso4sc_dataset_tar }
-                    - { get_input: za_charge }
-                    - { get_input: za_work_path }
-                    - { get_input: za_mail }
-                    - { get_input: za_mpi_md_slurm_1 }
-                    - { concat: [ { get_input: za_work_path },'/',{ get_input: za_image } ]}
-                    - { get_input: za_mpi_md_script }
-                    - { get_input: za_hpc_partition }
-                    - { get_input: za_mpi_nt }
-                    - { get_input: za_mpi_inp_1 }
         relationships:
             - type: job_contained_in_hpc
               target: ft2_node
@@ -819,11 +620,9 @@ node_templates:
             - type: job_contained_in_hpc
               target: ft2_node
             - type: job_depends_on
-              target: za_mpi_md_job_0
-            - type: job_depends_on
-              target: za_mpi_md_job_1
+              target: za_mpi_md_job
             
-    za_mpi_rerun_job_0:
+    za_mpi_rerun_job:
         type: hpc.nodes.job
         properties:
             job_options:
@@ -832,7 +631,8 @@ node_templates:
                     - { get_input: za_module_gcc }
                     - { get_input: za_module_mpi }
                     - { get_input: za_module_sing }
-                command: { concat: [' ', { get_input: za_work_path }, '/', { get_input: za_mpi_rerun_slurm_0 }] }
+                command: { concat: [' ', { get_input: za_work_path }, '/', { get_input: za_mpi_rerun_slurm }] }
+                scale: 61
             deployment:
                 bootstrap: 'scripts/za_mpi_rerun_bootstrap.sh'
                 revert: 'scripts/za_mpi_rerun_revert.sh'
@@ -842,43 +642,11 @@ node_templates:
                     - { get_input: za_charge }
                     - { get_input: za_work_path }
                     - { get_input: za_mail }
-                    - { get_input: za_mpi_rerun_slurm_0 }
+                    - { get_input: za_mpi_rerun_slurm }
                     - { concat: [ { get_input: za_work_path },'/',{ get_input: za_image } ]}
                     - { get_input: za_mpi_rerun_script }
                     - { get_input: za_hpc_partition }
                     - { get_input: za_mpi_nt_rerun }
-                    - { get_input: za_mpi_inp_0 }
-        relationships:
-            - type: job_contained_in_hpc
-              target: ft2_node
-            - type: job_depends_on
-              target: za_prep_rerun_job
-
-    za_mpi_rerun_job_1:
-        type: hpc.nodes.job
-        properties:
-            job_options:
-                type: 'SBATCH'
-                modules:
-                    - { get_input: za_module_gcc }
-                    - { get_input: za_module_mpi }
-                    - { get_input: za_module_sing }
-                command: { concat: [' ', { get_input: za_work_path }, '/', { get_input: za_mpi_rerun_slurm_1 }] }
-            deployment:
-                bootstrap: 'scripts/za_mpi_rerun_bootstrap.sh'
-                revert: 'scripts/za_mpi_rerun_revert.sh'
-                inputs:
-                    - { get_input: za_lig }
-                    - { get_input: mso4sc_dataset_tar }
-                    - { get_input: za_charge }
-                    - { get_input: za_work_path }
-                    - { get_input: za_mail }
-                    - { get_input: za_mpi_rerun_slurm_1 }
-                    - { concat: [ { get_input: za_work_path },'/',{ get_input: za_image } ]}
-                    - { get_input: za_mpi_rerun_script }
-                    - { get_input: za_hpc_partition }
-                    - { get_input: za_mpi_nt_rerun }
-                    - { get_input: za_mpi_inp_1 }
         relationships:
             - type: job_contained_in_hpc
               target: ft2_node
@@ -912,9 +680,7 @@ node_templates:
             - type: job_contained_in_hpc
               target: ft2_node
             - type: job_depends_on
-              target: za_mpi_rerun_job_0
-            - type: job_depends_on
-              target: za_mpi_rerun_job_1
+              target: za_mpi_rerun_job
               
     za_post_job:
         type: hpc.nodes.job
@@ -955,31 +721,31 @@ outputs:
         value: { get_attribute: [za_prep_job, job_name] }
     za_mpi_em_job_name:
         description: first job name in the HPC
-        value: { get_attribute: [za_mpi_em_job_0, job_name] }
+        value: { get_attribute: [za_mpi_em_job, job_name] }
     za_prep_nvt_job_name:
         description: first job name in the HPC
         value: { get_attribute: [za_prep_nvt_job, job_name] }
     za_mpi_nvt_job_name:
         description: first job name in the HPC
-        value: { get_attribute: [za_mpi_nvt_job_0, job_name] }
+        value: { get_attribute: [za_mpi_nvt_job, job_name] }
     za_prep_npt_job_name:
         description: first job name in the HPC
         value: { get_attribute: [za_prep_npt_job, job_name] }
     za_mpi_npt_job_name:
         description: first job name in the HPC
-        value: { get_attribute: [za_mpi_npt_job_0, job_name] }
+        value: { get_attribute: [za_mpi_npt_job, job_name] }
     za_prep_md_job_name:
         description: first job name in the HPC
         value: { get_attribute: [za_prep_md_job, job_name] }
     za_mpi_md_job_name:
         description: first job name in the HPC
-        value: { get_attribute: [za_mpi_md_job_0, job_name] }
+        value: { get_attribute: [za_mpi_md_job, job_name] }
     za_prep_rerun_job_name:
         description: first job name in the HPC
         value: { get_attribute: [za_prep_rerun_job, job_name] }
     za_mpi_rerun_job_name:
         description: first job name in the HPC
-        value: { get_attribute: [za_mpi_rerun_job_0, job_name] }
+        value: { get_attribute: [za_mpi_rerun_job, job_name] }
     za_post_rerun_job_name:
         description: first job name in the HPC
         value: { get_attribute: [za_post_rerun_job, job_name] }

@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 (
     cd run-flow-generic
     cfy blueprints upload -b run-flow-generic blueprint.yaml

@@ -25,7 +25,7 @@ inputs:
     # Monitor
     monitor_entrypoint:
         description: Monitor entrypoint IP
-        default: "193.144.35.146"
+        default: ""
         type: string
 
     # Job prefix name
@@ -61,9 +61,11 @@ node_templates:
         type: hpc.nodes.Compute
         properties:
             config: { get_input: mso4sc_hpc_primary }
-            monitor_entrypoint: { get_input: monitor_entrypoint }
-            monitor_orchestrator_available: True
+            external_monitor_entrypoint: { get_input: monitor_entrypoint }
             job_prefix: { get_input: job_prefix }
+            base_dir: "$HOME"
+            workdir_prefix: "single_sregistry"
+            skip_cleanup: True
 #            simulate: True  # COMMENT to test against a real HPC
 
     single_job:
@@ -88,6 +90,7 @@ node_templates:
                 inputs:
                     - { get_input: singularity_image_uri }
                     - { get_input: singularity_image_filename }
+            skip_cleanup: True
         relationships:
             - type: job_contained_in_hpc
               target: primary_hpc
