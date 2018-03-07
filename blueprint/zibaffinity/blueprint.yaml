@@ -25,6 +25,7 @@ inputs:
     monitor_entrypoint:
         description: Monitor entrypoint IP
         default: "193.144.35.146"
+        #default: "127.0.0.1"
         type: string
 
     # Job prefix name
@@ -55,11 +56,11 @@ inputs:
         default: '$HOME:/home/$USER'
         type: string
     
-    # $1 - ZA ligand path    !!!!! USER input still hard-coded
+    # $1 - ZA ligand path    !!!!! USER input still hard-coded TODO
     za_lig:
         description: ZA ligand path
-        default: { concat: [ { get_input: ft2_node.base_dir },'/17betaEstradiol.pdb' ]}
-        #default: '$LUSTRE/data_4_javier/zibaffinity_tosca/input/17betaEstradiol.pdb'
+        #default: { concat: [ { get_input: ft2_node.base_dir },'/17betaEstradiol.pdb' ]}
+        default: '$LUSTRE/data_4_javier/zibaffinity_tosca/input/17betaEstradiol.pdb'
         type: string
     
     # $4 - ZA main simulation directory    !!!!! HPC-dependent
@@ -392,7 +393,7 @@ node_templates:
                     - { get_input: za_module_mpi }
                     - { get_input: za_module_sing }
                 command: { concat: [' ', { get_input: za_work_path }, '/', { get_input: za_mpi_em_slurm }] }
-                scale: 61
+                scale: 4
             deployment:
                 bootstrap: 'scripts/za_mpi_em_bootstrap.sh'
                 revert: 'scripts/za_mpi_em_revert.sh'
@@ -452,7 +453,7 @@ node_templates:
                     - { get_input: za_module_mpi }
                     - { get_input: za_module_sing }
                 command: { concat: [' ', { get_input: za_work_path }, '/', { get_input: za_mpi_nvt_slurm }] }
-                scale: 61
+                scale: 4
             deployment:
                 bootstrap: 'scripts/za_mpi_nvt_bootstrap.sh'
                 revert: 'scripts/za_mpi_nvt_revert.sh'
@@ -512,7 +513,7 @@ node_templates:
                     - { get_input: za_module_mpi }
                     - { get_input: za_module_sing }
                 command: { concat: [' ', { get_input: za_work_path }, '/', { get_input: za_mpi_npt_slurm }] }
-                scale: 61
+                scale: 4
             deployment:
                 bootstrap: 'scripts/za_mpi_npt_bootstrap.sh'
                 revert: 'scripts/za_mpi_npt_revert.sh'
@@ -572,7 +573,7 @@ node_templates:
                     - { get_input: za_module_mpi }
                     - { get_input: za_module_sing }
                 command: { concat: [' ', { get_input: za_work_path }, '/', { get_input: za_mpi_md_slurm }] }
-                scale: 61
+                scale: 4
             deployment:
                 bootstrap: 'scripts/za_mpi_md_bootstrap.sh'
                 revert: 'scripts/za_mpi_md_revert.sh'
@@ -632,7 +633,7 @@ node_templates:
                     - { get_input: za_module_mpi }
                     - { get_input: za_module_sing }
                 command: { concat: [' ', { get_input: za_work_path }, '/', { get_input: za_mpi_rerun_slurm }] }
-                scale: 61
+                scale: 4
             deployment:
                 bootstrap: 'scripts/za_mpi_rerun_bootstrap.sh'
                 revert: 'scripts/za_mpi_rerun_revert.sh'
