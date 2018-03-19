@@ -28,7 +28,7 @@ cat > $ZA_SLURM <<- EOM
 #SBATCH -N 1
 #SBATCH -n 1
 #SBATCH --ntasks-per-node=1
-#SBATCH -t 00:00:45
+#SBATCH -t 00:00:59
 
 cd $2
 
