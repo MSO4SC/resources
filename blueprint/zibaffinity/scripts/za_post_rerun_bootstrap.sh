@@ -14,10 +14,10 @@ cat > $ZA_SLURM <<- EOM
 
 cd $4
 
-mpirun singularity exec -H \\$HOME:/home/\\$USER -B /mnt:/mnt,/scratch:/scratch $7 /bin/bash $8 $1 $za_tar $3 $4 $5 
+mpirun singularity exec -H \$HOME:/home/\$USER -B /mnt:/mnt,/scratch:/scratch $7 /bin/bash $8 $1 $za_tar $3 $4 $5 
 
 # $1: za_lig
-# $2: za_tar
+# $2: mso4sc_dataset_tar
 # $3: za_charge
 # $4: za_simpath
 # $5: za_mail

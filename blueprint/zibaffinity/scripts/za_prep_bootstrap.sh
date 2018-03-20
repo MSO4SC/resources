@@ -9,7 +9,6 @@ cat > $ZA_SLURM <<- EOM
 
 #SBATCH -p $9 #thin-shared
 #SBATCH -N 1
-#SBATCH -n 1
 #SBATCH --ntasks-per-node=1
 #SBATCH -t 00:15:00
 
