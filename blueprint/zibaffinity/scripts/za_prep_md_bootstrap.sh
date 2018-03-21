@@ -10,11 +10,12 @@ cat > $ZA_SLURM <<- EOM
 #SBATCH -p $9 #thin-shared
 #SBATCH -N 1
 #SBATCH --ntasks-per-node=1
-#SBATCH -t 00:01:00
+#SBATCH -t 00:05:00
 
 cd $4
 
-mpirun singularity exec -H \$HOME:/home/\$USER -B /mnt:/mnt,/scratch:/scratch $7 /bin/bash $8 $1 $za_tar $3 $4 $5 
+mpirun singularity exec -B /mnt:/mnt,/scratch:/scratch $7 /bin/bash $8 $1 $za_tar $3 $4 $5 
+#mpirun singularity exec -H \$HOME:/home/\$USER -B /mnt:/mnt,/scratch:/scratch $7 /bin/bash $8 $1 $za_tar $3 $4 $5 
 
 # $1: za_lig
 # $2: za_tar
