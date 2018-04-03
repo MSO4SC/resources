@@ -10823,6 +10823,7 @@ outputs:
     za_prep_nvt_job_name:
         description: first job name in the HPC
         value: { get_attribute: [za_prep_nvt_job, job_name] }
+<<<<<<< HEAD
     za_mpi_em_job_0_name:
         description: first job name in the HPC
         value: { get_attribute: [za_mpi_em_job_0, job_name] }
@@ -11009,6 +11010,8 @@ outputs:
     za_prep_nvt_job_name:
         description: first job name in the HPC
         value: { get_attribute: [za_prep_nvt_job, job_name] }
+=======
+>>>>>>> dcfbe4c952e922cd50010ac99cb2f10769a34263
     za_mpi_nvt_job_0_name:
         description: first job name in the HPC
         value: { get_attribute: [za_mpi_nvt_job_0, job_name] }
