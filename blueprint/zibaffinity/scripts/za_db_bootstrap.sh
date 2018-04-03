@@ -26,13 +26,17 @@ cat > $ZA_SLURM <<- EOM
 
 #SBATCH -p $9 #thin-shared
 #SBATCH -N 1
-#SBATCH --ntasks-per-node=1
+###SBATCH -n 1
+#SBATCH --ntasks-per-node 1
 #SBATCH -t 00:00:59
+
+echo -e "\\nhostname:\$(srun hostname)\\n"
 
 cd $2
 
-mpirun singularity exec -B /mnt:/mnt,/scratch:/scratch $3 /bin/bash $5 $za_tar $8 $2
-#mpirun singularity exec -H \$HOME:/home/\$USER -B /mnt:/mnt,/scratch:/scratch $3 /bin/bash $5 $za_tar $8 $2
+##mpirun -np 1 singularity exec -B /mnt:/mnt,/scratch:/scratch $3 /bin/bash $5 $za_tar $8 $2
+#mpirun -np 1 singularity exec -H \$HOME:/home/\$USER -B /mnt:/mnt,/scratch:/scratch $3 /bin/bash $5 $za_tar $8 $2
+singularity exec -H \$HOME:/home/\$USER -B /mnt:/mnt,/scratch:/scratch $3 /bin/bash $5 $za_tar $8 $2
 
 # $1 { get_input: za_image_path }
 # $2 { get_input: za_work_path }
