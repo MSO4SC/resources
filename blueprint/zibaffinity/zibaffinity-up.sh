@@ -1,6 +1,7 @@
 #!/bin/bash
 
-sys="zibaffinity"
+sys=$1
+#sys="za"
 if [ -z ${sys+x} ]; then 
 	sys="zibaffinity"
 	#sys="test"
