@@ -25,5 +25,6 @@ EOF
 done
 
 cat << EOF > run_flow.sh
-flow run_generated_\$SCALE_INDEX.param
+flow run_generated_\$SLURM_ARRAY_TASK_ID.param
 EOF
+chmod a+x run_flow.sh
