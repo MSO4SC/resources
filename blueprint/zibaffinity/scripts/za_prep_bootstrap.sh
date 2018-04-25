@@ -4,10 +4,9 @@ ZA_SLURM="${4}/${6}"
 
 za_tar=$(echo ${2} | sed 's#http://##g')
 
-## download dafault ligand file for testing
-curl -O $1 ${10}
-
-
+## download default ligand file for testing
+#curl -O $1 ${10}
+wget -O $1 ${10}
 
 cat > $ZA_SLURM <<- EOM
 #!/bin/bash -l
@@ -21,7 +20,6 @@ cat > $ZA_SLURM <<- EOM
 echo -e "\\nhostname:\$(srun hostname)\\n"
 
 cd $4
-wget mso4sc_dataset_lig
 
 ##mpirun -np 1 singularity exec -B /mnt:/mnt,/scratch:/scratch $7 /bin/bash $8 $1 $za_tar $3 $4 $5 
 #mpirun -np 1 singularity exec -H \$HOME:/home/\$USER -B /mnt:/mnt,/scratch:/scratch $7 /bin/bash $8 $1 $za_tar $3 $4 $5 
@@ -35,18 +33,7 @@ singularity exec -H \$HOME:/home/\$USER -B /mnt:/mnt,/scratch:/scratch $7 /bin/b
 # $6: za_prep_slurm -> prep slurm script (here as here doc)
 # $7: za_image
 # $8: za_prep_script -> za_prep_sim.sh (in container)
-# $9: za_hpc_cluster -> cola-corta
-# $10: mso4sc_dataset_lig
+# $9: za_hpc_cluster -> thin-shared
+# ${10}: mso4sc_dataset_lig
 
 EOM
-
-                    - { get_input: za_lig }
-                    - { get_input: mso4sc_dataset_tar }
-                    - { get_input: za_charge }
-                    - { get_input: za_work_path }
-                    - { get_input: za_mail }
-                    - { get_input: za_prep_slurm }
-                    - { concat: [ { get_input: za_work_path },'/',{ get_input: za_image } ]}
-                    - { get_input: za_prep_script }
-                    - { get_input: za_hpc_partition_prep }
-                    - { get_input: mso4sc_dataset_lig }
