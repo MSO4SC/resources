@@ -62,7 +62,7 @@ inputs:
         
     mso4sc_dataset_input_url:
         description: url to retrieve for case file
-        default: "https://gitlab.srv.cesga.es/atgeirr/OPM-public-testing-data/raw/master/spe1.tgz"
+        default: "https://gitlab.srv.cesga.es/atgeirr/OPM-public-testing-data/raw/master/SmallEnsemble.tgz"
 
     base_dir:
         description: Working directory
@@ -78,21 +78,22 @@ inputs:
 
 
 node_templates:
-    main_hpc_node:
+    first_hpc:
         type: hpc.nodes.Compute
         properties:
             config: { get_input: mso4sc_hpc_primary }
             external_monitor_entrypoint: { get_input: monitor_entrypoint }
             base_dir: { get_input: base_dir }
-            workdir_prefix: "opm"
+            workdir_prefix: "opm_ensemble"
             job_prefix: { get_input: job_prefix }
             skip_cleanup: True
 #            simulate: True  # COMMENT to test against a real HPC
 
-    opm_flow_single_job:
+    opm_flow_ensemble_job:
         type: hpc.nodes.singularity_job
         properties:
             job_options:
+                type: 'SBATCH'
                 modules:
                     - gcc/5.3.0
                     - openmpi/1.10.2
@@ -103,23 +104,25 @@ node_templates:
                 volumes:
                     - '/scratch '
                     - '/mnt'
-                command: 'flow $CURRENT_WORKDIR/run_generated.param output_dir=$CURRENT_WORKDIR/simoutput'
+                command: '$CURRENT_WORKDIR/run_flow.sh'
                 nodes: { get_input: parallel_nodes }
                 tasks: { get_input: parallel_tasks }
                 tasks_per_node: { get_input: parallel_tasks_per_node }
                 max_time: { get_input: max_time }
+                scale: 4
             deployment:
-                bootstrap: 'scripts/singularity_bootstrap_run-flow-generic.sh'
-                revert: 'scripts/singularity_revert_run-flow-generic.sh'
+                bootstrap: 'scripts/bootstrap_run-flow-ensemble.sh'
+                revert: 'scripts/revert_run-flow-ensemble.sh'
                 inputs:
                     - { get_input: mso4sc_dataset_input_url }
                     - { get_input: singularity_image_uri }
                     - { get_input: singularity_image_filename }
+            skip_cleanup: True
         relationships:
             - type: job_contained_in_hpc
-              target: main_hpc_node
+              target: first_hpc
 
 outputs:
     single_job_name:
         description: single job name in the HPC
-        value: { get_attribute: [opm_flow_single_job, job_name] }
+        value: { get_attribute: [opm_flow_ensemble_job, job_name] }
