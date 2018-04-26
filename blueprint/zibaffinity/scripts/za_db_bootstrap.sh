@@ -18,6 +18,9 @@ fi
 ### the actual reason why i couldn't mae use of "hpc.node.singularity_job" type:
 za_tar=$(echo ${7} | sed 's#http://##g')
 
+### download default ligand file for testing
+#curl -O $1 ${10}
+wget -O ${11} ${10}
 
 ZA_SLURM="${2}/${6}"
 

@@ -4,9 +4,6 @@ ZA_SLURM="${4}/${6}"
 
 za_tar=$(echo ${2} | sed 's#http://##g')
 
-## download default ligand file for testing
-#curl -O $1 ${10}
-wget -O $1 ${10}
 
 cat > $ZA_SLURM <<- EOM
 #!/bin/bash -l

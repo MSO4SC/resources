@@ -356,6 +356,8 @@ node_templates:
                     - { get_input: mso4sc_dataset_tar }
                     - { get_input: za_db }
                     - { get_input: za_hpc_partition_prep }
+                    - { get_input: mso4sc_dataset_lig }
+                    - { get_input: za_lig }
         relationships:
             - type: job_contained_in_hpc
               target: ft2_node
@@ -384,7 +386,6 @@ node_templates:
                     - { concat: [ { get_input: za_work_path },'/',{ get_input: za_image } ]}
                     - { get_input: za_prep_script }
                     - { get_input: za_hpc_partition_prep }
-                    - { get_input: mso4sc_dataset_lig }
         relationships:
             - type: job_contained_in_hpc
               target: ft2_node
