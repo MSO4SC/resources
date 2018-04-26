@@ -123,35 +123,35 @@ inputs:
         default: "za_db.slurm"
         type: string
     
-    # ZA HPC singularity module   !!!!! HPC-dependent (cola-corta, thin-shared)
+    # ZA HPC singularity module   !!!!! HPC-dependent
     za_module_sing:
         description: ZA HPC singularity module 
         default: "singularity/2.4.2"
         type: string
      
-    # ZA HPC gcc module   !!!!! HPC-dependent (cola-corta, thin-shared)
+    # ZA HPC gcc module   !!!!! HPC-dependent
     za_module_gcc:
         description: ZA HPC gcc module 
         default: "gcc/5.3.0"
         type: string
      
-    # ZA HPC gcc module   !!!!! HPC-dependent (cola-corta, thin-shared)
+    # ZA HPC gcc module   !!!!! HPC-dependent
     za_module_mpi:
         description: ZA HPC mpi module 
         default: "openmpi/1.10.2"
         type: string
      
-    # ZA HPC cluster partition   !!!!! HPC-dependent (cola-corta, thin-shared)
+    # ZA HPC cluster partition   !!!!! HPC-dependent (cola-corta, thin-shared, thinnodes)
     za_hpc_partition:
         description: ZA HPC cluster partition 
         default: "cola-corta"
         type: string
      
-    # ZA HPC cluster partition   !!!!! HPC-dependent (cola-corta, thin-shared)
+    # ZA HPC cluster partition   !!!!! HPC-dependent (cola-corta, thin-shared,thinnodes)
     za_hpc_partition_prep:
         description: ZA HPC cluster partition for non-mpi jobs 
-        #default: "thin-shared"
-        default: "thinnodes"
+        default: "thin-shared"
+        #default: "thinnodes"
         type: string
      
     # ZA number of cores    !!!!! HPC-dependent
