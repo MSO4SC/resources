@@ -50,17 +50,17 @@ inputs:
         default: 'www.zib.de/durmaz/temp/17betaEstradiol.pdb'
         type: string
     
-    # $1 - ZA ligand path    !!!!! USER input still hard-coded TODO
-    za_lig_name:
-        description: ZA default ligand name
-        default: 'ligand.pdb'
-        type: string
+#    # $1 - ZA ligand path    !!!!! USER input still hard-coded TODO
+#    za_lig_name:
+#        description: ZA default ligand name
+#        default: 'ligand.pdb'
+#        type: string
     
     # $1 - ZA ligand path    !!!!! USER input still hard-coded TODO
     za_lig:
         description: ZA ligand path
-        default: { concat: [ '$CURRENT_WORKDIR/' , { get_input: za_lig_name } ]}
-        #default: '$CURRENT_WORKDIR/ligand.pdb'
+        #default: { concat: [ '$CURRENT_WORKDIR/' , { get_input: za_lig_name } ]}
+        default: '$CURRENT_WORKDIR/ligand.pdb'
         type: string
         
     # ZA home directory
@@ -150,7 +150,8 @@ inputs:
     # ZA HPC cluster partition   !!!!! HPC-dependent (cola-corta, thin-shared)
     za_hpc_partition_prep:
         description: ZA HPC cluster partition for non-mpi jobs 
-        default: "thin-shared"
+        #default: "thin-shared"
+        default: "thinnodes"
         type: string
      
     # ZA number of cores    !!!!! HPC-dependent
