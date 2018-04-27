@@ -17,118 +17,16 @@ GIRDER_REPO_URL=$3
 GIRDER_FOLDER_ID=$4
 GIRDER_API_KEY=$5
 NO_ERASE=$6
-E2B_STR=$7
+MODULES=$7
+MODEL_PARAM_STR=$8
+MODEL_PARAM_ARR= ( ${MODEL_PARAM_STR} )
+
 
 # Prepare directories if they do not exists.
 mkdir -p ${WORK_DIR}/feel
 mkdir -p ${WORK_DIR}/singularity_images
 mkdir -p ${WORK_DIR}/data
 SIMG_DIR=${WORK_DIR}/singularity_images
-
-E2B_ARR=( $E2B_STR )
-
-echo "\
-{
-    \"Name\": \"HDG-Mixed-Poisson for lamina cribrosa\",
-    \"ShortName\":\"MP_LC\",
-    \"Model\":\"hdg\",
-    \"Materials\":
-    {
-        \"Lamina\":
-        {
-            \"name\":\"tissue\",
-            \"k\": \"${E2B_ARR[1]}\",
-            \"CRAflow_k\":\"4.157516880767877e3\",
-            \"CRVflow_k\":\"3.029719321202052e3\" 
-        }
-    },
-    \"BoundaryConditions\":
-    {
-        \"potential\":
-        {
-            \"InitialSolution\":
-            {
-                \"Lamina\":
-                {
-                    \"expr\":\"0.25\"
-                }
-            },
-            \"SourceTerm\":
-            {
-                \"Lamina\":
-                {
-                    \"expr\":\"0.0\" 
-                }
-            },
-            \"Dirichlet\":
-            {
-                \"Hole\":
-                {
-                     \"type\":\"file\",
-                     \"filetype\":\"csv\",
-                     \"filename\":\"${E2B_ARR[0]}\",
-                     \"abscissa\":\"time\",
-                     \"ordinate\":\"gain1.y\"
-                }
-            },
-            \"Neumann\":
-            {
-                \"Lamina_Retina\":
-                {
-                     \"expr\":\"0.0\"
-                },
-                \"Out\":
-                {
-                     \"expr\":\"0.0\"
-                }
-            }
-        },
-        \"flux\":
-        {
-            \"Integral\":
-            {
-                \"Lamina_Sclera\":
-                {
-                    \"type\":\"file\",
-                    \"filetype\":\"csv\",
-                    \"filename\":\"${E2B_ARR[0]}\",
-                    \"abscissa\":\"time\",
-                    \"ordinate\":\"lcR.p.i\"
-                }
-            }
-        },
-        \"Other quantities\":
-        {
-            \"CRAflow\":
-            {
-                \"Lamina_Sclera\":
-                {
-                    \"type\":\"file\",
-                    \"filetype\":\"csv\",
-                    \"filename\":\"${E2B_ARR[0]}\",
-                    \"abscissa\":\"time\",
-                    \"ordinate\":\"R1a.p2.i\"
-                }
-            },
-            \"CRVflow\":
-            {
-                \"Lamina_Sclera\":
-                {
-                    \"type\":\"file\",
-                    \"filetype\":\"csv\",
-                    \"filename\":\"${E2B_ARR[0]}\",
-                    \"abscissa\":\"time\",
-                    \"ordinate\":\"R5a.n2.i\"
-                }
-            }
-        }
-    },
-    \"PostProcess\":
-    {
-        \"Fields\":[\"potential\",\"flux\",\"CRVflow\",\"CRAflow\"]
-    }
-}" > ${WORK_DIR}/data/model_template.json
-
 
 # Download jq JSON parsing tool (if not available) to parse HTTP request response
 # if not available on the machine.
@@ -241,3 +139,36 @@ if [ ! -f ${SIMG_DIR}/${SIMG} ]; then
 else
     echo "Bootstrap will use ${SIMG_DIR}/${SIMG} singularity image!" >> ${LOG_FILE}
 fi
+
+
+# First we create the feelpp model (json) and configure the openmodelica model (xml).
+# MODEL parameters are stored in the array in the following order:
+# JSON PARAM
+#   @porosity_coeff@:  porosity [default = 0.015192]
+#   @init_pressure@: initial blood pressure within the lamina cribrosa [default = 0.25]
+#   @data_file@: the path to the results of OM [default =$cfgdir/data.csv ]
+# XML PARAM
+#   @final_time@: the final time of the simulation [default = 3, max allowed = 4]
+#   @IOP_value@: the value of the intraocular pressure [default = 15 ]
+#   @RLTp_value@: the value of retrolaminar tissue pressure [default = 7]
+MODEL_JSON_IN=/usr/local/share/feelpp/testcases/level1/model.json.in 
+MODEL_XML_IN=/usr/local/share/feelpp/testcases/level1/ominit.xml.in 
+MODEL_JSON=${WORK_DIR}/data/model.json
+MODULE_XML=${WORK_DIR}/data/ominit.xml
+if [ ! -f ${MODEL_JSON_IN} ]; then echo "Error: ${MODEL_JSON_IN} missing in singularity image"; exit 1 fi
+if [ ! -f ${MODEL_XML_IN} ]; then echo "Error: ${MODEL_XML_IN} missing in singularity image"; exit 1 fi
+if [ -z ${MODULES} ]; then
+    MODULES_LIST=`echo ${MODULES} | sed -e 's/,/ /g'`
+    for i in ${MODULE_LIST}; do
+        module load ${i}
+    done
+fi
+singularity exec cp ${MODEL_JSON_IN} ${MODEL_JSON}
+singularity exec cp ${MODEL_XML_IN} ${MODEL_XML}
+
+sed -i s/@porosity_coeff@/${MODEL_PARAM_ARR[0]}/ ${MODEL_JSON}
+sed -i s/@init_pressure@/${MODEL_PARAM_ARR[1]}/ ${MODEL_JSON}
+sed -i s/@data_file@/${MODEL_PARAM_ARR[2]}/ ${MODEL_JSON}
+sed -i s/@final_time@/${MODEL_PARAM_ARR[3]}/ ${MODEL_XML}
+sed -i s/@IOP_value@/${MODEL_PARAM_ARR[4]}/ ${MODEL_XML}
+sed -i s/@RLTp_value@/${MODEL_PARAM_ARR[5]}/ ${MODEL_XML}
