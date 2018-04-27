@@ -149,7 +149,7 @@ node_templates:
             config: { get_input: mso4sc_hpc_primary }
             external_monitor_entrypoint: { get_input: monitor_entrypoint }
             base_dir: { get_input: job_hpc_workdir }
-            wordir_prefix: "feelpp_toolboxes"
+            workdir_prefix: "feelpp_toolboxes"
             job_prefix: { get_input: job_prefix }
 
     job_toolboxes:
