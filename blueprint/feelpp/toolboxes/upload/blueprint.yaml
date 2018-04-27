@@ -134,7 +134,7 @@ inputs:
 
     revert_no_erase:
         description: cleanup singularity image files (be careful, future image won't redownload updated updated image version!).
-        default: 'False'
+        default: 'True'
         type: string
 
     skip_cleanup:
