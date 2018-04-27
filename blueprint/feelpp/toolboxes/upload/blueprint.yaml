@@ -18,14 +18,14 @@
 tosca_definitions_version: cloudify_dsl_1_3
 
 imports:
-    - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-manager/17.10.19/resources/rest-service/cloudify/types/types.yaml
+    - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-manager/18.1.11/resources/rest-service/cloudify/types/types.yaml
     - http://raw.githubusercontent.com/MSO4SC/cloudify-hpc-plugin/master/plugin.yaml
 
 inputs:
     # Monitor
     monitor_entrypoint:
         description: Monitor entrypoint IP
-        default: "127.0.0.1" # Required
+        default: "" # Required
         type: string
 
     # Job prefix name
@@ -137,7 +137,7 @@ inputs:
         default: 'False'
         type: string
 
-    avoid_cleanup:
+    skip_cleanup:
         description: erase orchestrator temporary generated files (debug).
         default: False
         type: boolean
@@ -170,7 +170,6 @@ node_templates:
                 tasks_per_node: { get_input: job_tasks_per_node }
                 max_time: { get_input: job_max_time }
                 image: { concat:[ { get_input: job_hpc_workdir }, '/singularity_images/', { get_input: singularity_image_file } ] }
-                avoid_cleanup: { get_input: avoid_cleanup } # debug keep bash scripts
             deployment:
                 bootstrap: 'scripts/bootstrap.sh'
                 revert: 'scripts/revert.sh'
@@ -181,6 +180,7 @@ node_templates:
                     - { get_input: girder_folder_id }
                     - { get_input: girder_api_key }
                     - { get_input: revert_no_erase } # NO_ERASE to not remove singularity image
+            skip_cleanup: { get_input: skip_cleanup } # debug keep bash scripts
 
         relationships:
             - type: job_contained_in_hpc
