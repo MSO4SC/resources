@@ -105,6 +105,13 @@ inputs:
         default: "shub://sregistry.srv.cesga.es/mso4sc/zibaffinity:latest"
         type: string
      
+    # ZA Gromacs path    !!!!! HPC-dependent
+    za_gmx_path:
+        description: ZA Gromacs path
+        default: "/opt/gromacs-5.1.2/bin/"
+        #default: ""
+        type: string
+     
     # ZA target DB file    !!!!! -dependent
     za_db:
         description: ZA target DB file
@@ -150,8 +157,8 @@ inputs:
     # ZA HPC cluster partition   !!!!! HPC-dependent (cola-corta, thin-shared,thinnodes)
     za_hpc_partition_prep:
         description: ZA HPC cluster partition for non-mpi jobs 
-        default: "thin-shared"
-        #default: "thinnodes"
+        #default: "thin-shared"
+        default: "thinnodes"
         type: string
      
     # ZA number of cores    !!!!! HPC-dependent
@@ -214,7 +221,7 @@ inputs:
         default: "za_mpi_nvt.slurm"
         type: string
     
-    # ZA npt preparation script name    !!!!! ZA prep script executed sequentially
+    # ZA npt preparation script name    !!!!! ZA prep script executed sequentially 
     za_prep_npt_script:
         description: ZA npt preparation script name
         default: "za_prep_npt.sh"
@@ -417,6 +424,7 @@ node_templates:
                     - { get_input: za_hpc_partition }
                     - { get_input: za_mpi_nt }
                     - '"0"'
+                    - { get_input: za_gmx_path }
         relationships:
             - type: job_contained_in_hpc
               target: ft2_node
@@ -448,6 +456,7 @@ node_templates:
                     - { get_input: za_hpc_partition }
                     - { get_input: za_mpi_nt }
                     - '"1"'
+                    - { get_input: za_gmx_path }
         relationships:
             - type: job_contained_in_hpc
               target: ft2_node
@@ -511,6 +520,7 @@ node_templates:
                     - { get_input: za_hpc_partition }
                     - { get_input: za_mpi_nt }
                     - '"0"'
+                    - { get_input: za_gmx_path }
         relationships:
             - type: job_contained_in_hpc
               target: ft2_node
@@ -542,6 +552,7 @@ node_templates:
                     - { get_input: za_hpc_partition }
                     - { get_input: za_mpi_nt }
                     - '"1"'
+                    - { get_input: za_gmx_path }
         relationships:
             - type: job_contained_in_hpc
               target: ft2_node
@@ -605,6 +616,7 @@ node_templates:
                     - { get_input: za_hpc_partition }
                     - { get_input: za_mpi_nt }
                     - '"0"'
+                    - { get_input: za_gmx_path }
         relationships:
             - type: job_contained_in_hpc
               target: ft2_node
@@ -636,6 +648,7 @@ node_templates:
                     - { get_input: za_hpc_partition }
                     - { get_input: za_mpi_nt }
                     - '"1"'
+                    - { get_input: za_gmx_path }
         relationships:
             - type: job_contained_in_hpc
               target: ft2_node
@@ -698,6 +711,7 @@ node_templates:
                     - { get_input: za_hpc_partition }
                     - { get_input: za_mpi_nt }
                     - '"0"'
+                    - { get_input: za_gmx_path }
         relationships:
             - type: job_contained_in_hpc
               target: ft2_node
@@ -729,6 +743,7 @@ node_templates:
                     - { get_input: za_hpc_partition }
                     - { get_input: za_mpi_nt }
                     - '"1"'
+                    - { get_input: za_gmx_path }
         relationships:
             - type: job_contained_in_hpc
               target: ft2_node
@@ -791,6 +806,7 @@ node_templates:
                     - { get_input: za_hpc_partition }
                     - { get_input: za_mpi_nt }
                     - '"0"'
+                    - { get_input: za_gmx_path }
         relationships:
             - type: job_contained_in_hpc
               target: ft2_node
@@ -822,6 +838,7 @@ node_templates:
                     - { get_input: za_hpc_partition }
                     - { get_input: za_mpi_nt }
                     - '"1"'
+                    - { get_input: za_gmx_path }
         relationships:
             - type: job_contained_in_hpc
               target: ft2_node
