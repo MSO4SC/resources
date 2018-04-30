@@ -107,8 +107,8 @@ inputs:
      
     # ZA Gromacs path    !!!!! HPC-dependent
     za_gmx_path:
-        description: ZA Gromacs path
-        default: "/opt/gromacs-5.1.2/bin/"
+        description: ZA Gromacs path: leave empty or put path to more portable installation
+        default: "/opt/gromacs-5.1.2/bin"
         #default: ""
         type: string
      
@@ -393,6 +393,7 @@ node_templates:
                     - { concat: [ { get_input: za_work_path },'/',{ get_input: za_image } ]}
                     - { get_input: za_prep_script }
                     - { get_input: za_hpc_partition_prep }
+                    - { get_input: za_gmx_path }
         relationships:
             - type: job_contained_in_hpc
               target: ft2_node
@@ -487,6 +488,7 @@ node_templates:
                     - { concat: [ { get_input: za_work_path },'/',{ get_input: za_image } ]}
                     - { get_input: za_prep_nvt_script }
                     - { get_input: za_hpc_partition_prep }
+                    - { get_input: za_gmx_path }
         relationships:
             - type: job_contained_in_hpc
               target: ft2_node
@@ -583,6 +585,7 @@ node_templates:
                     - { concat: [ { get_input: za_work_path },'/',{ get_input: za_image } ]}
                     - { get_input: za_prep_npt_script }
                     - { get_input: za_hpc_partition_prep }
+                    - { get_input: za_gmx_path }
         relationships:
             - type: job_contained_in_hpc
               target: ft2_node
@@ -678,6 +681,7 @@ node_templates:
                     - { concat: [ { get_input: za_work_path },'/',{ get_input: za_image } ]}
                     - { get_input: za_prep_md_script }
                     - { get_input: za_hpc_partition_prep }
+                    - { get_input: za_gmx_path }
         relationships:
             - type: job_contained_in_hpc
               target: ft2_node
@@ -773,6 +777,7 @@ node_templates:
                     - { concat: [ { get_input: za_work_path },'/',{ get_input: za_image } ]}
                     - { get_input: za_prep_rerun_script }
                     - { get_input: za_hpc_partition_prep }
+                    - { get_input: za_gmx_path }
         relationships:
             - type: job_contained_in_hpc
               target: ft2_node
@@ -869,6 +874,7 @@ node_templates:
                     - { concat: [ { get_input: za_work_path },'/',{ get_input: za_image } ]}
                     - { get_input: za_post_rerun_script }
                     - { get_input: za_hpc_partition_prep }
+                    - { get_input: za_gmx_path }
         relationships:
             - type: job_contained_in_hpc
               target: ft2_node
@@ -900,6 +906,7 @@ node_templates:
                     - { concat: [ { get_input: za_work_path },'/',{ get_input: za_image } ]}
                     - { get_input: za_post_script }
                     - { get_input: za_hpc_partition_prep }
+                    - { get_input: za_gmx_path }
         relationships:
             - type: job_contained_in_hpc
               target: ft2_node

@@ -17,9 +17,9 @@ echo -e "\\nhostname:\$(srun hostname)\\n"
 
 cd $4
 
-##mpirun -np 1 singularity exec -B /mnt:/mnt,/scratch:/scratch $7 /bin/bash $8 $1 $za_tar $3 $4 $5 
-#mpirun -np 1 singularity exec -H \$HOME:/home/\$USER -B /mnt:/mnt,/scratch:/scratch $7 /bin/bash $8 $1 $za_tar $3 $4 $5 
-singularity exec -H \$HOME:/home/\$USER -B /mnt:/mnt,/scratch:/scratch $7 /bin/bash $8 $1 $za_tar $3 $4 $5 
+##mpirun -np 1 singularity exec -B /mnt:/mnt,/scratch:/scratch $7 /bin/bash $8 $1 $za_tar $3 $4 $5 ${10}
+#mpirun -np 1 singularity exec -H \$HOME:/home/\$USER -B /mnt:/mnt,/scratch:/scratch $7 /bin/bash $8 $1 $za_tar $3 $4 $5 ${10}
+singularity exec -H \$HOME:/home/\$USER -B /mnt:/mnt,/scratch:/scratch $7 /bin/bash $8 $1 $za_tar $3 $4 $5 ${10}
 
 # $1: za_lig
 # $2: mso4sc_dataset_tar
@@ -30,5 +30,6 @@ singularity exec -H \$HOME:/home/\$USER -B /mnt:/mnt,/scratch:/scratch $7 /bin/b
 # $7: za_image
 # $8: za_prep_script -> za_prep_nvt.sh (in container)
 # $9: za_hpc_cluster -> cola-corta
+# ${10}: za_gmx_path
 
 EOM
