@@ -107,7 +107,7 @@ inputs:
      
     # ZA Gromacs path    !!!!! HPC-dependent
     za_gmx_path:
-        description: ZA Gromacs path: leave empty or put path to more portable installation
+        description: ZA Gromacs path - leave empty or put path to more portable installation
         default: "/opt/gromacs-5.1.2/bin"
         #default: ""
         type: string
