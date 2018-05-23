@@ -41,12 +41,12 @@ inputs:
 
     job_tasks:
         description: number of tasks/processes to run in parallel
-        default: 1
+        default: 16
         type: integer
 
     job_tasks_per_node:
         description: number of tasks/processes to run in parallel
-        default: 1
+        default: 16
         type: integer
 
     job_max_time:
@@ -87,7 +87,7 @@ inputs:
     mso4sc_hpc_primary:
         description: FTII connection credentials
         default: {} # required
-        
+
     mso4sc_dataset_input_url:
         description: url to retrieve for case file
         default: "" #"/usr/local/share/feelpp/testcases/eye2brain/level1/lc3d.cfg"
@@ -117,14 +117,29 @@ inputs:
         default: 3
         type: integer
 
+    feelpp_geo_file:
+        description: Feel++ config file loaded from the singularity container
+        default: "/usr/local/share/feelpp/testcases/CSM/torsionbar/torsionbar.geo"
+        type: string
+
+    feelpp_mesh_scale:
+        description: GMSH scale option to increase mesh size (scale*hsize).
+        default: 1
+        type: integer
+
+    feelpp_mesh_parts:
+        description: Number of partition (task_per_nodes*nodes).
+        default: 16
+        type: integer
+
     feelpp_config_file:
         description: Feel++ config file loaded from the singularity container
-        default: "/usr/local/share/feelpp/testcases/CSM/cantilever/cantilever.cfg"
+        default: "/usr/local/share/feelpp/testcases/CSM/torsionbar/torsionbar.cfg"
         type: string
 
     feelpp_opts:
         description: Feel++ config file loaded from the singularity container
-        default: "--fe-approximation=P1"
+        default: ""
         type: string
 
     singularity_image_file:
@@ -149,8 +164,85 @@ node_templates:
             config: { get_input: mso4sc_hpc_primary }
             external_monitor_entrypoint: { get_input: monitor_entrypoint }
             base_dir: { get_input: job_hpc_workdir }
-            workdir_prefix: "feelpp_toolboxes"
+            workdir_prefix: "feelpp_toolboxes_3j"
             job_prefix: { get_input: job_prefix }
+
+    create_geometry:
+        type: hpc.nodes.singularity_job
+        properties:
+            job_options:
+                modules: { get_input: job_hpc_modules }
+                partition: { get_input: job_hpc_partition }
+                reservation: { get_input: job_hpc_reservation }
+                home: '${HOME}:/home/${USER}'
+                volumes: { get_input: job_hpc_volumes }
+
+                command:
+                command: { concat:[
+                    'gmsh -', { get_input: feelpp_dim }, ' ',
+                    '-clscale', ' ',
+                    { get_input: feelpp_mesh_scale }, ' ',
+                    '-bin', ' ',
+                    '-o ${CURRENT_WORKDIR}/torsionbar.msh', ' ',
+                    { get_input: feelpp_geo_file }] }
+                nodes: 1
+                tasks: 1
+                tasks_per_node: 1
+
+                max_time: '00:15:00'
+                image: { concat:[ { get_input: job_hpc_workdir }, '/singularity_images/', { get_input: singularity_image_file } ] }
+            deployment:
+                bootstrap: 'scripts/bootstrap.sh'
+                revert: 'scripts/revert.sh'
+                inputs:
+                    - { get_input: job_hpc_workdir }  # boostrap, revert scripts arg $1
+                    - { get_input: singularity_image_file } # bootstrap, revert scripts arg $2
+                    - { get_input: girder_repo_url }
+                    - { get_input: girder_folder_id }
+                    - { get_input: girder_api_key }
+                    - { get_input: revert_no_erase } # NO_ERASE to not remove singularity image
+            skip_cleanup: { get_input: skip_cleanup } # debug keep bash scripts
+
+        relationships:
+            - type: job_contained_in_hpc
+              target: main_hpc
+
+    partition_mesh:
+        type: hpc.nodes.singularity_job
+        properties:
+            job_options:
+                modules: { get_input: job_hpc_modules }
+                partition: { get_input: job_hpc_partition }
+                reservation: { get_input: job_hpc_reservation }
+                home: '${HOME}:/home/${USER}'
+                volumes: { get_input: job_hpc_volumes }
+                command: { concat:[
+                    'feelpp_mesh_partitioner', ' ', 
+                    '--ifile ${CURRENT_WORKDIR}/torsionbar.msh', ' ', 
+                    '--ofile ${CURRENT_WORKDIR}/mesh_parted/mesh_parted_p', { get_input: feelpp_mesh_parts }, ' ',
+                    '--part ', { get_input: feelpp_mesh_parts } ] }
+                nodes: 1
+                tasks: 1
+                tasks_per_node: 1
+                max_time: '00:15:00'
+                image: { concat:[ { get_input: job_hpc_workdir }, '/singularity_images/', { get_input: singularity_image_file } ] }
+            deployment:
+                bootstrap: 'scripts/bootstrap.sh'
+                revert: 'scripts/revert.sh'
+                inputs:
+                    - { get_input: job_hpc_workdir }  # boostrap, revert scripts arg $1
+                    - { get_input: singularity_image_file } # bootstrap, revert scripts arg $2
+                    - { get_input: girder_repo_url }
+                    - { get_input: girder_folder_id }
+                    - { get_input: girder_api_key }
+                    - { get_input: revert_no_erase } # NO_ERASE to not remove singularity image
+            skip_cleanup: { get_input: skip_cleanup } # debug keep bash scripts
+
+        relationships:
+            - type: job_contained_in_hpc
+              target: main_hpc
+            - type: job_depends_on
+              target: create_geometry
 
     job_toolboxes:
         type: hpc.nodes.singularity_job
@@ -162,8 +254,10 @@ node_templates:
                 home: '${HOME}:/home/${USER}'
                 volumes: { get_input: job_hpc_volumes }
                 command: { concat: [
-                        'feelpp_toolbox_', { get_input: feelpp_toolbox_type }, '_', { get_input: feelpp_dim }, 'd',
-                        ' --config-file ', { get_input: feelpp_config_file }, ' ',
+                        'feelpp_toolbox_', { get_input: feelpp_toolbox_type }, '_', { get_input: feelpp_dim }, 'd', ' ',
+                        '--config-file ', { get_input: feelpp_config_file }, ' ',
+                        '--', { get_input: feelpp_toolbox_type }, '.mshfile ${CURRENT_WORKDIR}/mesh_parted/mesh_parted_p', { get_input: feelpp_mesh_parts }, '.json', ' ',
+                        '--', { get_input: feelpp_toolbox_type }, '.pc-type gamg', ' ',
                         { get_input: feelpp_opts } ] }
                 nodes: { get_input: job_nodes }
                 tasks: { get_input: job_tasks }
@@ -185,6 +279,8 @@ node_templates:
         relationships:
             - type: job_contained_in_hpc
               target: main_hpc
+            - type: job_depends_on
+              target: partition_mesh
 
 outputs:
     job_toolboxes:

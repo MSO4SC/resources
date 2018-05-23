@@ -161,9 +161,11 @@ node_templates:
                 reservation: { get_input: job_hpc_reservation }
                 home: '${HOME}:/home/${USER}'
                 volumes: { get_input: job_hpc_volumes }
-                command: { concat: [ ' feelpp_e2b_level1 ',
+                command: 
+                    { concat: [
+                    ' feelpp_e2b_level1 ',
                     ' --config-file ', { get_input: feelpp_config_file },
-                    ' --mixedpoisson.filename ', { get_input: job_hpc_workdir}, '/data/model_template.json',
+                    ' --mixedpoisson.filename ', { get_input: job_hpc_workdir}, '/data/model.json ',
                     { get_input: feelpp_opts }
                     ] }
                 nodes: { get_input: job_nodes }

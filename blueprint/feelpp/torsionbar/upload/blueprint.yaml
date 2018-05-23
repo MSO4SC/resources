@@ -136,15 +136,15 @@ node_templates:
                     - '/scratch'
                     - '${LUSTRE}/feel:/feel'
                 command: { concat: ['feelpp_toolbox_solid_3d
-                   --config-file /usr/local/share/feelpp/testcases/CSM/torsionbar/torsionbar.cfg
-                   --solid.mshfile /feel/mesh_partitioned/torsionbar_p', { get_property:[SELF, job_options, tasks] }, '.json
-                   --solid.pc-type gamg
-                   --solid.pc-view 1
-                   --ts.restart 0
-                   --solid.scalability-save 1']}
+                    --config-file /usr/local/share/feelpp/testcases/CSM/torsionbar/torsionbar.cfg
+                    --solid.mshfile /feel/mesh_partitioned/torsionbar_p', { get_property:[SELF, job_options, tasks] }, '.json
+                    --solid.pc-type gamg
+                    --solid.pc-view 1
+                    --ts.restart 0
+                    --solid.scalability-save 1']}
                 nodes: 1
-                tasks: 16
-                tasks_per_node: 16
+                tasks: 8
+                tasks_per_node: 8
                 max_time: '01:30:00'
                 image: '${LUSTRE}/singularity_images/feelpp_feelpp-toolboxes-mso4sc.simg'
             deployment:
