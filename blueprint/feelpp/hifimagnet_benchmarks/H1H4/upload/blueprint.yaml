@@ -49,11 +49,11 @@ node_templates:
     primary_hpc:
         type: hpc.nodes.Compute
         properties:
-            config: { get_input: mso4sc_hpc_primary }
-            monitor_entrypoint: { get_input: monitor_entrypoint }
-            monitor_orchestrator_available: True
-            job_prefix: { get_input: job_prefix }
-#            simulate: True  # COMMENT to test against a real HPC
+            config: {get_input: mso4sc_hpc_primary}
+            monitor_entrypoint: {get_input: monitor_entrypoint}
+            monitor_orchestrator_available: true
+            job_prefix: {get_input: job_prefix }
+            # simulate: True  # COMMENT to test against a real HPC
 
     job_test_coupledcartmodel:
         type: hpc.nodes.singularity_job
@@ -68,8 +68,7 @@ node_templates:
                 volumes:
                     - '/scratch'
                     - '${LUSTRE}/feel:/feel'
-                command: { concat: ['feelpp_hfm_coupledcartmodel_3DP1N1
-                   --config-file /usr/local/share/hifimagnet/CoupledCartModel/coupledcart_bmap_3D_P1_N1_cvg.cfg']}
+                command: {concat: ['feelpp_hfm_coupledcartmodel_3DP1N1 --config-file /usr/local/share/hifimagnet/CoupledCartModel/coupledcart_bmap_3D_P1_N1_cvg.cfg']}
                 nodes: 1
                 tasks: 6
                 tasks_per_node: 6
@@ -79,8 +78,8 @@ node_templates:
                 bootstrap: 'scripts/bootstrap.sh'
                 revert: 'scripts/revert.sh'
                 inputs:
-                    - '${STORE}/Singularity' # boostrap, revert scripts arg $1
-                    - 'feelpp_hifimagnet-mso4sc.simg' # bootstrap, revert scripts arg $2
+                    - '${STORE}/Singularity'           # boostrap, revert scripts arg $1
+                    - 'feelpp_hifimagnet-mso4sc.simg'  # bootstrap, revert scripts arg $2
 
         relationships:
             - type: job_contained_in_hpc
@@ -89,4 +88,4 @@ node_templates:
 outputs:
     job_test_coupledcartmodel:
         description: feelpp_hfm_coupledcartmodel_3DP1N1 results
-        value: { get_attribute: [job_test_coupledcartmodel, job_name] }
+        value: {get_attribute: [job_test_coupledcartmodel, job_name]}

@@ -35,8 +35,8 @@ tosca_definitions_version: cloudify_dsl_1_3
 imports:
     # to speed things up, it is possible to download this file,
     - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-manager/18.1.11/resources/rest-service/cloudify/types/types.yaml
-    # - https://raw.githubusercontent.com/MSO4SC/cloudify-hpc-plugin/master/plugin.yaml
-    - https://raw.githubusercontent.com/Trophime/cloudify-hpc-plugin/master/plugin.yaml
+    - https://raw.githubusercontent.com/MSO4SC/cloudify-hpc-plugin/master/plugin.yaml
+    # - https://raw.githubusercontent.com/Trophime/cloudify-hpc-plugin/master/plugin.yaml
 
 inputs:
     # Monitor
@@ -64,22 +64,27 @@ inputs:
         description: maximum allowed time for run (minutes and seconds)
         default: '00:30:00'
 
-   #  hpc_partition:
-   #      description: maximum allowed time for run (minutes and seconds)
+    hpc_partition:
+        description: slurm partition to choose depending on the targeted machine
+        default: 'thin-shared'
+        type: string
 
-   #  hpc_reservation:
-   #      description: maximum allowed time for run (minutes and seconds)
+    hpc_reservation:
+        description: slurm partition to choose depending on the targeted machine
+        default: ''
+        type: string
 
-   # hpc_modules:
-   #      description: maximum allowed time for run (minutes and seconds)
-    
+    hpc_modules:
+        description: modules to load depending on the targeted machine
+        default:
+            - gcc/6.1.0
+            - openmpi/1.10.2
+            - singularity/2.4.2
+
+    # specs for running simulations
     mso4sc_dataset_input_url:
         description: url to retrieve for case file
         default: ""
-
-    containerdir:
-        description: Container directory
-        default: "${LUSTRE}/singularity_images"
 
     execfile:
         description: executable file
@@ -89,9 +94,31 @@ inputs:
         description: configuration file
         default: "/usr/local/share/hifimagnet/ThermoElectricModel/thermoelectric_3D_V1T1_N1_cvg.cfg"
 
+    # specs for retreiving singularity images
+    sregistry_client:
+        description: define default sregistry client
+        default: "registry"
+
+    sregistry_client_secrets:
+        description: define path to file where sregistry secret are stored
+        default: "$HOME/.sregistry"
+
+    sregistry_storage:
+        description: define path to container directory
+        default: "${LUSTRE}/singularity_images"
+
+    singularity_sregistry_url:
+        description: URI pointing to the sregistry
+        default: "sregistry.srv.cesga.es"
+
+    singularity_sregistry_image:
+        description: URI pointing to the sregistry-cli image
+        default: "mso4sc/sregistry"
+
+    # singularity image
     singularity_image_uri:
         description: URI pointing to the singularity image
-        default: "shub://sregistry.srv.cesga.es/mso4sc/hifimagnet:tag"
+        default: "hifimagnet/test:small"
 
     singularity_image_filename:
         description: Filename of the singularity image
@@ -101,43 +128,46 @@ node_templates:
     primary_hpc:
         type: hpc.nodes.Compute
         properties:
-            config: { get_input: mso4sc_hpc_primary }
-            external_monitor_entrypoint: { get_input: monitor_entrypoint }
+            config: {get_input: mso4sc_hpc_primary}
+            external_monitor_entrypoint: {get_input: monitor_entrypoint}
             # monitor_orchestrator_available: True
-            job_prefix: { get_input: job_prefix }
+            job_prefix: {get_input: job_prefix}
             base_dir: "$HOME"
-            workdir_prefix: "fuck"
+            workdir_prefix: "tmp"
             # simulate: True  # COMMENT to test against a real HPC
 
     job_test:
         type: hpc.nodes.singularity_job
         properties:
             job_options:
-                # modules:
-                #     - gcc/6.1.0
-                #     - openmpi/1.10.2
-                #     - singularity/2.4.2
-                partition: "euler"
-                # partition: { get_attribute: [primary_hpc, hpc_partition] }
-                # reservation: 'MSO4SC'
+                modules: {get_input: hpc_modules}
+                partition: {get_input: hpc_partition}
+                reservation: {get_input: hpc_reservation}
                 home: '${HOME}:/home/${USER}'
-                # volumes:
-                #     - '/scratch'
-                #     - '${LUSTRE}/feel:/feel'
                 volumes:
-                    - '${HOME}/feel:/feel'
-                command: { concat: [ { get_input: execfile }, ' --config-file ', { get_input: cfgfile } ] }
-                tasks: { get_input: parallel_tasks }
-                max_time: { get_input: max_time }
-                image: { concat: [ { get_input: containerdir }, '/', { get_input: singularity_image_filename } ] }
+                    - '/scratch'
+                    - '${LUSTRE}/feel:/feel'
+                # partition: "euler"
+                # volumes:
+                #     - '${HOME}/feel:/feel'
+                command: {concat: [{get_input: execfile}, ' --config-file ', {get_input: cfgfile}]}
+                tasks: {get_input: parallel_tasks}
+                max_time: {get_input: max_time}
+                image: {concat: [{get_input: containerdir}, '/', {get_input: singularity_image_filename}]}
                 skip_cleanup: true
             skip_cleanup: true
             deployment:
                 bootstrap: 'scripts/bootstrap.sh'
                 revert: 'scripts/revert.sh'
                 inputs:
-                    - { get_input: containerdir }
-                    - { get_input: singularity_image_filename }
+                    - {get_input: containerdir}
+                    - {get_input: singularity_image_filename}
+                    - {get_input: singularity_uri}
+                    - {get_input: sregistry_client}
+                    - {get_input: sregistry_client_secrets}
+                    - {get_input: sregistry_url}
+                    - {get_input: sregistry_image}
+                    - {get_input: mso4sc_dataset_input_url}
 
         relationships:
             - type: job_contained_in_hpc
@@ -146,4 +176,4 @@ node_templates:
 outputs:
     job_test:
         description: feelpp_hfm_test results
-        value: { get_attribute: [job_test, job_name] }
+        value: {get_attribute: [job_test, job_name]}

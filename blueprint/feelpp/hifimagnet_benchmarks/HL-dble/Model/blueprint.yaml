@@ -74,28 +74,28 @@ inputs:
     max_time:
         description: maximum allowed time for run (hours, minutes and seconds)
         default: '00:30:00'
-        
+
     cadtype:
-        description: type of cad to genererate helix or insert 
+        description: type of cad to genererate helix or insert
         default: "helix"
         type: string
 
     cadcfg:
-        description: name of the yaml CAD config file 
+        description: name of the yaml CAD config file
         default: "HL-31_H1.yaml"
         type: string
 
     cadh5:
-        description: name of the hdf5 mesh file 
+        description: name of the hdf5 mesh file
         default: "HL-31_H1_h5.json"
 
     # cadmeshcfg:
-    #     description: name of the yaml mesh config file 
+    #     description: name of the yaml mesh config file
     #     default: "HL-31_H1_meshdata.yaml"
     #     type: string
 
     cadmsh:
-        description: name of the mesh file 
+        description: name of the mesh file
         default: "HL-31_H1.msh"
 
     cadmed:
@@ -146,9 +146,9 @@ node_templates:
     primary_hpc:
         type: hpc.nodes.Compute
         properties:
-            config: { get_input: mso4sc_hpc_primary }
-            external_monitor_entrypoint: { get_input: monitor_entrypoint }
-            job_prefix: { get_input: job_prefix }
+            config: {get_input: mso4sc_hpc_primary}
+            external_monitor_entrypoint: {get_input: monitor_entrypoint}
+            job_prefix: {get_input: job_prefix}
 
     create_mesh:
         type: hpc.nodes.singularity_job
@@ -164,20 +164,20 @@ node_templates:
                 volumes:
                     - '/scratch'
                     - '${LUSTRE}/feel:/feel'
-                command: { concat: [ 'gmsh -3 -clscale 1 -bin ',{get_input: cadmed}, ' -o,',{get_input: cadmsh} ]}
+                command: {concat: ['gmsh -3 -clscale 1 -bin ', {get_input: cadmed}, ' -o,', {get_input: cadmsh}]}
                 nodes: 1
                 tasks: 1
                 tasks_per_node: 1
                 max_time: '00:15:00'
-                image: { concat: [ { get_input: workdir }, '/', { get_input: singularity_salome_filename } ] }
+                image: {concat: [{get_input: workdir}, '/', {get_input: singularity_salome_filename}]}
             deployment:
                 bootstrap: 'scripts/bootstrap_CAD.sh'
                 revert: 'scripts/revert_CAD.sh'
                 inputs:
-                    - { get_input: workdir }
-                    - { get_input: singularity_salome_filename }
-                    - { get_input: datadir }
-                    - { get_input: mso4sc_dataset_input_url }
+                    - {get_input: workdir}
+                    - {get_input: singularity_salome_filename}
+                    - {get_input: datadir}
+                    - {get_input: mso4sc_dataset_input_url}
 
         relationships:
             - type: job_contained_in_hpc
@@ -197,23 +197,18 @@ node_templates:
                 volumes:
                     - '/scratch'
                     - '${LUSTRE}/feel:/feel'
-                command: { concat:[
-                    'feelpp_mesh_partitioner
-                     --ifile ', { get_input: cadmsh},
-                     --ofile ', { get_input: cadh5},
-                     --nochdir
-                     --part ', { get_property: [job_runmodel, job_options , tasks] }] }
+                command: {concat: ['feelpp_mesh_partitioner --ifile ', {get_input: cadmsh}, ' --ofile ', {get_input: cadh5}, '--nochdir --part ', {get_property: [job_runmodel, job_options, tasks]}]}
                 nodes: 1
                 tasks: 1
                 tasks_per_node: 1
                 max_time: '00:15:00'
-                image:  { concat: [ { get_input: workdir }, '/', { get_input: singularity_image_filename } ] }
+                image: {concat: [{get_input: workdir}, '/', {get_input: singularity_image_filename}]}
             deployment:
                 bootstrap: 'scripts/bootstrap.sh'
                 revert: 'scripts/revert.sh'
                 inputs:
-                    - { get_input: workdir }
-                    - { get_input: singularity_image_filename }
+                    - {get_input: workdir}
+                    - {get_input: singularity_image_filename}
 
         relationships:
             - type: job_contained_in_hpc
@@ -236,18 +231,18 @@ node_templates:
                     - '/scratch'
                     - '${LUSTRE}/feel:/feel'
                 command: 'ls -lrth'
-                # command: { concat: [{ get_input: execfile },' --config-file ',{get_input: input_compute_cfg},'.cfg']}
-                # nodes: { get_input: parallel_nodes }
-                tasks: { get_input: parallel_tasks }
-                # tasks_per_node: { get_input: parallel_tasks_per_nodes }
-                max_time: { get_input: max_time }
-                image: { concat: [ { get_input: workdir }, '/', { get_input: singularity_image_filename } ] }
+                # command: {concat: [{get_input: execfile}, ' --config-file ', {get_input: input_compute_cfg}, '.cfg']}
+                # nodes: {get_input: parallel_nodes}
+                tasks: {get_input: parallel_tasks}
+                # tasks_per_node: {get_input: parallel_tasks_per_nodes}
+                max_time: {get_input: max_time}
+                image: {concat: [{get_input: workdir}, '/', {get_input: singularity_image_filename}]}
             deployment:
                 bootstrap: 'scripts/bootstrap.sh'
                 revert: 'scripts/revert.sh'
                 inputs:
-                    - { get_input: workdir }
-                    - { get_input: singularity_image_filename }
+                    - {get_input: workdir}
+                    - {get_input: singularity_image_filename}
 
         relationships:
             - type: job_contained_in_hpc
@@ -258,4 +253,4 @@ node_templates:
 outputs:
     job_runmodel:
         description: "create CAD, mesh geometry and run Simulation"
-        value: { get_attribute: [job_runmodel, job_name] }
+        value: {get_attribute: [job_runmodel, job_name]}

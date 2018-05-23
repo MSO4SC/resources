@@ -42,7 +42,7 @@ inputs:
     max_time:
         description: maximum allowed time for run (minutes and seconds)
         default: '00:15:00'
-        
+
     # CESGA FTII parameters
     mso4sc_hpc_primary:
         description: FTII connection credentials
@@ -72,10 +72,10 @@ node_templates:
     primary_hpc:
         type: hpc.nodes.Compute
         properties:
-            config: { get_input: mso4sc_hpc_primary }
-            external_monitor_entrypoint: { get_input: monitor_entrypoint }
-            job_prefix: { get_input: job_prefix }
-#            simulate: True  # COMMENT to test against a real HPC
+            config: {get_input: mso4sc_hpc_primary}
+            external_monitor_entrypoint: {get_input: monitor_entrypoint}
+            job_prefix: {get_input: job_prefix}
+            # simulate: True  # COMMENT to test against a real HPC
 
     job_coupledcartmodel:
         type: hpc.nodes.singularity_job
@@ -90,8 +90,7 @@ node_templates:
                 volumes:
                     - '/scratch'
                     - '${LUSTRE}/feel:/feel'
-                command: { concat: ['feelpp_hfm_coupledcartmodel_3DP1N1
-                   --config-file /usr/local/share/hifimagnet/CoupledCartModel/coupledcart_bmap_3D_P1_N1_cvg.cfg']}
+                command: {concat: ['feelpp_hfm_coupledcartmodel_3DP1N1 --config-file /usr/local/share/hifimagnet/CoupledCartModel/coupledcart_bmap_3D_P1_N1_cvg.cfg']}
                 nodes: 1
                 tasks: 2
                 tasks_per_node: 2
@@ -101,8 +100,8 @@ node_templates:
                 bootstrap: 'scripts/bootstrap.sh'
                 revert: 'scripts/revert.sh'
                 inputs:
-                    - '${LUSTRE}/singularity_images' #{ get_input: workdir }
-                    - { get_input: singularity_image_filename }
+                    - '${LUSTRE}/singularity_images'  # {get_input: workdir}
+                    - {get_input: singularity_image_filename}
 
         relationships:
             - type: job_contained_in_hpc
@@ -111,4 +110,4 @@ node_templates:
 outputs:
     job_coupledcartmodel:
         description: feelpp_hfm_coupledcartmodel_3DP1N1 results
-        value: { get_attribute: [job_coupledcartmodel, job_name] }
+        value: {get_attribute: [job_coupledcartmodel, job_name]}
