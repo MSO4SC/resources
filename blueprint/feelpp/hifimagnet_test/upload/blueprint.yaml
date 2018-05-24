@@ -99,7 +99,7 @@ inputs:
 
     cfgfile:
         description: configuration file
-        default: "/usr/local/share/hifimagnet/ThermoElectricModel/quarter-turn3D.cfg"
+        default: "/usr/share/doc/hifimagnet/ThermoElectricModel/quarter-turn3D.cfg"
 
     # specs for retreiving singularity images
     sregistry_client:
