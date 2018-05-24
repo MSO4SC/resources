@@ -51,6 +51,8 @@ singularity exec -H \$HOME:/home/\$USER -B /mnt:/mnt,/scratch:/scratch $3 /bin/b
 # $7 { get_input: mso4sc_dataset_tar }
 # $8 { get_input: za_db }
 # $9 { get_input: za_hpc_cluster }
+# ${10} { get_input: ligand URL }
+# ${11} { get_input: ligand name }
 
 EOM
 

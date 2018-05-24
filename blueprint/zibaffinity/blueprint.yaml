@@ -323,7 +323,8 @@ node_templates:
         type: hpc.nodes.Compute
         properties:
             config: { get_input: mso4sc_hpc_primary }
-            external_monitor_entrypoint: { get_input: monitor_entrypoint }
+#            external_monitor_entrypoint: { get_input: monitor_entrypoint }
+            external_monitor_entrypoint: ""
             job_prefix: { get_input: job_prefix }
             base_dir: "$LUSTRE"
             workdir_prefix: "za"
