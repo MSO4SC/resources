@@ -77,14 +77,21 @@ inputs:
     hpc_modules:
         description: modules to load depending on the targeted machine
         default:
-            - gcc/6.1.0
-            - openmpi/1.10.2
+            - gcc/6.3.0
+            - openmpi/2.0.2
             - singularity/2.4.2
+
+    hpc_volumes:
+        description: volumes to be mounted on the targeted machine
+        default:
+            - /scratch
+            - /mnt
+            - ${LUSTRE}/feel:/feel
 
     # specs for running simulations
     mso4sc_dataset_input_url:
         description: url to retrieve for case file
-        default: ""
+        default: "None"
 
     execfile:
         description: executable file
@@ -92,7 +99,7 @@ inputs:
 
     cfgfile:
         description: configuration file
-        default: "/usr/local/share/hifimagnet/ThermoElectricModel/thermoelectric_3D_V1T1_N1_cvg.cfg"
+        default: "/usr/local/share/hifimagnet/ThermoElectricModel/quarter-turn3D.cfg"
 
     # specs for retreiving singularity images
     sregistry_client:
@@ -107,33 +114,39 @@ inputs:
         description: define path to container directory
         default: "${LUSTRE}/singularity_images"
 
-    singularity_sregistry_url:
+    sregistry_url:
         description: URI pointing to the sregistry
         default: "sregistry.srv.cesga.es"
 
-    singularity_sregistry_image:
+    sregistry_image:
         description: URI pointing to the sregistry-cli image
         default: "mso4sc/sregistry"
 
     # singularity image
     singularity_image_uri:
         description: URI pointing to the singularity image
-        default: "hifimagnet/test:small"
+        default: "hifimagnet/hifimagnet:stretch"
 
     singularity_image_filename:
         description: Filename of the singularity image
-        default: "feelpp_hifimagnet-mso4sc.simg"
+        default: "hifimagnet-stretch.simg"
+
+    singularity_image_cleanup:
+        description: force remove of singularity image
+        default: "false"
+
 
 node_templates:
     primary_hpc:
         type: hpc.nodes.Compute
         properties:
             config: {get_input: mso4sc_hpc_primary}
-            external_monitor_entrypoint: {get_input: monitor_entrypoint}
+            # external_monitor_entrypoint: {get_input: monitor_entrypoint}
             # monitor_orchestrator_available: True
             job_prefix: {get_input: job_prefix}
             base_dir: "$HOME"
             workdir_prefix: "tmp"
+            skip_cleanup: true
             # simulate: True  # COMMENT to test against a real HPC
 
     job_test:
@@ -144,25 +157,21 @@ node_templates:
                 partition: {get_input: hpc_partition}
                 reservation: {get_input: hpc_reservation}
                 home: '${HOME}:/home/${USER}'
-                volumes:
-                    - '/scratch'
-                    - '${LUSTRE}/feel:/feel'
+                volumes: {get_input: hpc_volumes}
                 # partition: "euler"
-                # volumes:
-                #     - '${HOME}/feel:/feel'
                 command: {concat: [{get_input: execfile}, ' --config-file ', {get_input: cfgfile}]}
                 tasks: {get_input: parallel_tasks}
                 max_time: {get_input: max_time}
-                image: {concat: [{get_input: containerdir}, '/', {get_input: singularity_image_filename}]}
-                skip_cleanup: true
+                image: {concat: [{get_input: sregistry_storage}, '/', {get_input: singularity_image_filename}]}
             skip_cleanup: true
             deployment:
                 bootstrap: 'scripts/bootstrap.sh'
                 revert: 'scripts/revert.sh'
                 inputs:
-                    - {get_input: containerdir}
+                    - {get_input: sregistry_storage}
                     - {get_input: singularity_image_filename}
-                    - {get_input: singularity_uri}
+                    - {get_input: singularity_image_uri}
+                    - {get_input: singularity_image_cleanup}
                     - {get_input: sregistry_client}
                     - {get_input: sregistry_client_secrets}
                     - {get_input: sregistry_url}
