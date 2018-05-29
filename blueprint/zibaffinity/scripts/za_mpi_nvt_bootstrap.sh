@@ -15,6 +15,7 @@ cat > $ZA_SLURM <<- EOM
 #declare +x OMP_NUM_THREADS
 
 cd $4
+
 ## load dynamic variables \$SCALE_INDEX, \$SCALE_COUNT, \$SCALE_MAX
 # DYNAMIC VARIABLES
 

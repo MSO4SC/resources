@@ -36,7 +36,6 @@ mpirun -np ${10} singularity exec -H \$HOME:/home/\$USER -B /mnt:/mnt,/scratch:/
 # $10: za_nt  -> not really required in child scripts
 # $11: za_gmx_path  -> compiled gromacs 5.1.2
 
-
 EOM
 
 #                    - { get_input: za_lig }

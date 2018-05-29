@@ -40,9 +40,9 @@ inputs:
         default: {}
     
     # SZE test infrastructure parameters
-    mso4sc_hpc_secondary:
-        description: SZE test infrastructure credentials
-        default: {}
+#    mso4sc_hpc_secondary:
+#        description: SZE test infrastructure credentials
+#        default: {}
         
     # Default ligand definition (testing)
     mso4sc_dataset_lig:
@@ -317,6 +317,8 @@ inputs:
         default: "za_post.slurm"
         type: string
 
+## dsl definitions:  https://docs.cloudify.co/4.3.0/developer/blueprints/spec-dsl-definitions/
+        
 
 node_templates:
     ft2_node:
@@ -325,7 +327,7 @@ node_templates:
             config: { get_input: mso4sc_hpc_primary }
 #            external_monitor_entrypoint: { get_input: monitor_entrypoint }
             external_monitor_entrypoint: ""
-            job_prefix: { get_input: job_prefix }
+            job_prefix: "mso4sc"
             base_dir: "$LUSTRE"
             workdir_prefix: "za"
             skip_cleanup: true
@@ -659,6 +661,7 @@ node_templates:
                     - { get_input: za_module_mpi }
                     - { get_input: za_module_sing }
                 command: { concat: [' ', { get_input: za_work_path }, '/za_mpi_rerun.slurm'] }
+                scale: 2
             deployment:
                 bootstrap: 'scripts/za_mpi_rerun_bootstrap.sh'
                 revert: 'scripts/za_mpi_rerun_revert.sh'
