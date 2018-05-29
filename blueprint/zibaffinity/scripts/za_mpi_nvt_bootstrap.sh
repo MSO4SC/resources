@@ -15,9 +15,11 @@ cat > $ZA_SLURM <<- EOM
 #declare +x OMP_NUM_THREADS
 
 cd $4
+## load dynamic variables \$SCALE_INDEX, \$SCALE_COUNT, \$SCALE_MAX
+# DYNAMIC VARIABLES
 
-mpirun -np ${10} singularity exec -H \$HOME:/home/\$USER -B /mnt:/mnt,/scratch:/scratch $7 /bin/bash $8 $1 $za_tar $3 $4 $5 ${11} ${10} ${12}
-#mpirun -np ${10} singularity exec -H \$HOME:/home/\$USER -B /mnt:/mnt,/scratch:/scratch $7 /bin/bash $8 $1 $za_tar $3 $4 $5 \$SCALE_INDEX ${10} ${12}
+mpirun -np ${10} singularity exec -H \$HOME:/home/\$USER -B /mnt:/mnt,/scratch:/scratch $7 /bin/bash $8 $1 $za_tar $3 $4 $5 \$SCALE_INDEX ${10} ${11}
+#mpirun -np ${10} singularity exec -H \$HOME:/home/\$USER -B /mnt:/mnt,/scratch:/scratch $7 /bin/bash $8 $1 $za_tar $3 $4 $5 ${11} ${10} ${12}
 #mpirun -np ${10} singularity exec -H \$HOME:/home/\$USER -B /mnt:/mnt,/scratch:/scratch $7 /bin/bash $8 $1 $za_tar $3 $4 $5 \$SLURM_ARRAY_TASK_ID ${10} ${12}
 
 
@@ -31,7 +33,6 @@ mpirun -np ${10} singularity exec -H \$HOME:/home/\$USER -B /mnt:/mnt,/scratch:/
 # $8: za_mpi_nvt_script -> za_mpi_nvt.sh (in container)
 # $9: za_hpc_cluster -> cola-corta
 # $10: za_nt  -> not really required in child scripts
-# $11: za_slurm_idx  -> manual slurm array index
-# $12: za_gmx_path  -> compiled gromacs 5.1.2
+# $11: za_gmx_path  -> compiled gromacs 5.1.2
 
 EOM
