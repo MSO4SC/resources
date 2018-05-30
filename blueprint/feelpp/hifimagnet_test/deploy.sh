@@ -7,6 +7,7 @@ arg=$1
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/" && pwd )"
 ROOT_DIR=${SCRIPT_DIR}/../../../
 JOB=hifimagnet_test_generic
+APP=hifimagnet_test
 UPLOAD_DIR=${SCRIPT_DIR}/upload
 TOSCA=blueprint.yaml
 LOCAL=local-blueprint-inputs.yaml
@@ -59,6 +60,14 @@ case $arg in
         echo "Deleting blueprint ${JOB}..."
         cfy blueprints delete "${JOB}"
         ;;
+
+    "pkg")
+        cd ${SCRIPT_DIR}
+        echo "Creating package..."
+        export COPYFILE_DISABLE=1
+        tar --transform s/^upload/${APP}/ -cvzf "${APP}.tar" upload
+        ;;
+
     *)
         echo "arg: $arg"
         echo "usage: $0 [option]"
@@ -66,6 +75,7 @@ case $arg in
         echo "options:"
         echo "      up     send to orchestrator"
         echo "    down     remove from orchestrator"
+        echo "     pkg     create a package for marketplace (For portal usage)"
         echo ""
         ;;
 esac

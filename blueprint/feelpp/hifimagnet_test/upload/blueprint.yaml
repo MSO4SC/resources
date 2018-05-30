@@ -88,6 +88,16 @@ inputs:
             - /mnt
             - ${LUSTRE}/feel:/feel
 
+    hpc_basedir:
+        description: basedir directory were calculations would be performed
+        default:
+            - ${LUSTRE}
+
+    hpc_workdir_prefix:
+        description: prefix of the directory name holding the actual calculation
+        default:
+            - "hifimagnet"
+
     # specs for running simulations
     mso4sc_dataset_input_url:
         description: url to retrieve for case file
@@ -144,8 +154,8 @@ node_templates:
             # external_monitor_entrypoint: {get_input: monitor_entrypoint}
             # monitor_orchestrator_available: True
             job_prefix: {get_input: job_prefix}
-            base_dir: "$HOME"
-            workdir_prefix: "tmp"
+            base_dir: {get_input: hpc_basedir}
+            workdir_prefix: {get_input: hpc_workdir_prefix}
             skip_cleanup: true
             # simulate: True  # COMMENT to test against a real HPC
 
