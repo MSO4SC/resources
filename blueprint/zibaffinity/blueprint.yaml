@@ -128,7 +128,10 @@ dsl_definitions:
         "za_post_sim.sh" # ZA post script name    !!!!! ZA prep script executed sequentially
     - &za_post_slurm
         "za_post.slurm" # ZA post batch script name    !!!!! name of slurm here script created outside container
-
+    - &za_modules_block
+        - gcc/5.3.0
+        - openmpi/1.10.2
+        - singularity/2.4.2
      
 
 node_templates:
@@ -149,7 +152,7 @@ node_templates:
         properties:
             job_options: 
                 type: 'SBATCH'
-                modules: *modules_block
+                modules: *za_modules_block
                 command: { concat: [' $CURRENT_WORKDIR/', *za_db_slurm ] }
             deployment:
                 bootstrap: 'scripts/za_db_bootstrap.sh'
@@ -176,7 +179,7 @@ node_templates:
             job_options: 
                 #### try sbatch
                 type: 'SBATCH'
-                modules: *modules_block
+                modules: *za_modules_block
                 command: { concat: [' ', *za_work_path , '/', *za_prep_slurm ] }
             deployment:
                 bootstrap: 'scripts/za_prep_bootstrap.sh'
@@ -203,8 +206,8 @@ node_templates:
         properties:
             job_options:
                 type: 'SBATCH'
-                modules: *modules_block
-                command: { concat: [' ', *za_work_path, '/za_mpi_em.slurm'] }
+                modules: *za_modules_block
+                command: { concat: [' ', *za_work_path, '/' , *za_mpi_em_slurm] }
                 scale: 2
             deployment:
                 bootstrap: 'scripts/za_mpi_em_bootstrap.sh'
@@ -215,7 +218,7 @@ node_templates:
                     - { get_input: za_charge }
                     - *za_work_path
                     - *za_mail
-                    - 'za_mpi_em.slurm'
+                    - *za_mpi_em_slurm
                     - { concat: [ *za_work_path ,'/',*za_image ]}
                     - *za_mpi_em_script
                     - *za_hpc_partition
@@ -232,7 +235,7 @@ node_templates:
         properties:
             job_options: 
                 type: 'SBATCH'
-                modules: *modules_block
+                modules: *za_modules_block
                 command: { concat: [' ', *za_work_path , '/', *za_prep_nvt_slurm ] }
             deployment:
                 bootstrap: 'scripts/za_prep_nvt_bootstrap.sh'
@@ -259,8 +262,8 @@ node_templates:
         properties:
             job_options:
                 type: 'SBATCH'
-                modules: *modules_block
-                command: { concat: [' ', *za_work_path, '/za_mpi_nvt.slurm'] }
+                modules: *za_modules_block
+                command: { concat: [' ', *za_work_path, '/' , *za_mpi_nvt_slurm] }
                 scale: 2
             deployment:
                 bootstrap: 'scripts/za_mpi_nvt_bootstrap.sh'
@@ -271,7 +274,7 @@ node_templates:
                     - { get_input: za_charge }
                     - *za_work_path
                     - *za_mail
-                    - 'za_mpi_nvt.slurm'
+                    - *za_mpi_nvt_slurm
                     - { concat: [ *za_work_path ,'/',*za_image ]}
                     - *za_mpi_nvt_script
                     - *za_hpc_partition
@@ -288,7 +291,7 @@ node_templates:
         properties:
             job_options: 
                 type: 'SBATCH'
-                modules: *modules_block
+                modules: *za_modules_block
                 command: { concat: [' ', *za_work_path , '/', *za_prep_npt_slurm ] }
             deployment:
                 bootstrap: 'scripts/za_prep_npt_bootstrap.sh'
@@ -315,8 +318,8 @@ node_templates:
         properties:
             job_options:
                 type: 'SBATCH'
-                modules: *modules_block
-                command: { concat: [' ', *za_work_path , '/za_mpi_npt.slurm'] }
+                modules: *za_modules_block
+                command: { concat: [' ', *za_work_path , '/' , *za_mpi_npt_slurm] }
                 scale: 2
             deployment:
                 bootstrap: 'scripts/za_mpi_npt_bootstrap.sh'
@@ -327,7 +330,7 @@ node_templates:
                     - { get_input: za_charge }
                     - *za_work_path
                     - *za_mail
-                    - 'za_mpi_npt.slurm'
+                    - *za_mpi_npt_slurm
                     - { concat: [ *za_work_path,'/',*za_image ]}
                     - *za_mpi_npt_script
                     - *za_hpc_partition
@@ -344,7 +347,7 @@ node_templates:
         properties:
             job_options: 
                 type: 'SBATCH'
-                modules: *modules_block
+                modules: *za_modules_block
                 command: { concat: [' ', *za_work_path , '/', *za_prep_md_slurm ] }
             deployment:
                 bootstrap: 'scripts/za_prep_md_bootstrap.sh'
@@ -371,8 +374,8 @@ node_templates:
         properties:
             job_options:
                 type: 'SBATCH'
-                modules: *modules_block
-                command: { concat: [' ', *za_work_path , '/za_mpi_md.slurm'] }
+                modules: *za_modules_block
+                command: { concat: [' ', *za_work_path , '/' , *za_mpi_md_slurm] }
                 scale: 2
             deployment:
                 bootstrap: 'scripts/za_mpi_md_bootstrap.sh'
@@ -383,7 +386,7 @@ node_templates:
                     - { get_input: za_charge }
                     - *za_work_path
                     - *za_mail
-                    - 'za_mpi_md.slurm'
+                    - *za_mpi_md_slurm
                     - { concat: [ *za_work_path ,'/',*za_image ]}
                     - *za_mpi_md_script
                     - *za_hpc_partition
@@ -400,7 +403,7 @@ node_templates:
         properties:
             job_options: 
                 type: 'SBATCH'
-                modules: *modules_block
+                modules: *za_modules_block
                 command: { concat: [' ', *za_work_path , '/', *za_prep_rerun_slurm ] }
             deployment:
                 bootstrap: 'scripts/za_prep_rerun_bootstrap.sh'
@@ -427,8 +430,8 @@ node_templates:
         properties:
             job_options:
                 type: 'SBATCH'
-                modules: *modules_block
-                command: { concat: [' ', *za_work_path , '/za_mpi_rerun.slurm'] }
+                modules: *za_modules_block
+                command: { concat: [' ', *za_work_path , '/' , *za_mpi_rerun_slurm] }
                 scale: 2
             deployment:
                 bootstrap: 'scripts/za_mpi_rerun_bootstrap.sh'
@@ -439,7 +442,7 @@ node_templates:
                     - { get_input: za_charge }
                     - *za_work_path
                     - *za_mail
-                    - 'za_mpi_rerun.slurm'
+                    - *za_mpi_rerun_slurm
                     - { concat: [ *za_work_path ,'/',*za_image  ]}
                     - *za_mpi_rerun_script
                     - *za_hpc_partition
@@ -456,7 +459,7 @@ node_templates:
         properties:
             job_options: 
                 type: 'SBATCH'
-                modules: *modules_block
+                modules: *za_modules_block
                 command: { concat: [' ', *za_work_path , '/', *za_post_rerun_slurm ] }
             deployment:
                 bootstrap: 'scripts/za_post_rerun_bootstrap.sh'
@@ -483,7 +486,7 @@ node_templates:
         properties:
             job_options: 
                 type: 'SBATCH'
-                modules: *modules_block
+                modules: *za_modules_block
                 command: { concat: [' ', *za_work_path , '/', *za_post_slurm ] }
             deployment:
                 bootstrap: 'scripts/za_post_bootstrap.sh'
