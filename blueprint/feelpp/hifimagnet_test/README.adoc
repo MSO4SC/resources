@@ -1,19 +1,16 @@
-= Hifimagnet basic workflow TOSCA
+= {hifimagnet} basic workflow TOSCA
+
+This is the basic demonstrator of {hifimagnet} workflow for ThermoElectric simulations
+of High Field Magnets.
+
+It actually run a 3D non-linear thermo-electric model on a benchmark geometry.
 
 == Running in the orchestrator CLI
 
 * Create a `local-blueprint-inputs.yaml` from the template file.
 ** Define the HPC ressource you are planning to use.
 ** Enter your credentials (`user/passwd`)
-** Setup <<input parameters, inputs>>
-
-First clone the `resources`:
-[source]
-----
-mkdir -p MSO4SC && cd $_
-git clone https://github.com/MSO4SC/resources.git
-git pull MSO4SC/resources
-----
+** Setup <<inputs, input parameters>>
 
 * Connect to the cloudify client via docker:
 [source]
@@ -46,6 +43,21 @@ NOTE: If the application fails during one step of the deploy up process, you'll 
 force cancel execution by hands. `cfy executions list`, `cfy executions cancel -f <id>`
 in the orchestrator client (*docker).
 
+[TIP]
+====
+Some useful commands :
+
+* `cfy status`
+* `cfy deployment list`
+* `cfy deployment delete -f <name>`
+* `cfy execution list`
+* `cfy execution cancel -f <id>
+* `cfy deployment delete -f <name>`
+* `cfy blueprint list`
+* `cfy blueprint delete <name>`
+
+====
+
 See https://github.com/MSO4SC/MSOOrchestrator-CLI/blob/master/README.adoc#remote-mode for details
 
 
@@ -60,6 +72,8 @@ using :
 
 [#inputs]
 == Input parameters
+
+The main parameters are noted in **bold**
 
 === HPC settings
 
@@ -82,7 +96,3 @@ using :
 ** eventually cleanup base_dir/workir_prefix_ID
 ** eventually cleanup singularity image
 ** remove loaded dataset
-
-
-
-==
