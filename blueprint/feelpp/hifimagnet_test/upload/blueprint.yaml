@@ -39,6 +39,9 @@ imports:
     # - https://raw.githubusercontent.com/Trophime/cloudify-hpc-plugin/master/plugin.yaml
 
 inputs:
+    mail-user: "christophe.trophime@lncmi.cnrs.fr"
+    mail-type: "ALL"
+
     # Monitor
     monitor_entrypoint:
         description: Monitor entrypoint IP
