@@ -66,6 +66,10 @@ if [ ! -f ${SREGISTRY_CLIENT_SECRETS} ]; then
     echo "You have to upload such file first on HPC resources" >> ${LOG_FILE}
     exit 1
 fi
+
+if [ ! -d ${SREGISTRY_STORAGE} ]; then
+    mkdir -p ${SREGISTRY_STORAGE}
+fi
 				      
 # Get Singularity image if not already installed
 if [ ! -f ${SREGISTRY_STORAGE}/$IMAGE_NAME ]; then
