@@ -39,10 +39,10 @@ imports:
     # - https://raw.githubusercontent.com/Trophime/cloudify-hpc-plugin/master/plugin.yaml
 
 inputs:
-    mail_user:
+    email_user:
         description: email address for reporting 
         default: "christophe.trophime@lncmi.cnrs.fr"
-    mail_type:
+    email_type:
         description: define mail-type
         default: "ALL"
 
@@ -96,10 +96,12 @@ inputs:
             - ${LUSTRE}/feel:/feel
 
     hpc_basedir:
+        type: string
         description: basedir directory were calculations would be performed
         default: ${LUSTRE}
 
     hpc_workdir_prefix:
+        type: string
         description: prefix of the directory name holding the actual calculation
         default: "hifimagnet"
 
@@ -112,14 +114,14 @@ inputs:
     #     - valid_values:
     #           [ "feelpp_hfm_thermoelectric_model_3D_V1T1_N1", "feelpp_hfm_coupledcartmodel_3DP1N1", "feelpp_hfm_coupledmodel_3D_P1N1" ]
     execfile:
-        # type: string
+        type: string
         description: executable file
         default: "feelpp_hfm_thermoelectric_model_3D_V1T1_N1"
 
     cfgfile:
         description: configuration file
         default: "/usr/share/doc/hifimagnet/ThermoElectricModel/quarter-turn3D.cfg"
-        # type: string
+        type: string
 
     # specs for retreiving singularity images
     sregistry_client:
@@ -175,6 +177,8 @@ node_templates:
         type: hpc.nodes.singularity_job
         properties:
             job_options:
+                mail_user: {get_input: email_user}
+                mail_type: {get_input: email_type}
                 modules: {get_input: hpc_modules}
                 partition: {get_input: hpc_partition}
                 reservation: {get_input: hpc_reservation}
