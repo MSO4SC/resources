@@ -39,10 +39,10 @@ imports:
     # - https://raw.githubusercontent.com/Trophime/cloudify-hpc-plugin/master/plugin.yaml
 
 inputs:
-    mail-user:
+    mail_user:
         description: email address for reporting 
         default: "christophe.trophime@lncmi.cnrs.fr"
-    mail-type:
+    mail_type:
         description: define mail-type
         default: "ALL"
 

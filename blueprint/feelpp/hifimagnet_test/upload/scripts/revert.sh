@@ -45,14 +45,14 @@ REMOTE_URL=$9
 
 # module should be optional:
 isModule=$(compgen -A function | grep  module)
-echo "isModule=${isModule}"
+echo "isModule=${isModule}" >> ${LOG_FILE}
 if [ "$isModule" != "" ]; then
     module load singularity >> ${LOG_FILE}
 fi
 
 
 # Remove image from the client ${SREGISTRY_STORAGE}
-echo "IMAGE_CLEANUP=${IMAGE_CLEANUP}"
+echo "IMAGE_CLEANUP=${IMAGE_CLEANUP}" >> ${LOG_FILE}
 if [ $IMAGE_CLEANUP = "true"  ]; then
    isSregistry=$(which sregistry 2>&1 > /dev/null)
    echo "isSregistry=$isSregistry"
