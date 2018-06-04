@@ -39,8 +39,12 @@ imports:
     # - https://raw.githubusercontent.com/Trophime/cloudify-hpc-plugin/master/plugin.yaml
 
 inputs:
-    mail-user: "christophe.trophime@lncmi.cnrs.fr"
-    mail-type: "ALL"
+    mail-user:
+        description: email address for reporting 
+        default: "christophe.trophime@lncmi.cnrs.fr"
+    mail-type:
+        description: define mail-type
+        default: "ALL"
 
     # Monitor
     monitor_entrypoint:
@@ -93,26 +97,29 @@ inputs:
 
     hpc_basedir:
         description: basedir directory were calculations would be performed
-        default:
-            - ${LUSTRE}
+        default: ${LUSTRE}
 
     hpc_workdir_prefix:
         description: prefix of the directory name holding the actual calculation
-        default:
-            - "hifimagnet"
+        default: "hifimagnet"
 
     # specs for running simulations
     mso4sc_dataset_input_url:
         description: url to retrieve for case file
         default: "None"
 
+    # constraints:
+    #     - valid_values:
+    #           [ "feelpp_hfm_thermoelectric_model_3D_V1T1_N1", "feelpp_hfm_coupledcartmodel_3DP1N1", "feelpp_hfm_coupledmodel_3D_P1N1" ]
     execfile:
+        # type: string
         description: executable file
         default: "feelpp_hfm_thermoelectric_model_3D_V1T1_N1"
 
     cfgfile:
         description: configuration file
         default: "/usr/share/doc/hifimagnet/ThermoElectricModel/quarter-turn3D.cfg"
+        # type: string
 
     # specs for retreiving singularity images
     sregistry_client:
@@ -145,8 +152,10 @@ inputs:
         default: "hifimagnet-stretch.simg"
 
     singularity_image_cleanup:
+        # type: boolean
         description: force remove of singularity image
         default: "false"
+        #default: false
 
 
 node_templates:

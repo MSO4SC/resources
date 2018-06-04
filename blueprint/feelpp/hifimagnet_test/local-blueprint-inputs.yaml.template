@@ -16,15 +16,28 @@ job_prefix: "mso_"
 # cfgfile: "/usr/share/doc/hifimagnet/ThermoElectricModel/quarter-turn3D.cfg"
 
 # on Cesga:
-# hpc_modules: []
-# hpc_volumes: ['/scratch', '/mnt', '${LUSTRE}/feel:/feel']
+hpc_modules: ["gcc/6.3.0", "openmpi/2.0.2", "singularity/2.4.2"]
+hpc_volumes: ['/scratch', '/mnt', '${LUSTRE}/feel:/feel']
+hpc_basedir: "$LUSTRE"
+hpc_workdir_prefix: "hifimagnet"
 sregistry_storage: "$LUSTRE/singularity_images"
 singularity_image_filename: "hifimagnet-stretch.simg"
 singularity_image_cleanup: "false"
 cfgfile: "/usr/share/doc/hifimagnet/ThermoElectricModel/quarter-turn3D.cfg"
 execfile: "feelpp_hfm_thermoelectric_model_3D_V1T1_N1"
 
-# # euler LNCMI credentials
+# # on euler or on stokes:
+# hpc_modules: []
+# hpc_volumes: ['${HOME}/feel:/feel']
+# hpc_basedir: "$HOME"
+# hpc_workdir_prefix: "hifimagnet"
+# sregistry_storage: "$HOME/singularity_images"
+# singularity_image_filename: "hifimagnet-stretch.simg"
+# singularity_image_cleanup: "false"
+# cfgfile: "/usr/share/doc/hifimagnet/ThermoElectricModel/quarter-turn3D.cfg"
+# execfile: "feelpp_hfm_thermoelectric_model_3D_V1T1_N1"
+
+# # euler or stokes LNCMI credentials
 # mso4sc_hpc_primary:
 #     credentials:
 #         host: "147.173.80.14"

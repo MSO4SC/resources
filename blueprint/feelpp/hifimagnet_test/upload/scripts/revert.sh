@@ -6,7 +6,7 @@
 # Custom logs
 LOG_FILE=$0.log
 
-echo "bootstrap" >> ${LOG_FILE}
+echo "revert" >> ${LOG_FILE}
 echo "parameters: $@" >> ${LOG_FILE}
 
 # params for singularity images:
@@ -45,14 +45,17 @@ REMOTE_URL=$9
 
 # module should be optional:
 isModule=$(compgen -A function | grep  module)
+echo "isModule=${isModule}"
 if [ "$isModule" != "" ]; then
     module load singularity >> ${LOG_FILE}
 fi
 
 
 # Remove image from the client ${SREGISTRY_STORAGE}
-if [ $IMAGE_CLEANUP  ]; then
+echo "IMAGE_CLEANUP=${IMAGE_CLEANUP}"
+if [ $IMAGE_CLEANUP = "true"  ]; then
    isSregistry=$(which sregistry 2>&1 > /dev/null)
+   echo "isSregistry=$isSregistry"
    if  [ "$isSregistry" != "" ] && [ ${SREGISTRY_URL} != "" ] && [ ${SREGISTRY_IMAGE} != "" ]; then
        sregistry rm ${IMAGE_URI} >> ${LOG_FILE}
    else
