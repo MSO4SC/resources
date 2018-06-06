@@ -154,6 +154,8 @@ node_templates:
                 type: 'SBATCH'
                 modules: *za_modules_block
                 command: { concat: [' $CURRENT_WORKDIR/', *za_db_slurm ] }
+                mail-user: *za_mail
+                mail-type: BEGIN
             deployment:
                 bootstrap: 'scripts/za_db_bootstrap.sh'
                 revert: 'scripts/za_db_revert.sh'
@@ -349,6 +351,8 @@ node_templates:
                 type: 'SBATCH'
                 modules: *za_modules_block
                 command: { concat: [' ', *za_work_path , '/', *za_prep_md_slurm ] }
+                mail-user: *za_mail
+                mail-type: ALL
             deployment:
                 bootstrap: 'scripts/za_prep_md_bootstrap.sh'
                 revert: 'scripts/za_prep_md_revert.sh'
@@ -488,6 +492,8 @@ node_templates:
                 type: 'SBATCH'
                 modules: *za_modules_block
                 command: { concat: [' ', *za_work_path , '/', *za_post_slurm ] }
+                mail-user: *za_mail
+                mail-type: END
             deployment:
                 bootstrap: 'scripts/za_post_bootstrap.sh'
                 revert: 'scripts/za_post_revert.sh'
