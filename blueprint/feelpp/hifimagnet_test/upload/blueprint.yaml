@@ -35,8 +35,8 @@ tosca_definitions_version: cloudify_dsl_1_3
 imports:
     # to speed things up, it is possible to download this file,
     - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-manager/18.1.11/resources/rest-service/cloudify/types/types.yaml
-    - https://raw.githubusercontent.com/MSO4SC/cloudify-hpc-plugin/master/plugin.yaml
-    # - https://raw.githubusercontent.com/Trophime/cloudify-hpc-plugin/master/plugin.yaml
+    # - https://raw.githubusercontent.com/MSO4SC/cloudify-hpc-plugin/master/plugin.yaml
+    - https://raw.githubusercontent.com/Trophime/cloudify-hpc-plugin/master/plugin.yaml
 
 inputs:
     email_user:
