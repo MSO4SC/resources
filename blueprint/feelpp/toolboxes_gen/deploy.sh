@@ -13,6 +13,9 @@ TOSCA=blueprint.yaml
 LOCAL=local-blueprint-inputs.yaml
 LOCAL_DIR=../../../../
 
+declare -a toolbox=("solid" "fluid" )
+declare -a toolbox_default_cases=("github:{path:toolboxes/CSM/cantilever/cantilever}" "github:{path:toolboxes/CFD/cantilever/cantilever}" )
+
 usage()
 {
     echo "usage: $0 [CMD] config_name"
@@ -69,6 +72,17 @@ case $arg in
         export COPYFILE_DISABLE=1
         export COPYFILE_DISABLE=true 
         tar --transform s/^upload/${APP}/ -cvf "${APP}.tar" upload
+        ;;
+
+    "build")
+        for i in ${toolbox[@]}
+        do
+            rm -rf build
+            mkdir build
+            cp -r upload build/$i
+            sed -i "s/solid/fluid/g" build/$i/blueprint.yaml
+            echo "Generate blueprint build/$i"
+        done
         ;;
 
     *)
