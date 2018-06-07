@@ -97,7 +97,7 @@ case $arg in
             echo "Creating package..."
             export COPYFILE_DISABLE=1
             export COPYFILE_DISABLE=true 
-            tar -cvf "build/${toolbox[i]}.tar" build/${toolbox[i]}
+            tar -cvf "build/${toolbox[i]}.tar" -C build/${toolbox[i]} .
         done
         ;;
     *)
