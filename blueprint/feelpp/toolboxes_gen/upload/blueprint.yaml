@@ -85,9 +85,9 @@ dsl_definitions:
     - &singularity_image_filename #Filename of the singularity image
         "mso4sc-feelpp-toolbox-v0.105.0.simg"
     - &singularity_image_file
-        '${LUSTRE}/mso4sc_orchestrator/singularity_images/mso4sc-feelpp-toolbox-v0.105.0.simg'
+        '${CURRENT_WORKDIR}/singularity_images/mso4sc-feelpp-toolbox-v0.105.0.simg'
     - &singularity_image_dir
-        '${LUSTRE}/mso4sc_orchestrator/singularity_images/'
+        '${CURRENT_WORKDIR}/singularity_images/'
 
 node_templates:
     main_hpc:

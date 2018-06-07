@@ -90,14 +90,14 @@ case $arg in
         do
             mkdir -p build
             cp -r upload build/${toolbox[i]}
-            sed -i "s/solid/fluid/g" build/${toolbox[i]}/blueprint.yaml
+            sed -i "s/solid/${toolbox[i]}/g" build/${toolbox[i]}/blueprint.yaml
             sed -i "s#default:\s*'\"g.*#default: '${toolbox_default_cases[i]}'#g" build/${toolbox[i]}/blueprint.yaml
             echo "Generate blueprint build/${toolbox[i]}"
 
             echo "Creating package..."
             export COPYFILE_DISABLE=1
             export COPYFILE_DISABLE=true 
-            tar -cvf "build/${toolbox[i]}.tar" -C build/${toolbox[i]} .
+            tar -cvf "build/${toolbox[i]}.tar" -C build ${toolbox[i]}
         done
         ;;
     *)
