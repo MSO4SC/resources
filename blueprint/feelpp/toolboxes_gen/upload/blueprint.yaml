@@ -1,0 +1,142 @@
+########
+# Copyright (c) 2017 MSO4SC
+# Author(s) javier.carnero@atos.net
+#           guillaume.dolle@cemosis.fr
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+tosca_definitions_version: cloudify_dsl_1_3
+
+imports:
+    - http://raw.githubusercontent.com/MSO4SC/cloudify-hpc-plugin/master/plugin.yaml
+    - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-manager/18.1.11/resources/rest-service/cloudify/types/types.yaml
+      #    - http://www.getcloudify.org/spec/cloudify/4.1/types.yaml
+
+inputs:
+    # Feelpp application
+    solid_case:
+        description: testcase from github repository
+        default: "github:{path:toolboxes/CSM/cantilever/cantilever}"
+        type: string
+
+    solid_case_dimension:
+        description: testcase dimension
+        default: 3
+        type: integer
+
+    solid_cli:
+        description: command line interface for solid toolbox
+        default: ""
+        type: string
+
+    # Job options:
+    job_tasks:
+        description: number of tasks/processes to run in parallel
+        default: 1
+        type: integer
+
+    job_max_time:
+        description: maximum allowed time for run (minutes and seconds)
+        default: '00:30:00'
+        type: string
+
+    # CESGA FTII parameters
+    mso4sc_hpc_primary:
+        description: FTII connection credentials
+        default: {} # required
+        
+    mso4sc_dataset_input_url:
+        description: url to retrieve for case file
+        default: "" #"/usr/local/share/feelpp/testcases/eye2brain/level1/lc3d.cfg"
+
+dsl_definitions:
+    - &monitor_entrypoint
+      ""
+    - &prefix
+      "feelpp_toolbox_"
+    - &job_prefix: #Job name prefix in HPCs
+        "mso_"
+    - &job_nodes #number of tasks/processes to run in parallel
+        1
+    - &job_tasks_per_node #number of tasks/processes to run in parallel
+        1
+    - &job_hpc_partition #slurm partition to choose depending on the targeted machine
+        'thin-shared'
+    - &job_hpc_reservation #slurm partition to choose depending on the targeted machine
+        ''
+    - &job_hpc_modules #modules to load depending on the targeted machine
+        - gcc/6.1.0
+        - openmpi/1.10.2
+        - singularity/2.4.2
+    - &job_hpc_workdir #Workdir for the bootstrap script
+        '${LUSTRE}/mso4sc_orchestrator'
+    - &job_hpc_volumes #mount point in singularity image
+        - '/scratch'
+        - '/mnt'
+        - '${CURRENT_WORKDIR}:/feel'
+    - &skip_cleanup #erase orchestrator temporary generated files (debug).
+        True
+    - &singularity_image_uri #URI pointing to the singularity image
+        "shub://sregistry.srv.cesga.es/mso4sc/feelpp-toolboxes:develop-v0.105.0-alpha.2-ubuntu-16.04"
+    - &singularity_image_file #Filename of the singularity image
+        "mso4sc-feelpp-toolbox-v0.105.simg"
+    - &singularity_image_filepath
+        '${LUSTRE}/mso4sc_orchestrator/singularity_images/mso4sc-feelpp-toolbox-v0.105.simg'
+    - &singularity_image_dir
+        '${LUSTRE}/mso4sc_orchestrator/singularity_images/'
+
+node_templates:
+    main_hpc:
+        type: hpc.nodes.Compute
+        properties:
+            config: { get_input: mso4sc_hpc_primary }
+            external_monitor_entrypoint: *monitor_entrypoint
+            base_dir: *job_hpc_workdir
+            workdir_prefix: *prefix
+            job_prefix: *job_prefix
+
+    job_toolboxes:
+        type: hpc.nodes.singularity_job
+        properties:
+            job_options:
+                modules: *job_hpc_modules
+                partition: *job_hpc_partition
+                reservation: *job_hpc_reservation
+                home: '${HOME}:/home/${USER}'
+                volumes: *job_hpc_volumes
+                command: { concat: [
+                    'feelpp_toolbox_', 'solid', '_', { get_input: solid_case_dimension }, 'd',
+                    ' --case ', { get_input: solid_case }, ' ',
+                    { get_input: solid_cli } ] }
+                nodes: *job_nodes
+                tasks: { get_input: job_tasks }
+                tasks_per_node: *job_tasks_per_node
+                max_time: { get_input: job_max_time }
+                image: *singularity_image_filepath
+            deployment:
+                bootstrap: 'scripts/bootstrap.sh'
+                revert: 'scripts/revert.sh'
+                inputs:
+                    - *singularity_image_dir
+                    - *singularity_image_uri
+                    - *singularity_image_file
+            skip_cleanup: *skip_cleanup # debug keep bash scripts
+
+        relationships:
+            - type: job_contained_in_hpc
+              target: main_hpc
+
+outputs:
+    job_toolboxes:
+        description: feelpp_toolboxes results
+        value: { get_attribute: [job_toolboxes, job_name] }
