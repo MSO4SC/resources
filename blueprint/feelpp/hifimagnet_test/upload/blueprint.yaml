@@ -2,6 +2,7 @@
 # Copyright (c) 2017 MSO4SC
 # Author(s) javier.carnero@atos.net
 #           guillaume.dolle@cemosis.fr
+#           christophe.trophime@lncmi.cnrs.fr
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -31,6 +32,7 @@ tosca_definitions_version: cloudify_dsl_1_3
 #       result:
 #         description: expected test result
 #         type: string
+
 
 imports:
     # to speed things up, it is possible to download this file,
@@ -124,6 +126,11 @@ inputs:
         default: "/usr/share/doc/hifimagnet/ThermoElectricModel/quarter-turn3D.cfg"
         type: string
 
+    do_not_delete_workdir:
+        description: skip deletion of workdir
+        default: true
+        type: boolean
+
     # specs for retreiving singularity images
     sregistry_client:
         description: define default sregistry client
@@ -171,7 +178,7 @@ node_templates:
             job_prefix: {get_input: job_prefix}
             base_dir: {get_input: hpc_basedir}
             workdir_prefix: {get_input: hpc_workdir_prefix}
-            skip_cleanup: true
+            skip_cleanup: {get_input: do_not_delete_workdir}
             # simulate: True  # COMMENT to test against a real HPC
 
     job_test:
@@ -189,7 +196,7 @@ node_templates:
                 reservation: {get_input: hpc_reservation}
                 tasks: {get_input: parallel_tasks}
                 max_time: {get_input: max_time}
-            skip_cleanup: true
+            skip_cleanup: {get_input: do_not_delete_workdir}
             deployment:
                 bootstrap: 'scripts/bootstrap.sh'
                 revert: 'scripts/revert.sh'
