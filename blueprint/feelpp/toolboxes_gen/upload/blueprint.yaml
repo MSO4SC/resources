@@ -28,11 +28,6 @@ inputs:
         default: '"github:{path:toolboxes/solid/cantilever}"'
         type: string
 
-    solid_case_dimension:
-        description: testcase dimension
-        default: 3
-        type: integer
-
     solid_cli:
         description: command line interface for solid toolbox
         default: ""
@@ -114,8 +109,8 @@ node_templates:
                 home: '${HOME}:/home/${USER}'
                 volumes: *job_hpc_volumes
                 command: { concat: [
-                    'feelpp_toolbox_', 'solid', '_', { get_input: solid_case_dimension }, 'd',
-                    ' --case ', { get_input: solid_case }, ' ',
+                    'feelpp_toolbox_', 'solid', ' ',
+                    '--case',' ', { get_input: solid_case }, ' ',
                     { get_input: solid_cli } ] }
                 nodes: *job_nodes
                 tasks: { get_input: job_tasks }

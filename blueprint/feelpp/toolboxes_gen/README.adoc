@@ -52,6 +52,13 @@ The archive is uploaded on https://girder.math.unistra.fr/#folder/5a6261a1b0e957
 and used in the _BLUEPRINT_PATH_ characteristic in the market place for the
 eye2brain product.
 
+Finally, to generate each toolbox, just type
+[source]
+----
+./deploy build
+----
+All archive will be available in the build directory.
+
 === HPC select.
 
 Currently, bluescripts are not adapted to several HPC and might changes in the future.
