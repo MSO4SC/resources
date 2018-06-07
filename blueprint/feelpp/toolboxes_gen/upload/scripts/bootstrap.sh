@@ -9,5 +9,5 @@ FILE=$3
 mkdir -p $WORKDIR
 if [ ! -f $WORKDIR/$FILE ]; then
     cd $WORKDIR
-    singularity pull --name $FILE $URI &> bootstrap.log
+    singularity pull --name $FILE $URI # &> bootstrap.log
 fi

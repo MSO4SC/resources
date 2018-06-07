@@ -13,8 +13,18 @@ TOSCA=blueprint.yaml
 LOCAL=local-blueprint-inputs.yaml
 LOCAL_DIR=../../../../
 
-declare -a toolbox=("solid" "fluid" )
-declare -a toolbox_default_cases=("github:{path:toolboxes/CSM/cantilever/cantilever}" "github:{path:toolboxes/CFD/cantilever/cantilever}" )
+declare -a toolbox=("solid"
+"fluid"
+"heat"
+"heatfluid"
+"thermoelectric"
+)
+declare -a toolbox_default_cases=( "\"github:{path:toolboxes/solid/cantilever}\""
+"\"github:{path:toolboxes/fluid/TurekHron}\"" 
+"\"github:{path:toolboxes/heat/thermo2d}\"" 
+"\"github:{path:toolboxes/heatfluid/NaturalConvection/cavity}\"" 
+"\"github:{path:toolboxes/thermoelectric/test}\"" 
+)
 
 usage()
 {
@@ -75,16 +85,21 @@ case $arg in
         ;;
 
     "build")
-        for i in ${toolbox[@]}
+        rm -rf build
+        for ((i=0;i<${#toolbox[@]};++i));
         do
-            rm -rf build
-            mkdir build
-            cp -r upload build/$i
-            sed -i "s/solid/fluid/g" build/$i/blueprint.yaml
-            echo "Generate blueprint build/$i"
+            mkdir -p build
+            cp -r upload build/${toolbox[i]}
+            sed -i "s/solid/fluid/g" build/${toolbox[i]}/blueprint.yaml
+            sed -i "s#default:\s*'\"g.*#default: '${toolbox_default_cases[i]}'#g" build/${toolbox[i]}/blueprint.yaml
+            echo "Generate blueprint build/${toolbox[i]}"
+
+            echo "Creating package..."
+            export COPYFILE_DISABLE=1
+            export COPYFILE_DISABLE=true 
+            tar -cvf "build/${toolbox[i]}.tar" build/${toolbox[i]}
         done
         ;;
-
     *)
         usage
         ;;

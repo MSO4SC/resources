@@ -25,7 +25,7 @@ inputs:
     # Feelpp application
     solid_case:
         description: testcase from github repository
-        default: "github:{path:toolboxes/CSM/cantilever/cantilever}"
+        default: '"github:{path:toolboxes/solid/cantilever}"'
         type: string
 
     solid_case_dimension:
@@ -62,7 +62,7 @@ dsl_definitions:
     - &monitor_entrypoint
         ""
     - &prefix
-        "feelpp_toolbox_"
+        "feelpp_toolbox_solid"
     - &job_prefix #Job name prefix in HPCs
         "mso_"
     - &job_nodes #number of tasks/processes to run in parallel
@@ -86,11 +86,11 @@ dsl_definitions:
     - &skip_cleanup #erase orchestrator temporary generated files (debug).
         True
     - &singularity_image_uri #URI pointing to the singularity image
-        "shub://sregistry.srv.cesga.es/mso4sc/feelpp-toolboxes:develop-v0.105.0-alpha.2-ubuntu-16.04"
-    - &singularity_image_file #Filename of the singularity image
-        "mso4sc-feelpp-toolbox-v0.105.simg"
-    - &singularity_image_filepath
-        '${LUSTRE}/mso4sc_orchestrator/singularity_images/mso4sc-feelpp-toolbox-v0.105.simg'
+        "shub://sregistry.srv.cesga.es/mso4sc/feelpp-toolboxes:develop-v0.105.0-rc.1-ubuntu-16.04"
+    - &singularity_image_filename #Filename of the singularity image
+        "mso4sc-feelpp-toolbox-v0.105.0.simg"
+    - &singularity_image_file
+        '${LUSTRE}/mso4sc_orchestrator/singularity_images/mso4sc-feelpp-toolbox-v0.105.0.simg'
     - &singularity_image_dir
         '${LUSTRE}/mso4sc_orchestrator/singularity_images/'
 
@@ -121,14 +121,14 @@ node_templates:
                 tasks: { get_input: job_tasks }
                 tasks_per_node: *job_tasks_per_node
                 max_time: { get_input: job_max_time }
-                image: *singularity_image_filepath
+                image: *singularity_image_file
             deployment:
                 bootstrap: 'scripts/bootstrap.sh'
                 revert: 'scripts/revert.sh'
                 inputs:
                     - *singularity_image_dir
                     - *singularity_image_uri
-                    - *singularity_image_file
+                    - *singularity_image_filename
             skip_cleanup: *skip_cleanup # debug keep bash scripts
 
         relationships:
