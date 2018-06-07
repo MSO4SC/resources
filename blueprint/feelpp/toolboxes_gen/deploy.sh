@@ -14,6 +14,7 @@ LOCAL=local-blueprint-inputs.yaml
 LOCAL_DIR=../../../../
 
 declare -a toolbox=("solid" "fluid" )
+declare -a toolbox_default_cases=("github:{path:toolboxes/CSM/cantilever/cantilever}" "github:{path:toolboxes/CFD/cantilever/cantilever}" )
 
 usage()
 {

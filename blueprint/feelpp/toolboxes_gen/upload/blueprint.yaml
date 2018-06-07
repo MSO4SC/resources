@@ -20,7 +20,6 @@ tosca_definitions_version: cloudify_dsl_1_3
 imports:
     - http://raw.githubusercontent.com/MSO4SC/cloudify-hpc-plugin/master/plugin.yaml
     - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-manager/18.1.11/resources/rest-service/cloudify/types/types.yaml
-      #    - http://www.getcloudify.org/spec/cloudify/4.1/types.yaml
 
 inputs:
     # Feelpp application
@@ -61,10 +60,10 @@ inputs:
 
 dsl_definitions:
     - &monitor_entrypoint
-      ""
+        ""
     - &prefix
-      "feelpp_toolbox_"
-    - &job_prefix: #Job name prefix in HPCs
+        "feelpp_toolbox_"
+    - &job_prefix #Job name prefix in HPCs
         "mso_"
     - &job_nodes #number of tasks/processes to run in parallel
         1
