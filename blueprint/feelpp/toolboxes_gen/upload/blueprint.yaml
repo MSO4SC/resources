@@ -49,9 +49,9 @@ inputs:
         description: FTII connection credentials
         default: {} # required
         
-    mso4sc_dataset_input_url:
-        description: url to retrieve for case file
-        default: "" #"/usr/local/share/feelpp/testcases/eye2brain/level1/lc3d.cfg"
+#    mso4sc_dataset_input_url:
+#        description: url to retrieve for case file
+#        default: "" #"/usr/local/share/feelpp/testcases/eye2brain/level1/lc3d.cfg"
 
 dsl_definitions:
     - &monitor_entrypoint
