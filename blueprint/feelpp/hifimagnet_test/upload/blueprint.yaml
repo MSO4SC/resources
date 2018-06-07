@@ -2,6 +2,7 @@
 # Copyright (c) 2017 MSO4SC
 # Author(s) javier.carnero@atos.net
 #           guillaume.dolle@cemosis.fr
+#           christophe.trophime@lncmi.cnrs.fr
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -32,19 +33,26 @@ tosca_definitions_version: cloudify_dsl_1_3
 #         description: expected test result
 #         type: string
 
+
 imports:
     # to speed things up, it is possible to download this file,
-    - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-manager/18.1.11/resources/rest-service/cloudify/types/types.yaml
+    # - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-manager/18.1.11/resources/rest-service/cloudify/types/types.yaml
+    - http://www.getcloudify.org/spec/cloudify/4.2.dev1/types.yaml
     # - https://raw.githubusercontent.com/MSO4SC/cloudify-hpc-plugin/master/plugin.yaml
     - https://raw.githubusercontent.com/Trophime/cloudify-hpc-plugin/master/plugin.yaml
+    # # ARIA plugin:
+    # - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-aria-plugin/master/plugin.yaml
 
 inputs:
     email_user:
         description: email address for reporting
         default: "christophe.trophime@lncmi.cnrs.fr"
     email_type:
+        type: string
         description: define mail-type
         default: "ALL"
+        # constraints:
+        #     - valid_values: ["ALL", "END", "FAIL"]
 
     # Monitor
     monitor_entrypoint:
@@ -89,22 +97,27 @@ inputs:
             - singularity/2.4.2
 
     # WATCH OUT : last entry should be <hpc_basedir>/feel
-    hpc_volumes:
-        description: volumes to be mounted on the targeted machine
-        default:
-            - /scratch
-            - /mnt
-            - ${LUSTRE}/feel:feelpp
-
     hpc_basedir:
         type: string
-        description: basedir directory were calculations would be performed
+        description: basedir directory where calculations would be performed
         default: ${LUSTRE}
 
     hpc_workdir_prefix:
         type: string
         description: prefix of the directory name holding the actual calculation
         default: "hifimagnet"
+
+    hpc_feelpp:
+        description: feel directory where simulations will endup
+        default:
+            concat: [get_input: hpc_basedir, "/feel"]
+
+    hpc_volumes:
+        description: volumes to be mounted on the targeted machine
+        default:
+            - /scratch
+            - /mnt
+            - concat: [get_input: hpc_feelpp, ":/feel"]
 
     # specs for running simulations
     mso4sc_dataset_input_url:
@@ -123,6 +136,11 @@ inputs:
         description: configuration file
         default: "/usr/share/doc/hifimagnet/ThermoElectricModel/quarter-turn3D.cfg"
         type: string
+
+    do_not_delete_workdir:
+        description: skip deletion of workdir
+        default: true
+        type: boolean
 
     # specs for retreiving singularity images
     sregistry_client:
@@ -171,7 +189,7 @@ node_templates:
             job_prefix: {get_input: job_prefix}
             base_dir: {get_input: hpc_basedir}
             workdir_prefix: {get_input: hpc_workdir_prefix}
-            skip_cleanup: true
+            skip_cleanup: {get_input: do_not_delete_workdir}
             # simulate: True  # COMMENT to test against a real HPC
 
     job_test:
@@ -189,7 +207,7 @@ node_templates:
                 reservation: {get_input: hpc_reservation}
                 tasks: {get_input: parallel_tasks}
                 max_time: {get_input: max_time}
-            skip_cleanup: true
+            skip_cleanup: {get_input: do_not_delete_workdir}
             deployment:
                 bootstrap: 'scripts/bootstrap.sh'
                 revert: 'scripts/revert.sh'
@@ -203,7 +221,7 @@ node_templates:
                     - {get_input: sregistry_url}
                     - {get_input: sregistry_image}
                     - {get_input: mso4sc_dataset_input_url}
-                    - {get_input: hpc_basedir}
+                    - {get_input: hpc_feelpp}
 
         relationships:
             - type: job_contained_in_hpc
