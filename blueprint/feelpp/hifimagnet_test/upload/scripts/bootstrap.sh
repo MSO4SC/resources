@@ -9,6 +9,10 @@ LOG_FILE=$0.log
 echo "bootstrap" >> ${LOG_FILE}
 echo "parameters: $@" >> ${LOG_FILE}
 
+nargs=$#
+echo "nargs: $nargs" >> ${LOG_FILE}
+echo "last arg: ${!nargs}" >> ${LOG_FILE}
+
 # params for singularity images:
 # $1 - { get_input: sregistry_storage }
 # $2 - { get_input: singularity_image_filename - aka collection/}
@@ -23,6 +27,7 @@ echo "parameters: $@" >> ${LOG_FILE}
 # $9 - { get_input: mso4sc_dataset_input_url }
 
 # params for output
+# $10 - {get_input: hpc_basedir}
 
 
 export SREGISTRY_STORAGE=$1 >> ${LOG_FILE}
@@ -39,6 +44,10 @@ SREGISTRY_IMAGE=$8
 
 # Ckan:
 REMOTE_URL=$9
+
+# Feel output result directory
+FEELPP_OUTPUT_DIR=$10/feel
+echo "mkdir -p $FEELPP_OUTPUT_DIR" >> ${LOG_FILE}
 
 echo "${SREGISTRY_URL}" >> ${LOG_FILE}
 echo "${SREGISTRY_IMAGE}" >> ${LOG_FILE}

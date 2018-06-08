@@ -15,6 +15,9 @@ job_prefix: "mso_"
 # hpc_volumes: '${HOME}/feel:/feel'
 # cfgfile: "/usr/share/doc/hifimagnet/ThermoElectricModel/quarter-turn3D.cfg"
 
+email_user: "christophe.trophime@lncmi.cnrs.fr"
+email_type: "ALL"
+
 # on Cesga:
 hpc_modules: ["gcc/6.3.0", "openmpi/2.0.2", "singularity/2.4.2"]
 hpc_volumes: ['/scratch', '/mnt', '${LUSTRE}/feel:/feel']
