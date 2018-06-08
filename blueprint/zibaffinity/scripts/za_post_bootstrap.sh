@@ -19,7 +19,7 @@ cd $4
 
 ##mpirun -np 1 singularity exec -B /mnt:/mnt,/scratch:/scratch $7 /bin/bash $8 $1 $za_tar $3 $4 $5 ${10}
 #mpirun -np 1 singularity exec -H \$HOME:/home/\$USER -B /mnt:/mnt,/scratch:/scratch $7 /bin/bash $8 $1 $za_tar $3 $4 $5 ${10}
-singularity exec -H \$HOME:/home/\$USER -B /mnt:/mnt,/scratch:/scratch $7 /bin/bash $8 $1 $za_tar $3 $4 $5 ${10}
+singularity exec -H \$HOME:/home/\$USER -B /mnt:/mnt,/scratch:/scratch $7 /bin/bash $8 $1 $za_tar $3 $4 $5 ${10} ${11}
 
 # $1: za_lig
 # $2: mso4sc_dataset_tar
@@ -31,6 +31,7 @@ singularity exec -H \$HOME:/home/\$USER -B /mnt:/mnt,/scratch:/scratch $7 /bin/b
 # $8: za_post_script -> za_prep_md.sh (in container)
 # $9: za_hpc_cluster -> thin-shared
 # ${10}: za_gmx_path
+# ${11}: za_outfile
 
 EOM
 

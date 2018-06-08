@@ -50,6 +50,8 @@ inputs:
 
 ## dsl definitions:  https://docs.cloudify.co/4.3.0/developer/blueprints/spec-dsl-definitions/
 dsl_definitions:
+    - &za_outfile
+        'za_results' #ZA ligand path
     - &za_lig
         '$CURRENT_WORKDIR/ligand.pdb' #ZA ligand path
     - &za_home_dir
@@ -508,6 +510,7 @@ node_templates:
                     - *za_post_script
                     - *za_hpc_partition_prep
                     - *za_gmx_path
+                    - *za_outfile
         relationships:
             - type: job_contained_in_hpc
               target: ft2_node
