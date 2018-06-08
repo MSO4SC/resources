@@ -21,9 +21,16 @@ declare -a toolbox=("solid"
 )
 declare -a toolbox_default_cases=( "\"github:{path:toolboxes/solid/cantilever}\""
 "\"github:{path:toolboxes/fluid/TurekHron}\"" 
-"\"github:{path:toolboxes/heat/thermo2d}\"" 
+"\"github:{path:toolboxes/heat/Building/ThermalBridgesENISO10211}\"" 
 "\"github:{path:toolboxes/heatfluid/NaturalConvection/cavity}\"" 
-"\"github:{path:toolboxes/thermoelectric/test}\"" 
+"\"github:{path:toolboxes/thermoelectric/ElectroMagnets/HL-31_H1}\"" 
+)
+
+declare -a toolbox_default_cli_cases=( ""
+"--case.config-file cfd2.cfg"
+""
+""
+"--case.config-file HL-31_H1_nonlinear.cfg"
 )
 
 usage()
@@ -92,6 +99,7 @@ case $arg in
             cp -r upload build/${toolbox[i]}
             sed -i "s/solid/${toolbox[i]}/g" build/${toolbox[i]}/blueprint.yaml
             sed -i "s#default:\s*'\"g.*#default: '${toolbox_default_cases[i]}'#g" build/${toolbox[i]}/blueprint.yaml
+            sed -i "s#default:\s*\"--case.config-file.*#default: '${toolbox_default_cli_cases[i]}'#g" build/${toolbox[i]}/blueprint.yaml
             echo "Generate blueprint build/${toolbox[i]}"
 
             echo "Creating package..."

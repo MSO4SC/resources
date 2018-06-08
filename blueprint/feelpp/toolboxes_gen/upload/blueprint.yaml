@@ -30,7 +30,7 @@ inputs:
 
     solid_cli:
         description: command line interface for solid toolbox
-        default: ""
+        default: "--case.config-file "
         type: string
 
     # Job options:
