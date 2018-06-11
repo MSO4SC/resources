@@ -48,7 +48,7 @@ inputs:
     mso4sc_hpc_primary:
         description: FTII connection credentials
         default: {} # required
-        
+
 #    mso4sc_dataset_input_url:
 #        description: url to retrieve for case file
 #        default: "" #"/usr/local/share/feelpp/testcases/eye2brain/level1/lc3d.cfg"
@@ -83,11 +83,11 @@ dsl_definitions:
     - &singularity_image_uri #URI pointing to the singularity image
         "shub://sregistry.srv.cesga.es/mso4sc/feelpp-toolboxes:develop-v0.105.0-rc.1-ubuntu-16.04"
     - &singularity_image_filename #Filename of the singularity image
-        "mso4sc-feelpp-toolbox-v0.105.0.simg"
+        "/opt/cesga/singularity/localrepo/mso4sc-feelpp-toolboxes-develop-v0.105.0-rc.1-ubuntu-16.04.simg"
     - &singularity_image_file
-        '${CURRENT_WORKDIR}/singularity_images/mso4sc-feelpp-toolbox-v0.105.0.simg'
+        '/opt/cesga/singularity/localrepo/mso4sc-feelpp-toolboxes-develop-v0.105.0-rc.1-ubuntu-16.04.simg' #'${CURRENT_WORKDIR}/singularity_images/mso4sc-feelpp-toolbox-v0.105.0.simg'
     - &singularity_image_dir
-        '${CURRENT_WORKDIR}/singularity_images/'
+        '/opt/cesga/singularity/localrepo/' #'${CURRENT_WORKDIR}/singularity_images/'
 
 node_templates:
     main_hpc:
