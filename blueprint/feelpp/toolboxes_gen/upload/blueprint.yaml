@@ -25,12 +25,12 @@ inputs:
     # Feelpp application
     solid_case:
         description: testcase from github repository
-        default: '"github:{path:toolboxes/solid/cantilever}"'
+        default: 'FEELPP_DEFAULT_OPTION_CASE'
         type: string
 
     solid_cli:
         description: command line interface for solid toolbox
-        default: "--case.config-file "
+        default: ""
         type: string
 
     # Job options:
