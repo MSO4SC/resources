@@ -23,12 +23,12 @@ imports:
 
 inputs:
     # Feelpp application
-    solid_case:
+    feelpp_solid_case:
         description: testcase from github repository
         default: 'FEELPP_DEFAULT_OPTION_CASE'
         type: string
 
-    solid_cli:
+    feelpp_solid_cli:
         description: command line interface for solid toolbox
         default: ""
         type: string
@@ -42,6 +42,11 @@ inputs:
     job_max_time:
         description: maximum allowed time for run (minutes and seconds)
         default: '00:30:00'
+        type: string
+
+    job_partition:
+        description: partition to choose depending on the targeted machine
+        default: 'thinnodes'
         type: string
 
     # CESGA FTII parameters
@@ -60,12 +65,10 @@ dsl_definitions:
         "feelpp_toolbox_solid"
     - &job_prefix #Job name prefix in HPCs
         "mso_"
-    - &job_nodes #number of tasks/processes to run in parallel
+    - &job_nodes #number of nodes
         1
-    - &job_tasks_per_node #number of tasks/processes to run in parallel
+    - &job_tasks_per_node #number of tasks/processes per node
         1
-    - &job_hpc_partition #slurm partition to choose depending on the targeted machine
-        'thin-shared'
     - &job_hpc_reservation #slurm partition to choose depending on the targeted machine
         ''
     - &job_hpc_modules #modules to load depending on the targeted machine
@@ -104,14 +107,14 @@ node_templates:
         properties:
             job_options:
                 modules: *job_hpc_modules
-                partition: *job_hpc_partition
+                partition: *job_partition
                 reservation: *job_hpc_reservation
                 home: '${HOME}:/home/${USER}'
                 volumes: *job_hpc_volumes
                 command: { concat: [
                     'feelpp_toolbox_', 'solid', ' ',
-                    '--case',' ', { get_input: solid_case }, ' ',
-                    { get_input: solid_cli } ] }
+                    '--case',' ', { get_input: feelpp_solid_case }, ' ',
+                    { get_input: feelpp_solid_cli } ] }
                 nodes: *job_nodes
                 tasks: { get_input: job_tasks }
                 tasks_per_node: *job_tasks_per_node
