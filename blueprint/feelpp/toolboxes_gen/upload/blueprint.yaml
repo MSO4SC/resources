@@ -64,7 +64,7 @@ dsl_definitions:
     - &prefix
         "feelpp_toolbox_solid"
     - &job_prefix #Job name prefix in HPCs
-        "feelpp_"
+        "mso_"
     - &job_nodes #number of nodes
         1
     - &job_tasks_per_node #number of tasks/processes per node
