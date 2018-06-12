@@ -46,7 +46,7 @@ inputs:
 
     job_partition:
         description: partition to choose depending on the targeted machine
-        default: 'thinnodes'
+        default: 'thin-shared'
         type: string
 
     # CESGA FTII parameters
