@@ -115,9 +115,7 @@ node_templates:
                     'feelpp_toolbox_', 'solid', ' ',
                     '--case',' ', { get_input: feelpp_solid_case }, ' ',
                     { get_input: feelpp_solid_cli } ] }
-                nodes: *job_nodes
                 tasks: { get_input: job_tasks }
-                tasks_per_node: *job_tasks_per_node
                 max_time: { get_input: job_max_time }
                 image: *singularity_image_file
             deployment:
