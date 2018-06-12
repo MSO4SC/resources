@@ -107,7 +107,7 @@ node_templates:
         properties:
             job_options:
                 modules: *job_hpc_modules
-                partition: *job_partition
+                partition: { get_input: job_partition }
                 reservation: *job_hpc_reservation
                 home: '${HOME}:/home/${USER}'
                 volumes: *job_hpc_volumes
