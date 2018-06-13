@@ -23,20 +23,20 @@ imports:
 
 inputs:
     # Feelpp application
-    solid_case:
+    feelpp_solid_case:
         description: testcase from github repository
-        default: '"github:{path:toolboxes/solid/cantilever}"'
+        default: 'FEELPP_DEFAULT_OPTION_CASE'
         type: string
 
-    solid_cli:
+    feelpp_solid_cli:
         description: command line interface for solid toolbox
-        default: "--case.config-file "
+        default: ""
         type: string
 
     # Job options:
     job_tasks:
         description: number of tasks/processes to run in parallel
-        default: 1
+        default: 4
         type: integer
 
     job_max_time:
@@ -44,11 +44,16 @@ inputs:
         default: '00:30:00'
         type: string
 
+    job_partition:
+        description: partition to choose depending on the targeted machine
+        default: 'thin-shared'
+        type: string
+
     # CESGA FTII parameters
     mso4sc_hpc_primary:
         description: FTII connection credentials
         default: {} # required
-        
+
 #    mso4sc_dataset_input_url:
 #        description: url to retrieve for case file
 #        default: "" #"/usr/local/share/feelpp/testcases/eye2brain/level1/lc3d.cfg"
@@ -59,13 +64,11 @@ dsl_definitions:
     - &prefix
         "feelpp_toolbox_solid"
     - &job_prefix #Job name prefix in HPCs
-        "mso_"
-    - &job_nodes #number of tasks/processes to run in parallel
+        "feelpp_"
+    - &job_nodes #number of nodes
         1
-    - &job_tasks_per_node #number of tasks/processes to run in parallel
+    - &job_tasks_per_node #number of tasks/processes per node
         1
-    - &job_hpc_partition #slurm partition to choose depending on the targeted machine
-        'thin-shared'
     - &job_hpc_reservation #slurm partition to choose depending on the targeted machine
         ''
     - &job_hpc_modules #modules to load depending on the targeted machine
@@ -83,11 +86,11 @@ dsl_definitions:
     - &singularity_image_uri #URI pointing to the singularity image
         "shub://sregistry.srv.cesga.es/mso4sc/feelpp-toolboxes:develop-v0.105.0-rc.1-ubuntu-16.04"
     - &singularity_image_filename #Filename of the singularity image
-        "mso4sc-feelpp-toolbox-v0.105.0.simg"
+        "/opt/cesga/singularity/localrepo/mso4sc-feelpp-toolboxes-develop-v0.105.0-rc.1-ubuntu-16.04.simg"
     - &singularity_image_file
-        '${CURRENT_WORKDIR}/singularity_images/mso4sc-feelpp-toolbox-v0.105.0.simg'
+        '/opt/cesga/singularity/localrepo/mso4sc-feelpp-toolboxes-develop-v0.105.0-rc.1-ubuntu-16.04.simg' #'${CURRENT_WORKDIR}/singularity_images/mso4sc-feelpp-toolbox-v0.105.0.simg'
     - &singularity_image_dir
-        '${CURRENT_WORKDIR}/singularity_images/'
+        '/opt/cesga/singularity/localrepo/' #'${CURRENT_WORKDIR}/singularity_images/'
 
 node_templates:
     main_hpc:
@@ -104,17 +107,15 @@ node_templates:
         properties:
             job_options:
                 modules: *job_hpc_modules
-                partition: *job_hpc_partition
+                partition: { get_input: job_partition }
                 reservation: *job_hpc_reservation
                 home: '${HOME}:/home/${USER}'
                 volumes: *job_hpc_volumes
                 command: { concat: [
                     'feelpp_toolbox_', 'solid', ' ',
-                    '--case',' ', { get_input: solid_case }, ' ',
-                    { get_input: solid_cli } ] }
-                nodes: *job_nodes
+                    '--case',' ', { get_input: feelpp_solid_case }, ' ',
+                    { get_input: feelpp_solid_cli } ] }
                 tasks: { get_input: job_tasks }
-                tasks_per_node: *job_tasks_per_node
                 max_time: { get_input: job_max_time }
                 image: *singularity_image_file
             deployment:

@@ -19,18 +19,18 @@ declare -a toolbox=("solid"
 "heatfluid"
 "thermoelectric"
 )
-declare -a toolbox_default_cases=( "\"github:{path:toolboxes/solid/cantilever}\""
-"\"github:{path:toolboxes/fluid/TurekHron}\"" 
-"\"github:{path:toolboxes/heat/Building/ThermalBridgesENISO10211}\"" 
-"\"github:{path:toolboxes/heatfluid/NaturalConvection/cavity}\"" 
-"\"github:{path:toolboxes/thermoelectric/ElectroMagnets/HL-31_H1}\"" 
+declare -a toolbox_default_cases=( "\"github:{path:toolboxes\/solid\/cantilever}\""
+"\"github:{path:toolboxes\/fluid\/TurekHron}\"" 
+"\"github:{path:toolboxes\/heat\/Building\/ThermalBridgesENISO10211}\"" 
+"\"github:{path:toolboxes\/heatfluid\/NaturalConvection\/cavity}\"" 
+"\"github:{path:toolboxes\/thermoelectric\/ElectroMagnets\/HL-31_H1}\"" 
 )
 
 declare -a toolbox_default_cli_cases=( ""
-"--case.config-file cfd2.cfg"
 ""
 ""
-"--case.config-file HL-31_H1_nonlinear.cfg"
+""
+""
 )
 
 usage()
@@ -52,10 +52,10 @@ usage()
 }
 
 
-if [ ! -f "${ROOT_DIR}/${LOCAL}" ]; then
-    echo "${ROOT_DIR}/${LOCAL} does not exist! See doc or blueprint examples!"
-    exit 1
-fi
+#if [ ! -f "${ROOT_DIR}/${LOCAL}" ]; then
+#    echo "${ROOT_DIR}/${LOCAL} does not exist! See doc or blueprint examples!"
+#    exit 1
+#fi
 
 
 case $arg in
@@ -97,9 +97,11 @@ case $arg in
         do
             mkdir -p build
             cp -r upload build/${toolbox[i]}
-            sed -i "s/solid/${toolbox[i]}/g" build/${toolbox[i]}/blueprint.yaml
-            sed -i "s#default:\s*'\"g.*#default: '${toolbox_default_cases[i]}'#g" build/${toolbox[i]}/blueprint.yaml
-            sed -i "s#default:\s*\"--case.config-file.*#default: '${toolbox_default_cli_cases[i]}'#g" build/${toolbox[i]}/blueprint.yaml
+            sed -i "" "s/solid/${toolbox[i]}/g" build/${toolbox[i]}/blueprint.yaml
+            sed -i "" "s/FEELPP_DEFAULT_OPTION_CASE/${toolbox_default_cases[i]}/g" build/${toolbox[i]}/blueprint.yaml
+
+            #sed -i "" "s#default:\s*'\"g.*#default: '${toolbox_default_cases[i]}'#g" build/${toolbox[i]}/blueprint.yaml
+            #sed -i "" "s#default:\s*\"--case.config-file.*#default: '${toolbox_default_cli_cases[i]}'#g" build/${toolbox[i]}/blueprint.yaml
             echo "Generate blueprint build/${toolbox[i]}"
 
             echo "Creating package..."
