@@ -18,30 +18,13 @@
 
 tosca_definitions_version: cloudify_dsl_1_3
 
-# data_types:
-
-#   hifimagnet.test:
-#     description: Hifimagnet test details
-#     properties:
-#       exec:
-#         description: executable
-#         type: string
-#       cfgfile:
-#         description: Feelpp cfg file
-#         type: string
-#       result:
-#         description: expected test result
-#         type: string
-
-
 imports:
     # to speed things up, it is possible to download this file,
     # - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-manager/18.1.11/resources/rest-service/cloudify/types/types.yaml
-    - http://www.getcloudify.org/spec/cloudify/4.2.dev1/types.yaml
+    - http://www.getcloudify.org/spec/cloudify/4.3.1/types.yaml
     # - https://raw.githubusercontent.com/MSO4SC/cloudify-hpc-plugin/master/plugin.yaml
-    - https://raw.githubusercontent.com/Trophime/cloudify-hpc-plugin/master/plugin.yaml
-    # # ARIA plugin:
-    # - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-aria-plugin/master/plugin.yaml
+    # - https://raw.githubusercontent.com/Trophime/cloudify-hpc-plugin/master/plugin.yaml
+    - https://raw.githubusercontent.com/Trophime/cloudify-hpc-plugin/add_checks/plugin.yaml
 
 inputs:
     email_user:
@@ -71,23 +54,34 @@ inputs:
         description: FTII connection credentials
         default: {}
 
+    parallel_nodes:
+        type: integer
+        description: number of nodes to run in parallel
+        default: 1
+
+    parallel_tasks_per_node:
+        type: integer
+        description: number of tasks per node
+        default: 1
+
     parallel_tasks:
-        description: number of tasks/processes to run in parallel
-        default: 2
+        type: integer
+        description: number of tasks to run in parallel
+        default: 1
 
     max_time:
         description: maximum allowed time for run (minutes and seconds)
         default: '00:30:00'
 
     hpc_partition:
+        type: string
         description: slurm partition to choose depending on the targeted machine
         default: 'thin-shared'
-        type: string
 
     hpc_reservation:
+        type: string
         description: slurm partition to choose depending on the targeted machine
         default: ''
-        type: string
 
     hpc_modules:
         description: modules to load depending on the targeted machine
@@ -96,7 +90,6 @@ inputs:
             - openmpi/2.0.2
             - singularity/2.4.2
 
-    # WATCH OUT : last entry should be <hpc_basedir>/feel
     hpc_basedir:
         type: string
         description: basedir directory where calculations would be performed
@@ -117,8 +110,7 @@ inputs:
     hpc_feelpp:
         type: string
         description: feel directory where simulations will endup
-        default:
-            concat: [get_input: hpc_basedir, "/feel"]
+        default: ${LUSTRE}/feel
 
     # # this does work in cli not in portal
     # hpc_volumes:
@@ -134,6 +126,7 @@ inputs:
             - /scratch
             - /mnt
             - ${LUSTRE}/feel:/feel
+    # - concat: [get_input: hpc_feelpp, ":/feel"]
 
     # specs for running simulations
     mso4sc_dataset_input_url:
@@ -144,19 +137,25 @@ inputs:
     #     - valid_values:
     #           [ "feelpp_hfm_thermoelectric_model_3D_V1T1_N1", "feelpp_hfm_coupledcartmodel_3DP1N1", "feelpp_hfm_coupledmodel_3D_P1N1" ]
     execfile:
-        type: string
         description: executable file
         default: "feelpp_hfm_thermoelectric_model_3D_V1T1_N1"
 
     cfgfile:
         description: configuration file
         default: "/usr/share/doc/hifimagnet/ThermoElectricModel/quarter-turn3D.cfg"
-        type: string
+
+    cadmsh:
+        description: name of the mesh file (either msh, med, ...)
+        default: "HL-31_H1.msh"
+
+    mshfile:
+        description: name of the partionned mesh file
+        default: "turlututu"
 
     do_not_delete_workdir:
+        type: boolean
         description: skip deletion of workdir
         default: true
-        type: boolean
 
     # specs for retreiving singularity images
     sregistry_client:
@@ -192,7 +191,7 @@ inputs:
     singularity_image_cleanup:
         type: string
         description: force remove of singularity image
-        default: false
+        default: "false"
         # default: false
 
 
@@ -209,7 +208,7 @@ node_templates:
             skip_cleanup: {get_input: do_not_delete_workdir}
             # simulate: True  # COMMENT to test against a real HPC
 
-    job_test:
+    job_partition:
         type: hpc.nodes.singularity_job
         properties:
             job_options:
@@ -220,9 +219,12 @@ node_templates:
                 home: '${HOME}:/home/${USER}'
                 volumes: {get_input: hpc_volumes}
                 command: {concat: [{get_input: execfile}, ' --config-file ', {get_input: cfgfile}]}
+		#command: {concat: ['feelpp_mesh_partitioner --ifile ', {get_input: cadmsh}, ' --ofile ', {get_input: mshfile}, '--nochdir --part ', {get_input: parallel_tasks}]}
                 partition: {get_input: hpc_partition}
                 reservation: {get_input: hpc_reservation}
+                nodes: {get_input: parallel_nodes}
                 tasks: {get_input: parallel_tasks}
+                tasks_per_node: {get_input: parallel_tasks_per_node}
                 max_time: {get_input: max_time}
             skip_cleanup: {get_input: do_not_delete_workdir}
             deployment:
@@ -245,6 +247,6 @@ node_templates:
               target: primary_hpc
 
 outputs:
-    job_test:
-        description: feelpp_hfm_test results
-        value: {get_attribute: [job_test, job_name]}
+    job_partition:
+        description: feelpp_mesh_partitioner results
+        value: {get_attribute: [job_partition, job_name]}

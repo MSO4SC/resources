@@ -6,11 +6,10 @@ arg=$1
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/" && pwd )"
 ROOT_DIR=${SCRIPT_DIR}/../../../
+#JOB=hifimagnet_test_generic
 
 APP=$(basename ${PWD})
 JOB=$(echo ${APP}_generic)
-JOB=hifimagnet_test_generic
-
 UPLOAD_DIR=${SCRIPT_DIR}/upload
 TOSCA=blueprint.yaml
 LOCAL=local-blueprint-inputs.yaml
@@ -78,7 +77,7 @@ case $arg in
         echo "options:"
         echo "      up     send to orchestrator"
         echo "    down     remove from orchestrator"
-        echo "     pkg     create a package for marketplace (For portal usage)"
+        echo "     pkg     create a package for marketplace (for portal usage)"
         echo ""
         ;;
 esac

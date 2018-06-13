@@ -23,11 +23,11 @@ echo "last arg: ${!nargs}" >> ${LOG_FILE}
 # $7 - { get_input: sregistry_url }
 # $8 - { get_input: sregistry_image } 
 
-# params fo input data
-# $9 - { get_input: mso4sc_dataset_input_url }
-
 # params for output
-# $10 - {get_input: hpc_basedir}
+# $9 - {get_input: hpc_feelpp}
+
+# params fo input data
+# $10 - { get_input: mso4sc_dataset_input_url }
 
 
 export SREGISTRY_STORAGE=$1 >> ${LOG_FILE}
@@ -43,11 +43,18 @@ SREGISTRY_URL=$7
 SREGISTRY_IMAGE=$8
 
 # Ckan:
-REMOTE_URL=$9
+if [ $nargs -ge 10 ]; then
+    REMOTE_URL=${10}
+fi
 
-# Feel output result directory
-FEELPP_OUTPUT_DIR=$10/feel
-echo "mkdir -p $FEELPP_OUTPUT_DIR" >> ${LOG_FILE}
+# # Feel output result directory
+if [ $nargs -ge 9 ]; then
+    FEELPP_OUTPUT_DIR=${9}
+    echo "FEELPP_OUTPUT_DIR=${FEELPP_OUTPUT_DIR}" >> ${LOG_FILE}
+    if [ ! -d ${FEELPP_OUTPUT_DIR} ]; then
+	mkdir -p ${FEELPP_OUTPUT_DIR} >> ${LOG_FILE} >> ${LOG_FILE}
+    fi
+fi
 
 echo "${SREGISTRY_URL}" >> ${LOG_FILE}
 echo "${SREGISTRY_IMAGE}" >> ${LOG_FILE}
