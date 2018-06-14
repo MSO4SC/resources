@@ -126,7 +126,6 @@ inputs:
             - /scratch
             - /mnt
             - ${LUSTRE}/feel:/feel
-    # - concat: [get_input: hpc_feelpp, ":/feel"]
 
     # specs for running simulations
     mso4sc_dataset_input_url:
@@ -137,20 +136,12 @@ inputs:
     #     - valid_values:
     #           [ "feelpp_hfm_thermoelectric_model_3D_V1T1_N1", "feelpp_hfm_coupledcartmodel_3DP1N1", "feelpp_hfm_coupledmodel_3D_P1N1" ]
     execfile:
-        description: executable file
+        description: name of executable file
         default: "feelpp_hfm_thermoelectric_model_3D_V1T1_N1"
 
     cfgfile:
-        description: configuration file
+        description: name of the configuration file
         default: "/usr/share/doc/hifimagnet/ThermoElectricModel/quarter-turn3D.cfg"
-
-    cadmsh:
-        description: name of the mesh file (either msh, med, ...)
-        default: "HL-31_H1.msh"
-
-    mshfile:
-        description: name of the partionned mesh file
-        default: "turlututu"
 
     do_not_delete_workdir:
         type: boolean
@@ -219,7 +210,7 @@ node_templates:
                 home: '${HOME}:/home/${USER}'
                 volumes: {get_input: hpc_volumes}
                 command: {concat: [{get_input: execfile}, ' --config-file ', {get_input: cfgfile}]}
-		#command: {concat: ['feelpp_mesh_partitioner --ifile ', {get_input: cadmsh}, ' --ofile ', {get_input: mshfile}, '--nochdir --part ', {get_input: parallel_tasks}]}
+                #command: {concat: ['feelpp_mesh_partitioner --ifile ', {get_input: cadmsh}, ' --ofile ', {get_input: mshfile}, ' --nochdir --part ', {get_input: parallel_tasks}]}
                 partition: {get_input: hpc_partition}
                 reservation: {get_input: hpc_reservation}
                 nodes: {get_input: parallel_nodes}

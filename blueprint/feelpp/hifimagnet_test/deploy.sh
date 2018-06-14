@@ -9,7 +9,6 @@ ROOT_DIR=${SCRIPT_DIR}/../../../
 
 APP=$(basename ${PWD})
 JOB=$(echo ${APP}_generic)
-JOB=hifimagnet_test_generic
 
 UPLOAD_DIR=${SCRIPT_DIR}/upload
 TOSCA=blueprint.yaml
@@ -31,7 +30,12 @@ cd ${UPLOAD_DIR}
 
 case $arg in
     "up" )
-        cfy blueprints upload ${DEBUG} -b "${JOB}" "${TOSCA}"
+        cfy blueprints validate "${TOSCA}"
+	isOK=$?
+	if [ $isOK != 0 ]; then
+	   exit 1
+	fi
+	cfy blueprints upload ${DEBUG} -b "${JOB}" "${TOSCA}"
 	isOK=$?
 	if [ $isOK != 0 ]; then
 	   exit 1
@@ -57,11 +61,11 @@ case $arg in
 
     "down" )
         echo "Uninstalling deployment ${JOB}..."
-        cfy executions start -d "${JOB}" uninstall
+        cfy executions start ${DEBUG} uninstall -d "${JOB}" -p ignore_failure=true
         echo "Deleting deployment ${JOB}..."
-        cfy deployments delete "${JOB}"
+        cfy deployments delete  ${DEBUG} "${JOB}"
         echo "Deleting blueprint ${JOB}..."
-        cfy blueprints delete "${JOB}"
+        cfy blueprints delete  ${DEBUG} "${JOB}"
         ;;
 
     "pkg")
@@ -78,7 +82,7 @@ case $arg in
         echo "options:"
         echo "      up     send to orchestrator"
         echo "    down     remove from orchestrator"
-        echo "     pkg     create a package for marketplace (For portal usage)"
+        echo "     pkg     create a package for marketplace (for portal usage)"
         echo ""
         ;;
 esac

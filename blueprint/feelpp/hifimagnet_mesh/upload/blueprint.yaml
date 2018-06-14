@@ -126,7 +126,6 @@ inputs:
             - /scratch
             - /mnt
             - ${LUSTRE}/feel:/feel
-    # - concat: [get_input: hpc_feelpp, ":/feel"]
 
     # specs for running simulations
     mso4sc_dataset_input_url:
@@ -138,7 +137,7 @@ inputs:
     #           [ "feelpp_hfm_thermoelectric_model_3D_V1T1_N1", "feelpp_hfm_coupledcartmodel_3DP1N1", "feelpp_hfm_coupledmodel_3D_P1N1" ]
     cadmsh:
         description: name of the mesh file (either msh, med, ...)
-        default: "HL-31_H1.msh"
+        default: "HL-31_H1.med"
 
     mshfile:
         description: name of the partionned mesh file
@@ -173,11 +172,11 @@ inputs:
     # singularity image
     singularity_image_uri:
         description: URI pointing to the singularity image
-        default: "hifimagnet/hifimagnet:stretch"
+        default: "hifimagnet/hifimagnet:dev"
 
     singularity_image_filename:
         description: Filename of the singularity image
-        default: "hifimagnet-stretch.simg"
+        default: "hifimagnet-dev.simg"
 
     # passing boolean to scripts work in cli not in portal
     singularity_image_cleanup:
@@ -213,9 +212,9 @@ node_templates:
                 command: {concat: ['feelpp_mesh_partitioner --ifile ', {get_input: cadmsh}, ' --ofile ', {get_input: mshfile}, ' --nochdir --part ', {get_input: parallel_tasks}]}
                 partition: {get_input: hpc_partition}
                 reservation: {get_input: hpc_reservation}
-                nodes: 1
-                tasks: 1
-                tasks_per_node: 1
+                nodes: {get_input: parallel_nodes}
+                tasks: {get_input: parallel_tasks}
+                tasks_per_node: {get_input: parallel_tasks_per_node}
                 max_time: {get_input: max_time}
             skip_cleanup: {get_input: do_not_delete_workdir}
             deployment:

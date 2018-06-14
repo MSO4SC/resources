@@ -6,10 +6,10 @@ arg=$1
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/" && pwd )"
 ROOT_DIR=${SCRIPT_DIR}/../../../
-#JOB=hifimagnet_test_generic
 
 APP=$(basename ${PWD})
 JOB=$(echo ${APP}_generic)
+
 UPLOAD_DIR=${SCRIPT_DIR}/upload
 TOSCA=blueprint.yaml
 LOCAL=local-blueprint-inputs.yaml
@@ -30,7 +30,12 @@ cd ${UPLOAD_DIR}
 
 case $arg in
     "up" )
-        cfy blueprints upload ${DEBUG} -b "${JOB}" "${TOSCA}"
+        cfy blueprints validate "${TOSCA}"
+	isOK=$?
+	if [ $isOK != 0 ]; then
+	   exit 1
+	fi
+	cfy blueprints upload ${DEBUG} -b "${JOB}" "${TOSCA}"
 	isOK=$?
 	if [ $isOK != 0 ]; then
 	   exit 1
@@ -56,11 +61,11 @@ case $arg in
 
     "down" )
         echo "Uninstalling deployment ${JOB}..."
-        cfy executions start -d "${JOB}" uninstall
+        cfy executions start ${DEBUG} uninstall -d "${JOB}" -p ignore_failure=true
         echo "Deleting deployment ${JOB}..."
-        cfy deployments delete "${JOB}"
+        cfy deployments delete  ${DEBUG} "${JOB}"
         echo "Deleting blueprint ${JOB}..."
-        cfy blueprints delete "${JOB}"
+        cfy blueprints delete  ${DEBUG} "${JOB}"
         ;;
 
     "pkg")

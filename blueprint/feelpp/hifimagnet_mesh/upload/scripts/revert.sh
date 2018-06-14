@@ -41,15 +41,15 @@ export SREGISTRY_CLIENT_SECRETS=$6 >> ${LOG_FILE}
 SREGISTRY_URL=$7
 SREGISTRY_IMAGE=$8
 
-# Ckan:
-if [ $nargs -ge 10 ]; then
-    REMOTE_URL=${10}
-fi
-
 # Feel output result directory
 if [ $nargs -ge 9 ]; then
     FEELPP_OUTPUT_DIR=${9}
     echo "FEELPP_OUTPUT_DIR=" ${FEELPP_OUTPUT_DIR} >> ${LOG_FILE}
+fi
+
+# Ckan:
+if [ $nargs -ge 10 ]; then
+    REMOTE_URL=${10}
 fi
 
 # # upload result to data catalogue
