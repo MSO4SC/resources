@@ -44,6 +44,12 @@ inputs:
         description: ZA formal ligand charge
         default: "'0'"
         type: string
+    
+    # $3 - ZA formal ligand charge    !!!!! USER input
+    za_user_mail:
+        description: ZA formal ligand charge
+#        default: ""
+        type: string
 
      
 
@@ -59,9 +65,9 @@ dsl_definitions:
     - &za_work_path
         '$CURRENT_WORKDIR' # $4 - ZA main simulation directory    !!!!! HPC-dependent
     - &za_mail
-        "durmaz@zib.de" # $5 - ZA user mail address    !!!!! USER input
+        "durmaz@zib.de" # $5 - ZA user mail address
     - &za_image
-        "zibaffinity-latest.simg" # ZA image file name    !!!!! HPC-dependent
+        "zibaffinity.simg" # ZA image file name
     - &za_image_path
         "shub://sregistry.srv.cesga.es/mso4sc/zibaffinity:latest" # ZA image path    !!!!! HPC-dependent
     - &za_gmx_path
@@ -511,6 +517,7 @@ node_templates:
                     - *za_hpc_partition_prep
                     - *za_gmx_path
                     - *za_outfile
+                    - { get_input: za_user_mail }
         relationships:
             - type: job_contained_in_hpc
               target: ft2_node
