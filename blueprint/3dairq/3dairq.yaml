@@ -13,14 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# 3D Air Quality Prediction blueprint
-# by Ákos Kovács & Tamás Budai
+# 3D AirQuality Prediction pilot TOSCA blueprint
+# Akos KOVACS & Tamas BUDAI, 2018, Szechenyi Istvan University
 
 tosca_definitions_version: cloudify_dsl_1_3
 
 imports:
     # to speed things up, it is possible to download this file,
-    - http://www.getcloudify.org/spec/cloudify/4.1/types.yaml
+    - http://www.getcloudify.org/spec/cloudify/4.3.1/types.yaml
     # HPC pluging
     - http://raw.githubusercontent.com/MSO4SC/cloudify-hpc-plugin/master/plugin.yaml
 
@@ -29,15 +29,16 @@ inputs:
     # Job prefix name
     job_prefix:
         description: 3DairqualityPred
-        default: "mso4sc"
+        default: "mcloudjob"
         type: string
 
+    # use internal monitor, leave this empy
     monitor_entrypoint:
         description: Monitor entrypoint IP
-        default: "193.144.35.146"
+        default: ""
         type: string
 
-  # Second HPC configuration
+  # HPC configuration
     mso4sc_hpc_secondary:
         description: Configuration for the secondary HPC to be used
         default: {}
@@ -46,7 +47,7 @@ inputs:
 ##      HPC input parameters
 ##
 
-    workdir:
+    datadir:
         description: working directory for user data
         default: "/nfs"
         type: string
@@ -54,21 +55,6 @@ inputs:
 ##
 ##      User Input Parameters
 ##
-
-    mso4sc_dataset_traffic_file:
-        description: Traffic sim file
-        default: ""
-        type: string
-
-    mso4sc_dataset_mesh_file:
-        description: City mesh file
-        default: ""
-        type: string
-
-    mso4sc_dataset_ltm_file:
-        description: Link file for traffic and city meshes
-        default: ""
-        type: string
 
     wind_profile:
         description: Wind profile (1 or 2)
@@ -98,6 +84,9 @@ node_templates:
             config: {get_input: mso4sc_hpc_secondary}
             external_monitor_entrypoint: { get_input: monitor_entrypoint }
             job_prefix: hpc_SZE_
+            base_dir: "$HOME"
+            workdir_prefix: ""
+            skip_cleanup: True
 
 
   # 3dairq steps
@@ -106,18 +95,15 @@ node_templates:
         properties:
             job_options:
                 type: 'SRUN'
-                command: { concat: [ {get_input: workdir},'/$USER/1-create_traffic.sh ',{get_input: workdir} ]}
+                command: { concat: [ {get_input: datadir},'/3dairq-sing/1-create_traffic.sh ',{get_input: datadir} ]}
                 nodes: 1
                 tasks: 1
                 tasks_per_node: 1
-                max_time: '00:10:00'
+                max_time: '01:00:00'
             deployment:
-                bootstrap: 'scripts/bootstrap_traffic.sh'
-                revert: 'scripts/revert_traffic.sh'
                 inputs:
-                    - { get_input: workdir }
-                    - { get_input: mso4sc_dataset_traffic_file }
-            avoid_cleanup: true
+                    - { get_input: datadir }
+            skip_cleanup: true
         relationships:
                     - type: job_contained_in_hpc
                       target: sze_node
@@ -127,19 +113,16 @@ node_templates:
         properties:
             job_options:
                 type: 'SRUN'
-                command: { concat: [ {get_input: workdir},'/$USER/2-create_mesh.sh ',{get_input: workdir} ]}
+                command: { concat: [ {get_input: datadir},'/3dairq-sing/2-create_mesh.sh ',{get_input: datadir} ]}
                 nodes: 1
                 tasks: 1
                 tasks_per_node: 1
-                max_time: '00:10:00'
+                max_time: '01:00:00'
             deployment:
-                bootstrap: 'scripts/bootstrap_mesh.sh'
-                revert: 'scripts/revert_mesh.sh'
                 inputs:
-                    - { get_input: workdir }
-                    - { get_input: mso4sc_dataset_mesh_file }
+                    - { get_input: datadir }
 
-            avoid_cleanup: true
+            skip_cleanup: true
         relationships:
                     - type: job_contained_in_hpc
                       target: sze_node
@@ -151,18 +134,15 @@ node_templates:
         properties:
             job_options:
                 type: 'SRUN'
-                command: { concat: [ {get_input: workdir},'/$USER/3-create_emission.sh ',{get_input: workdir} ]}
+                command: { concat: [ {get_input: datadir},'/3dairq-sing/3-create_emission.sh ',{get_input: datadir} ]}
                 nodes: 1
                 tasks: 1
                 tasks_per_node: 1
                 max_time: '00:10:00'
             deployment:
-                bootstrap: 'scripts/bootstrap_emission.sh'
-                revert: 'scripts/revert_emission.sh'
                 inputs:
-                    - { get_input: workdir }
-                    - { get_input: mso4sc_dataset_ltm_file }
-            avoid_cleanup: true
+                    - { get_input: datadir }
+            skip_cleanup: true
         relationships:
                     - type: job_contained_in_hpc
                       target: sze_node
@@ -173,7 +153,7 @@ node_templates:
         properties:
             job_options:
                 type: 'SRUN'
-                command: { concat: [ {get_input: workdir},'/$USER/4-create_wind.sh ',{get_input: workdir},' ',{get_input: wind_profile} ]}
+                command: { concat: [ {get_input: datadir},'/3dairq-sing/4-create_wind.sh ',{get_input: datadir},' ',{get_input: wind_profile} ]}
                 nodes: 1
                 tasks: 1
                 tasks_per_node: 1
@@ -181,7 +161,7 @@ node_templates:
             deployment:
                 inputs:
                     - 'wind'
-            avoid_cleanup: true
+            skip_cleanup: true
         relationships:
                     - type: job_contained_in_hpc
                       target: sze_node
@@ -193,15 +173,15 @@ node_templates:
         properties:
             job_options:
                 type: 'SRUN'
-                command: { concat: [ {get_input: workdir},'/$USER/5-fluent-sim.sh ',{get_input: workdir},' ',{get_input: fluent_start_time},' ',{get_input: fluent_iter_1},' ',{get_input: fluent_iter_2} ]}
+                command: { concat: [ {get_input: datadir},'/3dairq-sing/5-fluent-sim.sh ',{get_input: datadir},' ',{get_input: fluent_start_time},' ',{get_input: fluent_iter_1},' ',{get_input: fluent_iter_2} ]}
                 nodes: 1
                 tasks: 1
                 tasks_per_node: 1
-                max_time: '00:20:00'
+                max_time: '02:00:00'
             deployment:
                 inputs:
                     - 'fluent-version'
-            avoid_cleanup: true
+            skip_cleanup: true
         relationships:
                     - type: job_contained_in_hpc
                       target: sze_node
@@ -226,4 +206,4 @@ outputs:
     fluentdispersion_:
         description: 3D AirQuality Prediction on SZE cluster
         value: { get_attribute: [fluentdispersion, job_name] }
-
+				
