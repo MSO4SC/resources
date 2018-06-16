@@ -37,12 +37,6 @@ inputs:
         default: "mso4sc"
         type: string
 
-    # Monitor
-    monitor_entrypoint:
-        description: Monitor entrypoint IP
-        default: "193.144.35.131"
-        type: string
-
     hpc_number_nodes:
         description: number of nodes to run in parallel
         default: 1
@@ -112,7 +106,7 @@ node_templates:
         type: hpc.nodes.Compute
         properties:
             config: { get_input: mso4sc_hpc_primary }
-            external_monitor_entrypoint: { get_input: monitor_entrypoint }
+#            external_monitor_entrypoint: { get_input: monitor_entrypoint }
             job_prefix: { get_input: job_prefix }
             base_dir: {get_input: hpc_basedir}
             workdir_prefix: {get_input: hpc_workdir_prefix}
