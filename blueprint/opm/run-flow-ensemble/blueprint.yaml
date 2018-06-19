@@ -44,18 +44,6 @@ inputs:
         description: Configuration for the secondary HPC to be used
         default: {}
 
-    parallel_tasks:
-        description: number of tasks/processes to run in parallel
-        default: 1
-
-    parallel_nodes:
-        description: number of nodes on which to run
-        default: 1
-
-    parallel_tasks_per_node:
-        description: number of tasks/processes to run in parallel
-        default: 1
-
     max_time:
         description: maximum allowed time for run (minutes and seconds)
         default: '00:30:00'
@@ -76,6 +64,18 @@ inputs:
         description: Filename of the singularity image
         default: "mso4sc-opm-release.simg"
 
+    hpc_partition:
+        description: Computing partition to use on the HPC system chosen
+        default: "thinnodes"
+
+    hpc_reservation:
+        description: Computing reservation to use on the HPC system chosen
+        default: "MSO4SC"
+
+    hpc_array_scale:
+        description: Size of SLURM array (number of cases)
+        type: integer
+        default: 4
 
 node_templates:
     first_hpc:
@@ -98,18 +98,19 @@ node_templates:
                     - gcc/5.3.0
                     - openmpi/1.10.2
                     - singularity/2.4.2
-                partition: 'thin-shared'
+                partition: { get_input: hpc_partition }
+                reservation: { get_input: hpc_reservation }
                 image: { concat: [ '$CURRENT_WORKDIR/', { get_input: singularity_image_filename } ] }
                 home: '$HOME:/home/$USER'
                 volumes:
                     - '/scratch '
                     - '/mnt'
                 command: '$CURRENT_WORKDIR/run_flow.sh'
-                nodes: { get_input: parallel_nodes }
-                tasks: { get_input: parallel_tasks }
-                tasks_per_node: { get_input: parallel_tasks_per_node }
+                nodes: 1
+                tasks: 1
+                tasks_per_node: 1
                 max_time: { get_input: max_time }
-                scale: 4
+                scale: { get_input: hpc_array_scale }
             deployment:
                 bootstrap: 'scripts/bootstrap_run-flow-ensemble.sh'
                 revert: 'scripts/revert_run-flow-ensemble.sh'
