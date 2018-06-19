@@ -33,6 +33,7 @@ cat > $ZA_SLURM <<- EOM
 #SBATCH --ntasks-per-node 1
 #SBATCH -t 00:00:59
 
+
 echo -e "\\nhostname:\$(srun hostname)\\n"
 
 cd $2

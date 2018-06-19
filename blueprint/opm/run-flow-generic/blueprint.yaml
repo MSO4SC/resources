@@ -70,11 +70,11 @@ inputs:
 
     singularity_image_uri:
         description: URI pointing to the singularity image
-        default: "shub://sregistry.srv.cesga.es/mso4sc/opm:2017.10.1"
+        default: "shub://sregistry.srv.cesga.es/mso4sc/opm-release:latest"
 
     singularity_image_filename:
         description: Filename of the singularity image
-        default: "mso4sc-opm-2017.10.1.simg"
+        default: "mso4sc-opm-release.simg"
 
 
 node_templates:
