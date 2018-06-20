@@ -29,7 +29,7 @@ imports:
 inputs:
     email_user:
         description: email address for reporting
-        default: "christophe.trophime@lncmi.cnrs.fr"
+        default: "frist.lastname@domain"
     email_type:
         type: string
         description: define mail-type
