@@ -23,27 +23,27 @@ imports:
 
 inputs:
     # Feelpp application
-    feelpp_e2b_IOP:
+    patient_IOP:
         description: Intra-Ocular Pressure
         default: '16.0'
         type: string
 
-    feelpp_e2b_RLTp:
+    patient_RLTp:
         description: Retro-Lamina Tubular pressure
         default: '7.0'
         type: string
 
-    feelpp_e2b_HR:
+    patient_HR:
         description: Heart Rate
         default: '7.0'
         type: string
 
-    feelpp_e2b_SBP:
+    patient_SBP:
         description: Systolic Blood Pressure
         default: '120'
         type: string
 
-    feelpp_e2b_DBP:
+    patient_DBP:
         description: Diastolic Blood Pressure
         default: '80'
         type: string
@@ -51,16 +51,16 @@ inputs:
 
 {% if level >= '1' %}
 
-    feelpp_e2b_CRVp:
+    patient_CRVp:
         description: the CRV pressure that infer on the internal lateral boundary for the Darcy problem (CRVp)
         default: "19"
         type: string
 
 {% endif  %}
 
-{% if level >= '3' %}
+{% if level >= '2' %}
 
-    feelpp_e2b_CRAp:
+    patient_CRAp:
         description: the CRA pressure that infer on the internal lateral boundary for the elastic problem (CRAp)
         default: "80"
         type: string
@@ -153,16 +153,16 @@ node_templates:
                 command: { concat: [
                     'feelpp_e2b_main', ' ',
                     '--eye2brain.level=',' ', '{{ level }}', ' ',
-                    '--eye2brain.IOP=',' ', { get_input: feelpp_e2b_IOP }, ' ',
-                    '--eye2brain.RLTp=',' ', { get_input: feelpp_e2b_RLTp }, ' ',
-                    '--eye2brain.HR=',' ', { get_input: feelpp_e2b_HR }, ' ',
-                    '--eye2brain.SBP=',' ', { get_input: feelpp_e2b_SBP }, ' ',
-                    '--eye2brain.DBP=',' ', { get_input: feelpp_e2b_DBP }, ' ',
+                    '--eye2brain.IOP=',' ', { get_input: patient_IOP }, ' ',
+                    '--eye2brain.RLTp=',' ', { get_input: patient_RLTp }, ' ',
+                    '--eye2brain.HR=',' ', { get_input: patient_HR }, ' ',
+                    '--eye2brain.SBP=',' ', { get_input: patient_SBP }, ' ',
+                    '--eye2brain.DBP=',' ', { get_input: patient_DBP }, ' ',
                     {% if level >= '1' %}
-                    '--eye2brain.CRVp=',' ', { get_input: feelpp_e2b_CRVp }, ' ',
+                    '--eye2brain.CRVp=',' ', { get_input: patient_CRVp }, ' ',
                     {% endif  %}
                     {% if level >= '2' %}
-                    '--eye2brain.CRAp=',' ', { get_input: feelpp_e2b_CRAp }, ' ',
+                    '--eye2brain.CRAp=',' ', { get_input: patient_CRAp }, ' ',
                     {% endif  %}
                     { get_input: feelpp_e2b_cli } ] }
                 tasks: { get_input: job_tasks }
