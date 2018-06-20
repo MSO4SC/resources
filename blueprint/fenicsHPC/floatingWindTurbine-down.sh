@@ -1,10 +1,10 @@
 #!/bin/bash
 (
-    cd run-flow-generic
+    cd floatingWindTurbine
     echo "Uninstalling deployment.."
-    cfy executions start -d run-flow-generic uninstall
+    cfy executions start -d floatingWindTurbine uninstall
     echo "Deleting deployment.."
-    cfy deployments delete run-flow-generic
+    cfy deployments delete floatingWindTurbine
     echo "Deleting blueprint.."
-    cfy blueprints delete run-flow-generic
+    cfy blueprints delete floatingWindTurbine
 )
