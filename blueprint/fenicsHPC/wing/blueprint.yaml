@@ -44,25 +44,41 @@ inputs:
         description: Configuration for the secondary HPC to be used
         default: {}
 
+    parallel_tasks:
+        description: number of tasks/processes to run in parallel
+        default: 32
+
+    parallel_nodes:
+        description: number of nodes on which to run
+        default: 2
+
+    parallel_tasks_per_node:
+        description: number of tasks/processes to run in parallel
+        default: 16
+
     max_time:
         description: maximum allowed time for run (minutes and seconds)
         default: '00:30:00'
         
     mso4sc_dataset_input_url:
         description: url to retrieve for case file
-        default: "https://gitlab.srv.cesga.es/atgeirr/OPM-public-testing-data/raw/master/SmallEnsemble.tgz"
+        default: "NONE"
 
     base_dir:
         description: Working directory
         default: "$LUSTRE"
+   
+    workdir_pref:
+        description: directory prefix
+        default: "wing"
 
     singularity_image_uri:
         description: URI pointing to the singularity image
-        default: "shub://sregistry.srv.cesga.es/mso4sc/opm-release:latest"
+        default: "shub://sregistry.srv.cesga.es/mso4sc/fenics-unicorn:latest"
 
     singularity_image_filename:
         description: Filename of the singularity image
-        default: "mso4sc-opm-release.simg"
+        default: "mso4sc-fenics-unicorn-latest.simg"
 
     hpc_partition:
         description: Computing partition to use on the HPC system chosen
@@ -72,28 +88,40 @@ inputs:
         description: Computing reservation to use on the HPC system chosen
         default: "MSO4SC"
 
-    hpc_array_scale:
-        description: Size of SLURM array (number of cases)
-        type: integer
-        default: 4
+    app_T:
+        description: final time for the simulation
+        default: "'0.4'"
+
+    app_alpha:
+        description: angle of attack
+        default: "'0.0'"
+
+    app_cfl_target:
+        description: cfl number for decision of the timestep
+        default: "'20.0'"
+
+    app_trip_factor:
+        description: trip parameter
+        default: "'0.0'"
+
+
 
 node_templates:
-    first_hpc:
+    main_hpc_node:
         type: hpc.nodes.Compute
         properties:
             config: { get_input: mso4sc_hpc_primary }
             external_monitor_entrypoint: { get_input: monitor_entrypoint }
             base_dir: { get_input: base_dir }
-            workdir_prefix: "opm_ensemble"
+            workdir_prefix: { get_input: workdir_pref }
             job_prefix: { get_input: job_prefix }
             skip_cleanup: True
 #            simulate: True  # COMMENT to test against a real HPC
 
-    opm_flow_ensemble_job:
+    wing_compile:
         type: hpc.nodes.singularity_job
         properties:
             job_options:
-                type: 'SBATCH'
                 modules:
                     - gcc/5.3.0
                     - openmpi/1.10.2
@@ -101,29 +129,60 @@ node_templates:
                 partition: { get_input: hpc_partition }
                 reservation: { get_input: hpc_reservation }
                 image: { concat: [ '$CURRENT_WORKDIR/', { get_input: singularity_image_filename } ] }
-                home: '$HOME:/home/$USER'
                 volumes:
                     - '/scratch '
-                    - '/mnt'
-                command: '$CURRENT_WORKDIR/run_flow.sh'
+                    - '/mnt -B $PWD/unicorn:/home  --pwd /home/wing_sim01'
+                command: 'make UNICORNLIBDIR=/home > make_log 2>make_err'
                 nodes: 1
                 tasks: 1
                 tasks_per_node: 1
                 max_time: { get_input: max_time }
-                scale: { get_input: hpc_array_scale }
             deployment:
-                bootstrap: 'scripts/bootstrap_run-flow-ensemble.sh'
-                revert: 'scripts/revert_run-flow-ensemble.sh'
+                bootstrap: 'scripts/singularity_bootstrap.sh'
+                revert: 'scripts/singularity_revert.sh'
                 inputs:
                     - { get_input: mso4sc_dataset_input_url }
                     - { get_input: singularity_image_uri }
                     - { get_input: singularity_image_filename }
-            skip_cleanup: True
+                    - { get_input: app_T }
+                    - { get_input: app_alpha }
+                    - { get_input: app_cfl_target }
+                    - { get_input: app_trip_factor }
         relationships:
             - type: job_contained_in_hpc
-              target: first_hpc
+              target: main_hpc_node
+
+    wing_run:
+        type: hpc.nodes.singularity_job
+        properties:
+            job_options:
+                modules:
+                    - gcc/5.3.0
+                    - openmpi/1.10.2
+                    - singularity/2.4.2
+                partition: { get_input: hpc_partition }
+                reservation: { get_input: hpc_reservation }
+                image: { concat: [ '$CURRENT_WORKDIR/', { get_input: singularity_image_filename } ] }
+                volumes:
+                    - '/scratch '
+                    - '/mnt -B $PWD/unicorn:/home  --pwd /home/wing_sim01'
+                command: './wing > run_log 2> run_err'
+                nodes: { get_input: parallel_nodes }
+                tasks: { get_input: parallel_tasks }
+                tasks_per_node: { get_input: parallel_tasks_per_node }
+                max_time: { get_input: max_time }
+
+        relationships:
+            - type: job_contained_in_hpc
+              target: main_hpc_node
+            - type: job_depends_on
+              target: wing_compile
+
 
 outputs:
-    single_job_name:
-        description: single job name in the HPC
-        value: { get_attribute: [opm_flow_ensemble_job, job_name] }
+    compile_job_name:
+        description: compile job name in the HPC
+        value: { get_attribute: [wing_compile, job_name] }
+    run_job_name:
+        description: run job name in the HPC
+        value: { get_attribute: [wing_run, job_name] }

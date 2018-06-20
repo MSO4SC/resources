@@ -70,12 +70,19 @@ inputs:
 
     singularity_image_uri:
         description: URI pointing to the singularity image
-        default: "shub://sregistry.srv.cesga.es/mso4sc/opm:2017.10.1"
+        default: "shub://sregistry.srv.cesga.es/mso4sc/opm-release:latest"
 
     singularity_image_filename:
         description: Filename of the singularity image
-        default: "mso4sc-opm-2017.10.1.simg"
+        default: "mso4sc-opm-release.simg"
 
+    hpc_partition:
+        description: Computing partition to use on the HPC system chosen
+        default: "thinnodes"
+
+    hpc_reservation:
+        description: Computing reservation to use on the HPC system chosen
+        default: "MSO4SC"
 
 node_templates:
     main_hpc_node:
@@ -97,7 +104,8 @@ node_templates:
                     - gcc/5.3.0
                     - openmpi/1.10.2
                     - singularity/2.4.2
-                partition: 'thin-shared'
+                partition: { get_input: hpc_partition }
+                reservation: { get_input: hpc_reservation }
                 image: { concat: [ '$CURRENT_WORKDIR/', { get_input: singularity_image_filename } ] }
                 home: '$HOME:/home/$USER'
                 volumes:
