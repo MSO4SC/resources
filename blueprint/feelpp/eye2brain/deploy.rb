@@ -9,7 +9,14 @@ for l in 0..2
   unless Dir.exist?("level#{l}/scripts")
     system 'cp', '-r', 'upload/scripts', "level#{l}"
   end
-  File.write("level#{l}/blueprint.yaml", @template.render("level" => "#{l}"))
+  File.write("level#{l}/blueprint.yaml", @template.render(
+               "level" => "#{l}",
+               "job_tasks" => "1"
+             )) if l == 0
+  File.write("level#{l}/blueprint.yaml", @template.render(
+               "level" => "#{l}",
+               "job_tasks" => "10",
+             )) unless l == 0
   if File.exist?("feelpp_e2b_level#{l}.tar")
     system 'rm',"feelpp_e2b_level#{l}.tar"
   end
