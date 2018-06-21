@@ -105,6 +105,9 @@ inputs:
         default: "'0.0'"
 
 
+    app_adaptive_iterations:
+        description: number of adaptive refinements
+        default: "'3'"
 
 node_templates:
     main_hpc_node:
@@ -153,7 +156,7 @@ node_templates:
               target: main_hpc_node
 
     wing_run:
-        type: hpc.nodes.singularity_job
+        type: hpc.nodes.job
         properties:
             job_options:
                 modules:
@@ -162,16 +165,19 @@ node_templates:
                     - singularity/2.4.2
                 partition: { get_input: hpc_partition }
                 reservation: { get_input: hpc_reservation }
-                image: { concat: [ '$CURRENT_WORKDIR/', { get_input: singularity_image_filename } ] }
-                volumes:
-                    - '/scratch '
-                    - '/mnt -B $PWD/unicorn:/home  --pwd /home/wing_sim01'
-                command: './wing > run_log 2> run_err'
-                nodes: { get_input: parallel_nodes }
-                tasks: { get_input: parallel_tasks }
-                tasks_per_node: { get_input: parallel_tasks_per_node }
-                max_time: { get_input: max_time }
-
+                command: 'touch.script'
+            deployment:
+                bootstrap: 'scripts/sbatch_bootstrap.sh'
+                revert: 'scripts/sbatch_revert.sh'
+                inputs:
+                    - { get_input: mso4sc_dataset_input_url }
+                    - { get_input: singularity_image_uri }
+                    - { get_input: singularity_image_filename }
+                    - { get_input: parallel_tasks }
+                    - { get_input: parallel_nodes }
+                    - { get_input: parallel_tasks_per_node }
+                    - { get_input: max_time }
+                    - { get_input: app_adaptive_iterations }
         relationships:
             - type: job_contained_in_hpc
               target: main_hpc_node
