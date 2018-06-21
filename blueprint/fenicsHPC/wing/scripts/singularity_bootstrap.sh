@@ -11,9 +11,9 @@ echo $5 >> bootstrap_log
 echo $6 >> bootstrap_log
 echo $7 >> bootstrap_log
 
-REMOTE_URL=$1
-IMAGE_URI=$2
-IMAGE_NAME=$3
+REMOTE_URL=$7
+IMAGE_URI=$1
+IMAGE_NAME=$2
 
 # cd $CURRENT_WORKDIR ## not needed, already started there
 singularity pull --name $IMAGE_NAME $IMAGE_URI
@@ -25,7 +25,7 @@ git fetch --all
 git checkout next
 
 cd wing_sim01
-if [ ${REMOTE_URL} != "NONE" ]
+if [ ${REMOTE_URL} != "NONE" ] && [ ${REMOTE_URL}x != "x" ] 
 then
 	wget $REMOTE_URL
 	ARCHIVE=$(basename $REMOTE_URL)
@@ -39,10 +39,10 @@ echo -e "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" > parameters.xml
 echo -e "" >> parameters.xml
 echo -e "<dolfin xmlns:dolfin=\"http://fenicsproject.org\">" >> parameters.xml
 echo -e "  <parameters name=\"parameters\">" >> parameters.xml 
-echo -e "    <parameter name=\"T\" type=\"real\" value=\"$4\"/>" >> parameters.xml
-echo -e "    <parameter name=\"alpha\" type=\"real\" value=\"$5\"/>" >> parameters.xml
-echo -e "    <parameter name=\"cfl_target\" type=\"real\" value=\"$6\"/>" >> parameters.xml
-echo -e "    <parameter name=\"trip_factor\" type=\"real\" value=\"$7\"/>" >> parameters.xml
+echo -e "    <parameter name=\"T\" type=\"real\" value=\"$3\"/>" >> parameters.xml
+echo -e "    <parameter name=\"alpha\" type=\"real\" value=\"$4\"/>" >> parameters.xml
+echo -e "    <parameter name=\"cfl_target\" type=\"real\" value=\"$5\"/>" >> parameters.xml
+echo -e "    <parameter name=\"trip_factor\" type=\"real\" value=\"$6\"/>" >> parameters.xml
 echo -e "  </parameters>" >> parameters.xml
 echo -e "</dolfin>" >> parameters.xml
 

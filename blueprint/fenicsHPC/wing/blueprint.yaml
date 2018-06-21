@@ -144,13 +144,13 @@ node_templates:
                 bootstrap: 'scripts/singularity_bootstrap.sh'
                 revert: 'scripts/singularity_revert.sh'
                 inputs:
-                    - { get_input: mso4sc_dataset_input_url }
                     - { get_input: singularity_image_uri }
                     - { get_input: singularity_image_filename }
                     - { get_input: app_T }
                     - { get_input: app_alpha }
                     - { get_input: app_cfl_target }
                     - { get_input: app_trip_factor }
+                    - { get_input: mso4sc_dataset_input_url }
         relationships:
             - type: job_contained_in_hpc
               target: main_hpc_node
