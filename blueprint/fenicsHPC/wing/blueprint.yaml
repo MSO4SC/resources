@@ -169,7 +169,6 @@ node_templates:
                 bootstrap: 'scripts/sbatch_bootstrap.sh'
                 revert: 'scripts/sbatch_revert.sh'
                 inputs:
-                    - { get_input: mso4sc_dataset_input_url }
                     - { get_input: singularity_image_uri }
                     - { get_input: singularity_image_filename }
                     - { get_input: parallel_tasks }
@@ -179,6 +178,7 @@ node_templates:
                     - { get_input: app_adaptive_iterations }
                     - { get_input: hpc_reservation }
                     - { get_input: hpc_partition }
+                    - { get_input: mso4sc_dataset_input_url }
         relationships:
             - type: job_contained_in_hpc
               target: main_hpc_node

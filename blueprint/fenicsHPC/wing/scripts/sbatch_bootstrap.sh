@@ -16,15 +16,15 @@ echo $8 >> bootstrap_log
 echo $9 >> bootstrap_log
 echo ${10} >> bootstrap_log
 
-REMOTE_URL=$1
-IMAGE_URI=$2
-IMAGE_NAME=$3
+REMOTE_URL=${10}
+IMAGE_URI=$1
+IMAGE_NAME=$2
 
-NO_CORES=$4
-NO_NODES=$5
-NO_CPN=$6
-TIME=$7
-ADAPT_ITER=$(($8))
+NO_CORES=$3
+NO_NODES=$4
+NO_CPN=$5
+TIME=$6
+ADAPT_ITER=$(($7))
 
 
 FILE="touch.script"
@@ -32,12 +32,12 @@ FILE="touch.script"
 cat > $FILE <<- EOM
 #!/bin/bash -l
 
-#SBATCH -p ${10}
+#SBATCH -p $9
 #SBATCH -N $NO_NODES
 #SBATCH -n $NO_CORES
 #SBATCH --ntasks-per-node=$NO_CPN
-#SBATCH -t $7
-#SBATCH --reservation=$9
+#SBATCH -t $TIME
+#SBATCH --reservation=$8
 
 module add gcc/5.3.0
 module add openmpi/1.10.2
