@@ -46,15 +46,15 @@ inputs:
 
     parallel_tasks:
         description: number of tasks/processes to run in parallel
-        default: 32
+        default: "'32'"
 
     parallel_nodes:
         description: number of nodes on which to run
-        default: 2
+        default: "'2'"
 
     parallel_tasks_per_node:
         description: number of tasks/processes to run in parallel
-        default: 16
+        default: "'16'"
 
     max_time:
         description: maximum allowed time for run (minutes and seconds)
@@ -163,9 +163,8 @@ node_templates:
                     - gcc/5.3.0
                     - openmpi/1.10.2
                     - singularity/2.4.2
-                partition: { get_input: hpc_partition }
-                reservation: { get_input: hpc_reservation }
                 command: 'touch.script'
+                type: 'SBATCH'
             deployment:
                 bootstrap: 'scripts/sbatch_bootstrap.sh'
                 revert: 'scripts/sbatch_revert.sh'
@@ -178,6 +177,8 @@ node_templates:
                     - { get_input: parallel_tasks_per_node }
                     - { get_input: max_time }
                     - { get_input: app_adaptive_iterations }
+                    - { get_input: hpc_reservation }
+                    - { get_input: hpc_partition }
         relationships:
             - type: job_contained_in_hpc
               target: main_hpc_node
