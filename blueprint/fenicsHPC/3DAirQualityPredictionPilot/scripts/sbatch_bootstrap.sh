@@ -43,7 +43,7 @@ module add openmpi/1.10.2
 module add singularity/2.4.2
 
 mkdir results
-mpirun -n $NO_CORES singularity exec -B \$PWD/unicorn:/home -B /mnt  -B /scratch --pwd /home/3DAirQualityPredictionPilot $IMAGE_NAME ./3DAirQualityPredictionPilot > log1 2>log2
+mpirun -n $NO_CORES singularity exec -B \$PWD/unicorn:/home -B /mnt  -B /scratch --pwd /home/3DAirQualityPredictionPilot $IMAGE_NAME ./3dAirQualityPredictionPilot > log2 2>log2
 mpirun -n 1 singularity exec -B \$PWD/unicorn:/home -B /mnt  -B /scratch --pwd /home/3DAirQualityPredictionPilot $IMAGE_NAME /usr/local/bin/dolfin_post -m mesh_out.bin -t vtk -n 200 -s velocity
 mv ./unicorn/3DAirQualityPredictionPilot/*bin results
 mv ./unicorn/3DAirQualityPredictionPilot/*vtu results
