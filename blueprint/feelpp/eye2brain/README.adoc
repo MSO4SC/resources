@@ -1,0 +1,13 @@
+=
+
+to install the liquid template system
+----
+bundle
+----
+
+to generate the blueprints
+----
+ruby deploy.rb
+----
+
+it generates the directories level0, level1 and level2
