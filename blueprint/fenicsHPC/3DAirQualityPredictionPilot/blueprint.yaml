@@ -107,6 +107,15 @@ inputs:
     app_discrete_tolerance:
         description: the discrete tolerance 
         default: "'0.01'"
+    app_uinx:
+        description: inflow velocity x direction
+        default: "'1.0'"
+    app_uiny:
+        description: inflow velocity y direction 
+        default: "'0.0'"
+    app_uinz:
+        description: inflow  velocity z direction
+        default: "'0.0'"
 
 node_templates:
     main_hpc_node:
@@ -150,6 +159,9 @@ node_templates:
                     - { get_input: app_cfl_target }
                     - { get_input: app_trip_factor }
                     - { get_input: app_discrete_tolerance }
+                    - { get_input: app_uinx }
+                    - { get_input: app_uiny }
+                    - { get_input: app_uinz }
                     - { get_input: mso4sc_dataset_input_url }
         relationships:
             - type: job_contained_in_hpc

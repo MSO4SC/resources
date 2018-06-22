@@ -11,8 +11,11 @@ echo $5 >> bootstrap_log
 echo $6 >> bootstrap_log
 echo $7 >> bootstrap_log
 echo $8 >> bootstrap_log
+echo $9 >> bootstrap_log
+echo $10 >> bootstrap_log
+echo $11 >> bootstrap_log
 
-REMOTE_URL=$8
+REMOTE_URL=${11}
 IMAGE_URI=$1
 IMAGE_NAME=$2
 
@@ -46,6 +49,9 @@ echo -e "    <parameter name=\"alpha\" type=\"real\" value=\"$4\"/>" >> paramete
 echo -e "    <parameter name=\"cfl_target\" type=\"real\" value=\"$5\"/>" >> parameters.xml
 echo -e "    <parameter name=\"trip_factor\" type=\"real\" value=\"$6\"/>" >> parameters.xml
 echo -e "    <parameter name=\"discrete_tolerance\" type=\"real\" value=\"$7\"/>" >> parameters.xml
+echo -e "    <parameter name=\"Uinx\" type=\"real\" value=\"$8\"/>" >> parameters.xml
+echo -e "    <parameter name=\"Uiny\" type=\"real\" value=\"$9\"/>" >> parameters.xml
+echo -e "    <parameter name=\"Uinz\" type=\"real\" value=\"${10}\"/>" >> parameters.xml
 echo -e "  </parameters>" >> parameters.xml
 echo -e "</dolfin>" >> parameters.xml
 
