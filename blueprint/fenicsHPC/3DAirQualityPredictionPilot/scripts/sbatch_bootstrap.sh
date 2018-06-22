@@ -44,7 +44,7 @@ module add singularity/2.4.2
 
 mkdir results
 mpirun -n $NO_CORES singularity exec -B \$PWD/unicorn:/home -B /mnt  -B /scratch --pwd /home/3DAirQualityPredictionPilot $IMAGE_NAME ./3dAirQualityPredictionPilot > log1 2>log2
-mpirun -n 1 singularity exec -B \$PWD/unicorn:/home -B /mnt  -B /scratch --pwd /home/3DAirQualityPredictionPilot $IMAGE_NAME /usr/local/bin/dolfin_post -m mesh_out.bin -t vtk -n 200 -s velocity
+mpirun -n 1 singularity exec -B \$PWD/unicorn:/home -B /mnt  -B /scratch --pwd /home/3DAirQualityPredictionPilot $IMAGE_NAME /usr/local/bin/dolfin_post -m mesh_out.bin -t vtk -n 50 -s velocity
 mv ./unicorn/3DAirQualityPredictionPilot/*bin results
 mv ./unicorn/3DAirQualityPredictionPilot/*vtu results
 mv ./unicorn/3DAirQualityPredictionPilot/*pvd results
