@@ -13,6 +13,9 @@ cat > $ZA_SLURM <<- EOM
 ###SBATCH -n 1
 #SBATCH --ntasks-per-node=1
 #SBATCH -t 00:15:00
+#SBATCH --mail-user=$5
+#SBATCH --mail-type=ALL
+###SBATCH --reservation=MSO4SC
 
 echo -e "\\nhostname:\$(srun hostname)\\n"
 
