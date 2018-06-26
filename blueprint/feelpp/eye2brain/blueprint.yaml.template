@@ -1,7 +1,6 @@
-########
+######## -*- mode: yaml -*-
 # Copyright (c) 2017 MSO4SC
-# Author(s) javier.carnero@atos.net
-#           guillaume.dolle@cemosis.fr
+# Author(s) christophe.prudhomme@cemosis.fr
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,20 +22,59 @@ imports:
 
 inputs:
     # Feelpp application
-    feelpp_solid_case:
-        description: testcase from github repository
-        default: 'FEELPP_DEFAULT_OPTION_CASE'
+    e2b_patient_IOP:
+        description: Intra-Ocular Pressure
+        default: '16.0'
         type: string
 
-    feelpp_solid_cli:
-        description: command line interface for solid toolbox
+    e2b_patient_RLTp:
+        description: Retro-Laminar Tissue pressure
+        default: '7.0'
+        type: string
+
+    e2b_patient_HR:
+        description: Heart Rate
+        default: '7.0'
+        type: string
+
+    e2b_patient_SBP:
+        description: Systolic Blood Pressure
+        default: '120'
+        type: string
+
+    e2b_patient_DBP:
+        description: Diastolic Blood Pressure
+        default: '80'
+        type: string
+
+
+{% if level >= '1' %}
+
+    e2b_patient_CRVp:
+        description: the CRV pressure that infer on the internal lateral boundary for the Darcy problem (CRVp)
+        default: "19"
+        type: string
+
+{% endif  %}
+
+{% if level >= '2' %}
+
+    e2b_patient_CRAp:
+        description: the CRA pressure that infer on the internal lateral boundary for the elastic problem (CRAp)
+        default: "80"
+        type: string
+
+{% endif  %}
+
+    feelpp_e2b_cli:
+        description: command line interface for Eye2Brain
         default: ""
         type: string
 
     # Job options:
     job_tasks:
         description: number of tasks/processes to run in parallel
-        default: 4
+        default: {{ job_tasks }}
         type: integer
 
     job_max_time:
@@ -46,7 +84,7 @@ inputs:
 
     job_partition:
         description: partition to choose depending on the targeted machine
-        default: 'thin-shared'
+        default: 'thinnodes'
         type: string
 
     # CESGA FTII parameters
@@ -62,15 +100,15 @@ dsl_definitions:
     - &monitor_entrypoint
         ""
     - &prefix
-        "feelpp_toolbox_solid"
+        "feelpp_e2b"
     - &job_prefix #Job name prefix in HPCs
-        "feelpp_"
+        "feelpp_e2b"
     - &job_nodes #number of nodes
         1
     - &job_tasks_per_node #number of tasks/processes per node
         1
     - &job_hpc_reservation #slurm partition to choose depending on the targeted machine
-        ''
+        'MSO4SC'
     - &job_hpc_modules #modules to load depending on the targeted machine
         - gcc/6.1.0
         - openmpi/1.10.2
@@ -84,11 +122,11 @@ dsl_definitions:
     - &skip_cleanup #erase orchestrator temporary generated files (debug).
         True
     - &singularity_image_uri #URI pointing to the singularity image
-        "shub://sregistry.srv.cesga.es/mso4sc/feelpp-toolboxes:develop-v0.105.0-ubuntu-16.04"
+        "shub://sregistry.srv.cesga.es/mso4sc/feelpp_eye2brain-develop-v0.106.0-alpha.1-ubuntu-16.04"
     - &singularity_image_filename #Filename of the singularity image
-        "/opt/cesga/singularity/localrepo/mso4sc-feelpp-toolboxes-develop-v0.105.0-ubuntu-16.04.simg"
+        "/opt/cesga/singularity/localrepo/feelpp_eye2brain-develop-v0.106.0-alpha.1-ubuntu-16.04.simg"
     - &singularity_image_file
-        '/opt/cesga/singularity/localrepo/mso4sc-feelpp-toolboxes-develop-v0.105.0-ubuntu-16.04.simg' #'${CURRENT_WORKDIR}/singularity_images/mso4sc-feelpp-toolbox-v0.105.0.simg'
+        '/opt/cesga/singularity/localrepo/feelpp_eye2brain-develop-v0.106.0-alpha.1-ubuntu-16.04.simg' #'${CURRENT_WORKDIR}/singularity_images/mso4sc-feelpp-toolbox-v0.105.0.simg'
     - &singularity_image_dir
         '/opt/cesga/singularity/localrepo/' #'${CURRENT_WORKDIR}/singularity_images/'
 
@@ -102,7 +140,7 @@ node_templates:
             workdir_prefix: *prefix
             job_prefix: *job_prefix
 
-    job_toolboxes:
+    job_e2b:
         type: hpc.nodes.singularity_job
         properties:
             job_options:
@@ -112,9 +150,20 @@ node_templates:
                 home: '${HOME}:/home/${USER}'
                 volumes: *job_hpc_volumes
                 command: { concat: [
-                    'feelpp_toolbox_', 'solid', ' ',
-                    '--case',' ', { get_input: feelpp_solid_case }, ' ',
-                    { get_input: feelpp_solid_cli } ] }
+                    'feelpp_e2b_main', ' ',
+                    '--eye2brain.level=',' ', '{{ level }}', ' ',
+                    '--eye2brain.IOP=',' ', { get_input: e2b_patient_IOP }, ' ',
+                    '--eye2brain.RLTp=',' ', { get_input: e2b_patient_RLTp }, ' ',
+                    '--eye2brain.HR=',' ', { get_input: e2b_patient_HR }, ' ',
+                    '--eye2brain.SBP=',' ', { get_input: e2b_patient_SBP }, ' ',
+                    '--eye2brain.DBP=',' ', { get_input: e2b_patient_DBP }, ' ',
+                    {% if level >= '1' %}
+                    '--eye2brain.CRVp=',' ', { get_input: e2b_patient_CRVp }, ' ',
+                    {% endif  %}
+                    {% if level >= '2' %}
+                    '--eye2brain.CRAp=',' ', { get_input: e2b_patient_CRAp }, ' ',
+                    {% endif  %}
+                    { get_input: feelpp_e2b_cli } ] }
                 tasks: { get_input: job_tasks }
                 max_time: { get_input: job_max_time }
                 image: *singularity_image_file
@@ -132,6 +181,6 @@ node_templates:
               target: main_hpc
 
 outputs:
-    job_toolboxes:
-        description: feelpp_toolboxes results
-        value: { get_attribute: [job_toolboxes, job_name] }
+    job_e2b:
+        description: feelpp_e2b results
+        value: { get_attribute: [job_e2b, job_name] }

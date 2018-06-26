@@ -1,8 +1,7 @@
 #!/bin/bash -l
 
-module load singularity/2.4.2
+module load singularity/2.3.1
 
-URI=$1
-FILENAME=$2
-
-singularity pull --name $FILENAME $URI &> bootstrap.log
+if [ ! -f $1/$2 ]; then
+    cp $SINGULARITY_REPO/$2 $1
+fi
