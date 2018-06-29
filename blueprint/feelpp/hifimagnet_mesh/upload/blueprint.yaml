@@ -129,6 +129,22 @@ inputs:
         description: url to retrieve for case file
         default: "None"
 
+    mso4sc_dataset_model:
+        description: Model dataset
+        default: ""
+
+    mso4sc_datacatalogue_entrypoint:
+        description: entrypoint of the data catalogue
+        default: "http://193.144.35.207"
+
+    mso4sc_datacatalogue_key:
+        description: API Key to publish the outputs
+        default: ""
+
+    mso4sc_outdataset_outputs_at:
+        description: ID of the CKAN output dataset
+        default: ""
+
     # constraints:
     #     - valid_values:
     #           [ "feelpp_hfm_thermoelectric_model_3D_V1T1_N1", "feelpp_hfm_coupledcartmodel_3DP1N1", "feelpp_hfm_coupledmodel_3D_P1N1" ]
