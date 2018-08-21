@@ -13,5 +13,6 @@ cat > $FILE <<- EOM
 
 # DYNAMIC VARIABLES
 
-touch test_$1.test
+printf "$3" > test_$1.test
+
 EOM
