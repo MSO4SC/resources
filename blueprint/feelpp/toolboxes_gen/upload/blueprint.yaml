@@ -36,7 +36,7 @@ inputs:
     # Job options:
     job_tasks:
         description: number of tasks/processes to run in parallel
-        default: 1
+        default: 4
         type: integer
 
     job_max_time:
@@ -46,7 +46,7 @@ inputs:
 
     job_partition:
         description: partition to choose depending on the targeted machine
-        default: 'thinnodes'
+        default: 'thin-shared'
         type: string
 
     # CESGA FTII parameters
@@ -64,7 +64,7 @@ dsl_definitions:
     - &prefix
         "feelpp_toolbox_solid"
     - &job_prefix #Job name prefix in HPCs
-        "mso_"
+        "feelpp_"
     - &job_nodes #number of nodes
         1
     - &job_tasks_per_node #number of tasks/processes per node
@@ -84,11 +84,11 @@ dsl_definitions:
     - &skip_cleanup #erase orchestrator temporary generated files (debug).
         True
     - &singularity_image_uri #URI pointing to the singularity image
-        "shub://sregistry.srv.cesga.es/mso4sc/feelpp-toolboxes:develop-v0.105.0-rc.1-ubuntu-16.04"
+        "shub://sregistry.srv.cesga.es/mso4sc/feelpp-toolboxes:develop-v0.105.0-ubuntu-16.04"
     - &singularity_image_filename #Filename of the singularity image
-        "/opt/cesga/singularity/localrepo/mso4sc-feelpp-toolboxes-develop-v0.105.0-rc.1-ubuntu-16.04.simg"
+        "/opt/cesga/singularity/localrepo/mso4sc-feelpp-toolboxes-develop-v0.105.0-ubuntu-16.04.simg"
     - &singularity_image_file
-        '/opt/cesga/singularity/localrepo/mso4sc-feelpp-toolboxes-develop-v0.105.0-rc.1-ubuntu-16.04.simg' #'${CURRENT_WORKDIR}/singularity_images/mso4sc-feelpp-toolbox-v0.105.0.simg'
+        '/opt/cesga/singularity/localrepo/mso4sc-feelpp-toolboxes-develop-v0.105.0-ubuntu-16.04.simg' #'${CURRENT_WORKDIR}/singularity_images/mso4sc-feelpp-toolbox-v0.105.0.simg'
     - &singularity_image_dir
         '/opt/cesga/singularity/localrepo/' #'${CURRENT_WORKDIR}/singularity_images/'
 
