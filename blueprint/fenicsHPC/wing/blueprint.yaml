@@ -130,7 +130,6 @@ node_templates:
                     - openmpi/1.10.2
                     - singularity/2.4.2
                 partition: { get_input: hpc_partition }
-                reservation: { get_input: hpc_reservation }
                 image: { concat: [ '$CURRENT_WORKDIR/', { get_input: singularity_image_filename } ] }
                 volumes:
                     - '/scratch '
