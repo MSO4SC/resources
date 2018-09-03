@@ -55,18 +55,15 @@ inputs:
         default: {}
 
     parallel_nodes:
-        type: integer
-        description: number of nodes to run in parallel
-        default: 1
+        description: number of nodes to run in parallel (optional)
+        default: ''
 
     parallel_tasks_per_node:
-        type: integer
-        description: number of tasks per node
-        default: 1
+        description: number of tasks per node (optional)
+        default: ''
 
     parallel_tasks:
-        type: integer
-        description: number of tasks to run in parallel
+        description: number of tasks to run in parallel (mandatory)
         default: 1
 
     max_time:
@@ -131,6 +128,22 @@ inputs:
     mso4sc_dataset_input_url:
         description: url to retrieve for case file
         default: "None"
+
+    mso4sc_dataset_model:
+        description: Model dataset
+        default: ""
+
+    mso4sc_datacatalogue_entrypoint:
+        description: entrypoint of the data catalogue
+        default: "http://193.144.35.207"
+
+    mso4sc_datacatalogue_key:
+        description: API Key to publish the outputs
+        default: ""
+
+    mso4sc_outdataset_outputs_at:
+        description: ID of the CKAN output dataset
+        default: ""
 
     # constraints:
     #     - valid_values:
@@ -212,9 +225,9 @@ node_templates:
                 command: {concat: ['feelpp_mesh_partitioner --ifile ', {get_input: cadmsh}, ' --ofile ', {get_input: mshfile}, ' --nochdir --part ', {get_input: parallel_tasks}]}
                 partition: {get_input: hpc_partition}
                 reservation: {get_input: hpc_reservation}
-                nodes: {get_input: parallel_nodes}
-                tasks: {get_input: parallel_tasks}
-                tasks_per_node: {get_input: parallel_tasks_per_node}
+                nodes: 1
+                tasks: 1
+                tasks_per_node: 1
                 max_time: {get_input: max_time}
             skip_cleanup: {get_input: do_not_delete_workdir}
             deployment:

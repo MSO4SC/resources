@@ -10,19 +10,14 @@ cat > $ZA_SLURM <<- EOM
 
 #SBATCH -p $9 #thin-shared
 #SBATCH -N 1
-###SBATCH -n 1
 #SBATCH --ntasks-per-node=1
 #SBATCH -t 00:15:00
-#SBATCH --mail-user=$5
-#SBATCH --mail-type=ALL
+##SBATCH --mail-user=$5
+##SBATCH --mail-type=ALL
 ###SBATCH --reservation=MSO4SC
-
-echo -e "\\nhostname:\$(srun hostname)\\n"
 
 cd $4
 
-##mpirun -np 1 singularity exec -B /mnt:/mnt,/scratch:/scratch $7 /bin/bash $8 $1 $za_tar $3 $4 $5 ${10}
-#mpirun -np 1 singularity exec -H \$HOME:/home/\$USER -B /mnt:/mnt,/scratch:/scratch $7 /bin/bash $8 $1 $za_tar $3 $4 $5 ${10}
 singularity exec -H \$HOME:/home/\$USER -B /mnt:/mnt,/scratch:/scratch $7 /bin/bash $8 $1 $za_tar $3 $4 $5 ${10}
 
 # $1: za_lig
@@ -37,3 +32,4 @@ singularity exec -H \$HOME:/home/\$USER -B /mnt:/mnt,/scratch:/scratch $7 /bin/b
 # ${10}: za_gmx_path
 
 EOM
+

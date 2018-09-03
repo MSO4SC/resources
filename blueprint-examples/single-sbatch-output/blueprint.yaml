@@ -32,13 +32,26 @@ inputs:
     # Job prefix name
     job_prefix:
         description: Job name prefix in HPCs
-        default: "cfyhpc"
+        default: "mso"
         type: string
 
     partition:
         description: Partition in which the jobs will run
         default: "public"
         type: string
+        
+    mso4sc_file_test_file:
+        description: Test file to check file edition capabilities
+        default: |
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus lectus sem, molestie ut tortor a, ornare placerat mauris. Nullam justo metus, malesuada sodales tellus id, tempus ultrices ex. Donec non tempus mi. Fusce vehicula lobortis congue. Sed neque sapien, lobortis quis massa sit amet, aliquam varius sapien. Pellentesque ac pharetra dolor. Mauris fermentum scelerisque tempus. Nullam aliquam mi maximus quam hendrerit, scelerisque dictum purus pharetra. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nam luctus ipsum metus. Mauris sed scelerisque diam. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.
+            
+            Vestibulum ex elit, scelerisque sit amet porttitor eget, vestibulum non purus. Curabitur in ex vulputate, lacinia mauris sed, mollis elit. Suspendisse sodales id massa non auctor. Duis diam quam, efficitur a dictum molestie, fermentum ut ligula. Fusce sagittis lacus quis felis sagittis gravida. Duis sed libero finibus, faucibus libero in, luctus velit. Curabitur eleifend turpis sed eros pharetra interdum condimentum et nisl. Integer ac leo augue.
+            
+            Phasellus feugiat dictum malesuada. Mauris gravida at quam id molestie. Integer nec elementum dolor. Donec ac ante vitae erat pellentesque consequat at ut erat. Vestibulum mattis velit a elementum eleifend. Aenean convallis ipsum mi, et volutpat quam consequat cursus. Nam tristique, leo ac placerat tristique, ex nulla fringilla diam, ut pharetra tellus eros id elit. Nam malesuada ex congue enim vulputate, ac placerat nibh malesuada. Vestibulum elementum pretium nibh, eget pulvinar ex sodales non. Donec enim ligula, dictum ut lorem ut, tincidunt tempus turpis.
+            
+            Cras vel egestas odio. Nunc congue lectus consectetur sapien dictum, et ornare sapien semper. Quisque pulvinar velit diam, quis fringilla leo pulvinar posuere. Integer iaculis augue sed arcu porttitor congue. Pellentesque sed dapibus leo. Pellentesque vestibulum odio vitae fringilla mollis. Phasellus vel neque sollicitudin, euismod nibh vel, pellentesque dolor. Cras consectetur ex orci. Maecenas rhoncus faucibus quam sed cursus. Maecenas condimentum massa eget commodo mollis. Vivamus venenatis eleifend lacus, non semper nisi ullamcorper et. Maecenas id libero ac lorem cursus dictum vel ut augue. Donec non risus dolor. Aliquam imperdiet dictum ipsum ut condimentum. Aliquam ullamcorper sapien sed lacus ullamcorper, eu blandit lacus commodo.
+            
+            Morbi at nisi sollicitudin nisl condimentum vehicula. Quisque rutrum lobortis venenatis. Suspendisse tincidunt est sit amet finibus euismod. Vivamus efficitur lectus et bibendum facilisis. Sed ut quam est. Aliquam lacinia leo lacus. Nunc volutpat massa eu rutrum feugiat. Nullam pharetra enim quis erat ultricies, sit amet sodales libero tincidunt. Curabitur at massa eget justo fringilla porta quis eu lectus.
 
     mso4sc_hpc_primary:
         description: Configuration for the primary HPC to be used
@@ -83,6 +96,7 @@ node_templates:
                 inputs:
                     - 'single'
                     - { get_input: partition }
+                    - { get_input: mso4sc_file_test_file }
             publish:
                 - type: "CKAN"
                   entrypoint: { get_input: mso4sc_datacatalogue_entrypoint}

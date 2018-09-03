@@ -11,8 +11,9 @@ cat > $ZA_SLURM <<- EOM
 #SBATCH -N 1
 #SBATCH -n ${10}
 #SBATCH -t 00:20:00
-
-#declare +x OMP_NUM_THREADS
+##SBATCH --mail-user=${12}
+##SBATCH --mail-type=END
+###SBATCH --reservation=MSO4SC
 
 cd $4
 
@@ -20,9 +21,6 @@ cd $4
 # DYNAMIC VARIABLES
 
 mpirun -np ${10} singularity exec -H \$HOME:/home/\$USER -B /mnt:/mnt,/scratch:/scratch $7 /bin/bash $8 $1 $za_tar $3 $4 $5 \$SCALE_INDEX ${10} ${11}
-#mpirun -np ${10} singularity exec -H \$HOME:/home/\$USER -B /mnt:/mnt,/scratch:/scratch $7 /bin/bash $8 $1 $za_tar $3 $4 $5 ${11} ${10} ${12}
-#mpirun -np ${10} singularity exec -H \$HOME:/home/\$USER -B /mnt:/mnt,/scratch:/scratch $7 /bin/bash $8 $1 $za_tar $3 $4 $5 \$SLURM_ARRAY_TASK_ID ${10} ${12}
-
 
 # $1: za_lig
 # $2: za_tar
@@ -33,7 +31,9 @@ mpirun -np ${10} singularity exec -H \$HOME:/home/\$USER -B /mnt:/mnt,/scratch:/
 # $7: za_image
 # $8: za_mpi_nvt_script -> za_mpi_nvt.sh (in container)
 # $9: za_hpc_cluster -> cola-corta
-# $10: za_nt  -> not really required in child scripts
-# $11: za_gmx_path  -> compiled gromacs 5.1.2
+# ${10}: za_nt  -> not really required in child scripts
+# ${11}: za_gmx_path  -> compiled gromacs 5.1.2
+# ${12}: za_user_mail
 
 EOM
+

@@ -33,22 +33,28 @@ inputs:
         default: 'www.zib.de/durmaz/temp/17betaEstradiol.pdb'
         type: string
     
-    # ZA target name    !!!!! USER selection from catalogue corresponding to DB table
+    # Default ligand definition (testing)
+    #za_lig_url:
+    #    description: ZA default ligand definition
+    #    default: 'www.zib.de/durmaz/temp/17betaEstradiol.pdb'
+    #    type: string
+    
+    # ZA target name
     mso4sc_dataset_tar:
         description: ZA target (path)
         default: 'erAlpha-1gwr'
         type: string
     
-    # $3 - ZA formal ligand charge    !!!!! USER input
+    # $3 - ZA formal ligand charge
     za_charge:
         description: ZA formal ligand charge
         default: "'0'"
         type: string
     
-    # $3 - ZA formal ligand charge    !!!!! USER input
+    # $3 - User email
     za_user_mail:
         description: ZA formal ligand charge
-#        default: ""
+        default: ""
         type: string
 
      
@@ -57,85 +63,85 @@ inputs:
 ## dsl definitions:  https://docs.cloudify.co/4.3.0/developer/blueprints/spec-dsl-definitions/
 dsl_definitions:
     - &za_outfile
-        'za_results' #ZA ligand path
+        'za_results' # ZA output file name
     - &za_lig
-        '$CURRENT_WORKDIR/ligand.pdb' #ZA ligand path
+        '$CURRENT_WORKDIR/ligand.pdb' # ZA ligand path and local name
     - &za_home_dir
         '$HOME:/home/$USER' # ZA home directory  
     - &za_work_path
-        '$CURRENT_WORKDIR' # $4 - ZA main simulation directory    !!!!! HPC-dependent
+        '$CURRENT_WORKDIR' # ZA main simulation directory
     - &za_mail
-        "durmaz@zib.de" # $5 - ZA user mail address
+        "durmaz@zib.de" # $5 - ZA developer mail address
     - &za_image
         "zibaffinity.simg" # ZA image file name
     - &za_image_path
-        "shub://sregistry.srv.cesga.es/mso4sc/zibaffinity:latest" # ZA image path    !!!!! HPC-dependent
+        "shub://sregistry.srv.cesga.es/mso4sc/zibaffinity:latest" # ZA image URL
     - &za_gmx_path
-        "/opt/gromacs-5.1.2/bin" # ZA Gromacs path    !!!!! HPC-dependent
+        "/opt/gromacs-5.1.2/bin" # ZA Gromacs path
     - &za_db
-        "/opt/zibaffinity_target_database.sqlite" # ZA target DB file    !!!!! -dependent
+        "/opt/zibaffinity_target_database.sqlite" # ZA target DB file
     - &za_db_script
-        "za_db_target.sh" # ZA db script name  za_db_slurm
+        "za_db_target.sh" # ZA db script name
     - &za_db_slurm
-        "za_db.slurm" # ZA db batch script name    !!!!! name of slurm here script created outside container
+        "za_db.slurm" # ZA db batch script name
     - &za_module_sing
-        "singularity/2.4.2" # ZA HPC singularity module   !!!!! HPC-dependent
+        "singularity/2.4.2" # ZA HPC singularity module
     - &za_hpc_partition
-        "cola-corta" # ZA HPC cluster partition   !!!!! HPC-dependent (cola-corta, thin-shared, thinnodes)
+        "cola-corta" # ZA HPC cluster partition
     - &za_hpc_partition_prep
-        "thinnodes" # ZA HPC cluster partition   !!!!! HPC-dependent (cola-corta, thin-shared,thinnodes)
+        "thinnodes" # ZA HPC cluster partition
     - &za_mpi_nt
-        '"24"' # ZA number of cores    !!!!! HPC-dependent  
+        '"24"' # ZA number of cores 
     - &za_mpi_nt_rerun
-        "'6'" # ZA number of cores for rerun    !!!!! HPC-dependent
+        "'6'" # ZA number of cores for rerun
     - &za_prep_script
-        "za_prep_sim.sh" # ZA prep script name    !!!!! ZA prep script executed sequentially
+        "za_prep_sim.sh" # ZA prep script name
     - &za_prep_slurm
-        "za_prep.slurm" # ZA prep batch script name    !!!!! name of slurm here script created outside container
+        "za_prep.slurm" # ZA prep batch script name
     - &za_mpi_em_script
-        "za_mpi_em.sh" # ZA energy minimization script name    !!!!! ZA main script executed using mpirun (currently OpenMPI)
+        "za_mpi_em.sh" # ZA energy minimization script name
     - &za_mpi_em_slurm
-        "za_mpi_em.slurm" # ZA energy minimization batch script name    !!!!! name of slurm here script created outside container
+        "za_mpi_em.slurm" # ZA energy minimization batch script name
     - &za_prep_nvt_script
-        "za_prep_nvt.sh" # ZA nvt preparation script name    !!!!! ZA prep script executed sequentially   
+        "za_prep_nvt.sh" # ZA nvt preparation script name   
     - &za_prep_nvt_slurm
-        "za_prep_nvt.slurm" # ZA nvt preparation batch script name    !!!!! name of slurm here script created outside container
+        "za_prep_nvt.slurm" # ZA nvt preparation batch script name
     - &za_mpi_nvt_script
-        "za_mpi_nvt.sh" # ZA temperature equilibration script name    !!!!! ZA main script executed using mpirun (currently OpenMPI)
+        "za_mpi_nvt.sh" # ZA temperature equilibration script name
     - &za_mpi_nvt_slurm
-        "za_mpi_nvt.slurm" # ZA temperature equilibration batch script name    !!!!! name of slurm here script created outside container
+        "za_mpi_nvt.slurm" # ZA temperature equilibration batch script name
     - &za_prep_npt_script
-        "za_prep_npt.sh" # ZA npt preparation script name    !!!!! ZA prep script executed sequentially 
+        "za_prep_npt.sh" # ZA npt preparation script name
     - &za_prep_npt_slurm
-        "za_prep_npt.slurm"  # ZA npt preparation batch script name    !!!!! name of slurm here script created outside container
+        "za_prep_npt.slurm"  # ZA npt preparation batch script name
     - &za_mpi_npt_script
-        "za_mpi_npt.sh" # ZA pressure equilibration script name    !!!!! ZA main script executed using mpirun (currently OpenMPI)
+        "za_mpi_npt.sh" # ZA pressure equilibration script name
     - &za_mpi_npt_slurm
-        "za_mpi_npt.slurm" # ZA pressure equilibration batch script name    !!!!! name of slurm here script created outside container
+        "za_mpi_npt.slurm" # ZA pressure equilibration batch script name
     - &za_prep_md_script
-        "za_prep_md.sh" # ZA md preparation script name    !!!!! ZA prep script executed sequentially
+        "za_prep_md.sh" # ZA md preparation script name
     - &za_prep_md_slurm
-        "za_prep_md.slurm" # ZA md preparation batch script name    !!!!! name of slurm here script created outside container
+        "za_prep_md.slurm" # ZA md preparation batch script name
     - &za_mpi_md_script
-        "za_mpi_md.sh" # ZA production run script name    !!!!! ZA main script executed using mpirun (currently OpenMPI)
+        "za_mpi_md.sh" # ZA production run script name
     - &za_mpi_md_slurm
-        "za_mpi_md.slurm" # ZA production run batch script name    !!!!! name of slurm here script created outside container
+        "za_mpi_md.slurm" # ZA production run batch script name
     - &za_prep_rerun_script
-        "za_prep_rerun.sh" # ZA rerun preparation script name    !!!!! ZA prep script executed sequentially
+        "za_prep_rerun.sh" # ZA rerun preparation script name
     - &za_prep_rerun_slurm
-        "za_prep_rerun.slurm" # ZA rerun preparation batch script name    !!!!! name of slurm here script created outside container
+        "za_prep_rerun.slurm" # ZA rerun preparation batch script name
     - &za_mpi_rerun_script
-        "za_mpi_rerun.sh" # ZA energy rerun script name    !!!!! ZA main script executed using mpirun (currently OpenMPI)
+        "za_mpi_rerun.sh" # ZA energy rerun script name
     - &za_mpi_rerun_slurm
-        "za_mpi_rerun.slurm" # ZA energy rerun batch script name    !!!!! name of slurm here script created outside container
+        "za_mpi_rerun.slurm" # ZA energy rerun batch script name
     - &za_post_rerun_script
-        "za_post_rerun.sh" # ZA post rerun script name    !!!!! ZA prep script executed sequentially
+        "za_post_rerun.sh" # ZA post rerun script name
     - &za_post_rerun_slurm
-        "za_post_rerun.slurm" # ZA post rerun batch script name    !!!!! name of slurm here script created outside container
+        "za_post_rerun.slurm" # ZA post rerun batch script name
     - &za_post_script
-        "za_post_sim.sh" # ZA post script name    !!!!! ZA prep script executed sequentially
+        "za_post_sim.sh" # ZA post script name
     - &za_post_slurm
-        "za_post.slurm" # ZA post batch script name    !!!!! name of slurm here script created outside container
+        "za_post.slurm" # ZA post batch script name
     - &za_modules_block
         - gcc/5.3.0
         - openmpi/1.10.2
@@ -162,8 +168,6 @@ node_templates:
                 type: 'SBATCH'
                 modules: *za_modules_block
                 command: { concat: [' $CURRENT_WORKDIR/', *za_db_slurm ] }
-                mail-user: *za_mail
-                mail-type: BEGIN
             deployment:
                 bootstrap: 'scripts/za_db_bootstrap.sh'
                 revert: 'scripts/za_db_revert.sh'
@@ -179,6 +183,9 @@ node_templates:
                     - *za_hpc_partition_prep
                     - { get_input: mso4sc_dataset_lig }
                     - *za_lig
+                    - *za_mail
+                    - { get_input: za_user_mail }
+                    - *za_outfile
         relationships:
             - type: job_contained_in_hpc
               target: ft2_node
@@ -234,6 +241,7 @@ node_templates:
                     - *za_hpc_partition
                     - *za_mpi_nt
                     - *za_gmx_path
+                    - { get_input: za_user_mail }
         relationships:
             - type: job_contained_in_hpc
               target: ft2_node
@@ -290,6 +298,7 @@ node_templates:
                     - *za_hpc_partition
                     - *za_mpi_nt
                     - *za_gmx_path
+                    - { get_input: za_user_mail }
         relationships:
             - type: job_contained_in_hpc
               target: ft2_node
@@ -346,6 +355,7 @@ node_templates:
                     - *za_hpc_partition
                     - *za_mpi_nt
                     - *za_gmx_path
+                    - { get_input: za_user_mail }
         relationships:
             - type: job_contained_in_hpc
               target: ft2_node
@@ -359,8 +369,6 @@ node_templates:
                 type: 'SBATCH'
                 modules: *za_modules_block
                 command: { concat: [' ', *za_work_path , '/', *za_prep_md_slurm ] }
-                mail-user: *za_mail
-                mail-type: ALL
             deployment:
                 bootstrap: 'scripts/za_prep_md_bootstrap.sh'
                 revert: 'scripts/za_prep_md_revert.sh'
@@ -404,6 +412,7 @@ node_templates:
                     - *za_hpc_partition
                     - *za_mpi_nt
                     - *za_gmx_path
+                    - { get_input: za_user_mail }
         relationships:
             - type: job_contained_in_hpc
               target: ft2_node
@@ -460,6 +469,7 @@ node_templates:
                     - *za_hpc_partition
                     - *za_mpi_nt
                     - *za_gmx_path
+                    - { get_input: za_user_mail }
         relationships:
             - type: job_contained_in_hpc
               target: ft2_node
