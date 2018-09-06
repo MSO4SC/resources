@@ -22,13 +22,14 @@ imports:
     # to speed things up, it is possible to download this file,
     # - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-manager/18.1.11/resources/rest-service/cloudify/types/types.yaml
     - http://www.getcloudify.org/spec/cloudify/4.3.1/types.yaml
-    # - https://raw.githubusercontent.com/MSO4SC/cloudify-hpc-plugin/canary/plugin.yaml
+    # - https://raw.githubusercontent.com/MSO4SC/cloudify-hpc-plugin/master/plugin.yaml
+    # - https://raw.githubusercontent.com/Trophime/cloudify-hpc-plugin/master/plugin.yaml
     - https://raw.githubusercontent.com/Trophime/cloudify-hpc-plugin/add_checks/plugin.yaml
 
 inputs:
     email_user:
         description: email address for reporting
-        default: "first.lastname@domain"
+        default: "christophe.trophime@lncmi.cnrs.fr"
     email_type:
         type: string
         description: define mail-type
@@ -53,9 +54,24 @@ inputs:
         description: FTII connection credentials
         default: {}
 
+    parallel_nodes:
+        type: integer
+        description: number of nodes to run in parallel
+        default: 1
+
+    parallel_tasks_per_node:
+        type: integer
+        description: number of tasks per node
+        default: 1
+
+    parallel_tasks:
+        type: integer
+        description: number of tasks to run in parallel
+        default: 1
+
     max_time:
         description: maximum allowed time for run (minutes and seconds)
-        default: '00:50:00'
+        default: '00:30:00'
 
     hpc_partition:
         type: string
@@ -82,50 +98,51 @@ inputs:
     hpc_workdir_prefix:
         type: string
         description: prefix of the directory name holding the actual calculation
-        default: "salome"
+        default: "hifimagnet"
+
+    # # this does work in cli not in portal
+    # hpc_feelpp:
+    #     type: string
+    #     description: feel directory where simulations will endup
+    #     default:
+    #         concat: [get_input: hpc_basedir, "/feel"]
+
+    hpc_feelpp:
+        type: string
+        description: feel directory where simulations will endup
+        default: ${LUSTRE}/feel
+
+    # # this does work in cli not in portal
+    # hpc_volumes:
+    #     description: volumes to be mounted on the targeted machine
+    #     default:
+    #         - /scratch
+    #         - /mnt
+    #         - concat: [get_input: hpc_feelpp, ":/feel"]
 
     hpc_volumes:
         description: volumes to be mounted on the targeted machine
         default:
             - /scratch
             - /mnt
-            - ${HOME}/MeshGems:/opt/DISTENE/DLim:ro
+            - ${LUSTRE}/feel:/feel
+    # - concat: [get_input: hpc_feelpp, ":/feel"]
 
     # specs for running simulations
-    # mso4sc_dataset_input_url:
-    #     description: url to retrieve for case file
-    #     default: "None"
-
-    mso4sc_dataset_model:
-        description: Model dataset
+    mso4sc_dataset_input_url:
+        description: url to retrieve for case file
         default: "None"
-
-    mso4sc_datacatalogue_entrypoint:
-        description: entrypoint of the data catalogue
-        default: "http://193.144.35.207"
-
-    mso4sc_datacatalogue_key:
-        description: API Key to publish the outputs
-        default: ""
-
-    mso4sc_outdataset_outputs_at:
-        description: ID of the CKAN output dataset
-        default: ""
 
     # constraints:
     #     - valid_values:
     #           [ "feelpp_hfm_thermoelectric_model_3D_V1T1_N1", "feelpp_hfm_coupledcartmodel_3DP1N1", "feelpp_hfm_coupledmodel_3D_P1N1" ]
-    cadcfg:
-        description: name of the cad cfg file
-        default: "Insert-H1H4-Leads-2t.yaml"
+    execfile:
+        description: executable file
+        default: "feelpp_hfm_thermoelectric_model_3D_V1T1_N1"
 
-    cadoption:
-        description: options to be passed to cad generation (default is "", ",--air")
-        default: ""
-
-    meshoption:
-        description: options to be passed to cad generation (default is "", ",--groupCoolingChannels")
-        default: ""
+    cfgfile:
+        description: configuration file
+        default: "/usr/share/doc/hifimagnet/ThermoElectricModel/quarter-turn3D.cfg"
 
     do_not_delete_workdir:
         type: boolean
@@ -156,15 +173,11 @@ inputs:
     # singularity image
     singularity_image_uri:
         description: URI pointing to the singularity image
-        default: "hifimagnet/salome:8.4.0"
+        default: "hifimagnet/hifimagnet:stretch"
 
     singularity_image_filename:
         description: Filename of the singularity image
-        default: "salome-8.4.0.simg"
-
-    hifimagnet:
-        description: Installation directory of Hifimagnet Salome plugin within the singularity image
-        default: "/opt/SALOME-8.4.0-MPI-DB9.5/BINARIES-DB9.5/HIFIMAGNET/bin/salome/"
+        default: "hifimagnet-stretch.simg"
 
     # passing boolean to scripts work in cli not in portal
     singularity_image_cleanup:
@@ -187,7 +200,7 @@ node_templates:
             skip_cleanup: {get_input: do_not_delete_workdir}
             # simulate: True  # COMMENT to test against a real HPC
 
-    job_cad:
+    job_simu:
         type: hpc.nodes.singularity_job
         properties:
             job_options:
@@ -197,53 +210,7 @@ node_templates:
                 image: {concat: [{get_input: sregistry_storage}, '/', {get_input: singularity_image_filename}]}
                 home: '${HOME}:/home/${USER}'
                 volumes: {get_input: hpc_volumes}
-                command: {concat: ['salome -t -b -m -m GEOM,SMESH,HIFIMAGNET ', {get_input: hifimagnet}, '/HIFIMAGNET_Cmd.py args:--cfg=', {get_input: cadcfg}, {get_input: cadoption}]}
-                partition: {get_input: hpc_partition}
-                reservation: {get_input: hpc_reservation}
-                nodes: 1
-                tasks: 1
-                tasks_per_node: 1
-                max_time: {get_input: max_time}
-            skip_cleanup: {get_input: do_not_delete_workdir}
-            deployment:
-                bootstrap: 'scripts/bootstrap.sh'
-                revert: 'scripts/revert.sh'
-                #mso4sc_dataset_input_url replaced by mso4sc_dataset_model
-                inputs:
-                    - {get_input: sregistry_storage}
-                    - {get_input: singularity_image_filename}
-                    - {get_input: singularity_image_uri}
-                    - {get_input: singularity_image_cleanup}
-                    - {get_input: sregistry_client}
-                    - {get_input: sregistry_client_secrets}
-                    - {get_input: sregistry_url}
-                    - {get_input: sregistry_image}
-                    - {get_input: mso4sc_dataset_model}
-                    - {get_input: mso4sc_datacatalogue_key}
-                    - {get_input: cadcfg}
-
-            # publish:
-            #    entrypoint: {get_input: mso4sc_datacatalogue_entrypoint}
-            # 	 api_key: {get_input: mso4sc_datacatalogue_key}
-            #    dataset: {get_input: mso4sc_datacatalogue_key} #Id of the dataset in which the file will be published.
-            #    file_path: {get_input: hpc_basedir} #Local path of the output file in the computation node.
-            #    name: Name used to publish the file in the repository.
-
-        relationships:
-            - type: job_contained_in_hpc
-              target: primary_hpc
-
-    job_mesh:
-        type: hpc.nodes.singularity_job
-        properties:
-            job_options:
-                mail_user: {get_input: email_user}
-                mail_type: {get_input: email_type}
-                modules: {get_input: hpc_modules}
-                image: {concat: [{get_input: sregistry_storage}, '/', {get_input: singularity_image_filename}]}
-                home: '${HOME}:/home/${USER}'
-                volumes: {get_input: hpc_volumes}
-                command: {concat: ['salome -t -b -m GEOM,SMESH,HIFIMAGNET ', {get_input: hifimagnet}, '/HIFIMAGNET_Cmd.py args:--cfg=', {get_input: cadcfg}, ',--mesh', {get_input: meshoption}]}
+                command: {concat: [{get_input: execfile}, ' --config-file ', {get_input: cfgfile}]}
                 partition: {get_input: hpc_partition}
                 reservation: {get_input: hpc_reservation}
                 nodes: 1
@@ -263,27 +230,14 @@ node_templates:
                     - {get_input: sregistry_client_secrets}
                     - {get_input: sregistry_url}
                     - {get_input: sregistry_image}
-                    - {get_input: mso4sc_dataset_model}
-                    - {get_input: mso4sc_datacatalogue_key}
-                    - {get_input: cadcfg}
-
-            # publish:
-            #     entrypoint: {get_input: mso4sc_datacatalogue_entrypoint}
-            #     api_key: {get_input: mso4sc_datacatalogue_key}
-            #     dataset: {get_input: mso4sc_datacatalogue_key} #Id of the dataset in which the file will be published.
-            #     file_path: {get_input: hpc_basedir} #Local path of the output file in the computation node.
-            #     name: Name used to publish the file in the repository.
+                    - {get_input: hpc_feelpp}
+                    - {get_input: mso4sc_dataset_input_url}
 
         relationships:
             - type: job_contained_in_hpc
               target: primary_hpc
-            - type: job_depends_on
-              target: job_cad
 
 outputs:
-    job_cad:
-        description: "create CAD"
-        value: {get_attribute: [job_cad, job_name]}
-    job_mesh:
-        description: "create mesh"
-        value: {get_attribute: [job_mesh, job_name]}
+    job_simu:
+        description: feelpp_hfm_test results
+        value: {get_attribute: [job_simu, job_name]}

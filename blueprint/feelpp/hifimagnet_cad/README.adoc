@@ -97,3 +97,5 @@ The main parameters are noted in **bold**
 ** eventually cleanup singularity image
 ** upload result cad(s) and mesh [TODO]
 ** remove loaded dataset
+
+see https://github.com/MSO4SC/cloudify-hpc-plugin/tree/canary for details about upload data to CKAN

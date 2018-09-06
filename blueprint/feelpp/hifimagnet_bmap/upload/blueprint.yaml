@@ -89,7 +89,6 @@ inputs:
         default:
             - /scratch
             - /mnt
-            - ${HOME}/MeshGems:/opt/DISTENE/DLim:ro
 
     # specs for running simulations
     # mso4sc_dataset_input_url:
@@ -115,17 +114,45 @@ inputs:
     # constraints:
     #     - valid_values:
     #           [ "feelpp_hfm_thermoelectric_model_3D_V1T1_N1", "feelpp_hfm_coupledcartmodel_3DP1N1", "feelpp_hfm_coupledmodel_3D_P1N1" ]
-    cadcfg:
-        description: name of the cad cfg file
-        default: "Insert-H1H4-Leads-2t.yaml"
+    magnetcfg:
+        description: name of the magnet cfg file without extension
+        default: "HL-31"
 
-    cadoption:
-        description: options to be passed to cad generation (default is "", ",--air")
+    options:
+        description: options to be passed to bmap
         default: ""
 
-    meshoption:
-        description: options to be passed to cad generation (default is "", ",--groupCoolingChannels")
-        default: ""
+    Helix_current:
+        description: specifiy current in the insert (default is "31 KA")
+        default: "31000"
+
+    Bitter_current:
+        description: specifiy current in the Bitters (default is "31 KA")
+        default: "31000"
+
+    Supra_current:
+        description: specifiy current in the supra (default is "31 KA")
+        default: "31000"
+
+    R_max:
+        description: specifiy r max in m (default is "0")
+        default: "0"
+    R_min:
+        description: specifiy r max in m (default is "0")
+        default: "0"
+    N_R:
+        description: specifiy number of points along Or (default is "1")
+        default: "1"
+
+    Z_max:
+        description: specifiy r max in m (default is "0")
+        default: "0"
+    Z_min:
+        description: specifiy r max in m (default is "0")
+        default: "0"
+    N_Z:
+        description: specifiy number of points along Or (default is "1")
+        default: "1"
 
     do_not_delete_workdir:
         type: boolean
@@ -156,15 +183,11 @@ inputs:
     # singularity image
     singularity_image_uri:
         description: URI pointing to the singularity image
-        default: "hifimagnet/salome:8.4.0"
+        default: "hifimagnet/hifimagnet:stretch"
 
     singularity_image_filename:
         description: Filename of the singularity image
-        default: "salome-8.4.0.simg"
-
-    hifimagnet:
-        description: Installation directory of Hifimagnet Salome plugin within the singularity image
-        default: "/opt/SALOME-8.4.0-MPI-DB9.5/BINARIES-DB9.5/HIFIMAGNET/bin/salome/"
+        default: "hifimagnet-stretch.simg"
 
     # passing boolean to scripts work in cli not in portal
     singularity_image_cleanup:
@@ -187,7 +210,7 @@ node_templates:
             skip_cleanup: {get_input: do_not_delete_workdir}
             # simulate: True  # COMMENT to test against a real HPC
 
-    job_cad:
+    job_bmap:
         type: hpc.nodes.singularity_job
         properties:
             job_options:
@@ -195,9 +218,9 @@ node_templates:
                 mail_type: {get_input: email_type}
                 modules: {get_input: hpc_modules}
                 image: {concat: [{get_input: sregistry_storage}, '/', {get_input: singularity_image_filename}]}
-                home: '${HOME}:/home/${USER}'
+                home: '${PWD}:/home/${USER}'
                 volumes: {get_input: hpc_volumes}
-                command: {concat: ['salome -t -b -m -m GEOM,SMESH,HIFIMAGNET ', {get_input: hifimagnet}, '/HIFIMAGNET_Cmd.py args:--cfg=', {get_input: cadcfg}, {get_input: cadoption}]}
+                command: {concat: ['B_Map --interactive ', {get_input: magnetcfg}, '.d ', {get_input: options}, ' < input.in']}
                 partition: {get_input: hpc_partition}
                 reservation: {get_input: hpc_reservation}
                 nodes: 1
@@ -220,70 +243,29 @@ node_templates:
                     - {get_input: sregistry_image}
                     - {get_input: mso4sc_dataset_model}
                     - {get_input: mso4sc_datacatalogue_key}
-                    - {get_input: cadcfg}
+                    - {get_input: magnetcfg}
+                    - {get_input: Helix_current}
+                    - {get_input: Bitter_current}
+                    - {get_input: Supra_current}
+                    - {get_input: R_max}
+                    - {get_input: R_min}
+                    - {get_input: N_R}
+                    - {get_input: Z_max}
+                    - {get_input: Z_min}
+                    - {get_input: N_Z}
 
             # publish:
             #    entrypoint: {get_input: mso4sc_datacatalogue_entrypoint}
             # 	 api_key: {get_input: mso4sc_datacatalogue_key}
             #    dataset: {get_input: mso4sc_datacatalogue_key} #Id of the dataset in which the file will be published.
-            #    file_path: {get_input: hpc_basedir} #Local path of the output file in the computation node.
+            #    file_path: { concat:[{get_input: magnetcfg}, '_Field_Map.dat']} #Local path of the output file in the computation node.
             #    name: Name used to publish the file in the repository.
 
         relationships:
             - type: job_contained_in_hpc
               target: primary_hpc
 
-    job_mesh:
-        type: hpc.nodes.singularity_job
-        properties:
-            job_options:
-                mail_user: {get_input: email_user}
-                mail_type: {get_input: email_type}
-                modules: {get_input: hpc_modules}
-                image: {concat: [{get_input: sregistry_storage}, '/', {get_input: singularity_image_filename}]}
-                home: '${HOME}:/home/${USER}'
-                volumes: {get_input: hpc_volumes}
-                command: {concat: ['salome -t -b -m GEOM,SMESH,HIFIMAGNET ', {get_input: hifimagnet}, '/HIFIMAGNET_Cmd.py args:--cfg=', {get_input: cadcfg}, ',--mesh', {get_input: meshoption}]}
-                partition: {get_input: hpc_partition}
-                reservation: {get_input: hpc_reservation}
-                nodes: 1
-                tasks: 1
-                tasks_per_node: 1
-                max_time: {get_input: max_time}
-            skip_cleanup: {get_input: do_not_delete_workdir}
-            deployment:
-                bootstrap: 'scripts/bootstrap.sh'
-                revert: 'scripts/revert.sh'
-                inputs:
-                    - {get_input: sregistry_storage}
-                    - {get_input: singularity_image_filename}
-                    - {get_input: singularity_image_uri}
-                    - {get_input: singularity_image_cleanup}
-                    - {get_input: sregistry_client}
-                    - {get_input: sregistry_client_secrets}
-                    - {get_input: sregistry_url}
-                    - {get_input: sregistry_image}
-                    - {get_input: mso4sc_dataset_model}
-                    - {get_input: mso4sc_datacatalogue_key}
-                    - {get_input: cadcfg}
-
-            # publish:
-            #     entrypoint: {get_input: mso4sc_datacatalogue_entrypoint}
-            #     api_key: {get_input: mso4sc_datacatalogue_key}
-            #     dataset: {get_input: mso4sc_datacatalogue_key} #Id of the dataset in which the file will be published.
-            #     file_path: {get_input: hpc_basedir} #Local path of the output file in the computation node.
-            #     name: Name used to publish the file in the repository.
-
-        relationships:
-            - type: job_contained_in_hpc
-              target: primary_hpc
-            - type: job_depends_on
-              target: job_cad
-
 outputs:
-    job_cad:
-        description: "create CAD"
-        value: {get_attribute: [job_cad, job_name]}
-    job_mesh:
-        description: "create mesh"
-        value: {get_attribute: [job_mesh, job_name]}
+    job_bmap:
+        description: "generate Magnetic Field Map"
+        value: {get_attribute: [job_bmap, job_name]}

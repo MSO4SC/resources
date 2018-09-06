@@ -14,14 +14,14 @@ echo "nargs: $nargs" >> ${LOG_FILE}
 echo "last arg: ${!nargs}" >> ${LOG_FILE}
 
 # params for singularity images:
-# $1 - { get_input: sregistry_storage }
-# $2 - { get_input: singularity_image_filename - aka collection/}
-# $3 - { get_input: singularity_image_uri }
-# $4 - { get_input: singularity_image_cleanup }
-# $5 - { get_input: sregistry_client }
-# $6 - { get_input: sregistry_secrets } 
-# $7 - { get_input: sregistry_url }
-# $8 - { get_input: sregistry_image } 
+# $1   - { get_input: sregistry_storage }
+# $2   - { get_input: singularity_image_filename - aka collection/}
+# $3   - { get_input: singularity_image_uri }
+# $4   - { get_input: singularity_image_cleanup }
+# $5   - { get_input: sregistry_client }
+# $6   - { get_input: sregistry_secrets } 
+# $7  - { get_input: sregistry_url }
+# $8  - { get_input: sregistry_image } 
 
 # params for output
 # $9 - {get_input: hpc_feelpp}
