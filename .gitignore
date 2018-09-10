@@ -5,3 +5,5 @@
 blueprint/feelpp/toolboxes_gen/build
 /blueprint/feelpp/eye2brain/Gemfile.lock
 /**/*.tar
+/**/*.tar.gz
+/**/*.tgz
