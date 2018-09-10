@@ -114,13 +114,13 @@ if [ ! -f "${SREGISTRY_STORAGE}/$IMAGE_NAME" ]; then
    if  [ "$isSregistry" != "" ] && [ "${SREGISTRY_URL}" != "" ] && [ "${SREGISTRY_IMAGE}" != "" ]; then
        echo "Get ${IMAGE_NAME} using sregistry-cli" >> "${LOG_FILE}"
        # On Lnmci
-       sregistry get "${IMAGE_URI}" >> "${LOG_FILE}"
+       sregistry pull "${IMAGE_URI}" >> "${LOG_FILE}" 2>&1
        status=$?
        if [ $status != "0" ]; then
 	   echo "sregistry get ${IMAGE_URI}: FAILS" >> "${LOG_FILE}"
 	   exit 1
        fi
-       sregistry rename "${IMAGE_URI}" "${IMAGE_NAME}" >> "${LOG_FILE}"
+       sregistry rename "${IMAGE_URI}" "${IMAGE_NAME}" >> "${LOG_FILE}" 2>&1
        status=$?
        if [ $status != "0" ]; then
 	   echo "sregistry rename ${IMAGE_URI} ${IMAGE_NAME}: FAILS" >> "${LOG_FILE}"

@@ -49,7 +49,7 @@ if [ "$IMAGE_CLEANUP" = "true"  ]; then
    isSregistry=$(which sregistry 2>&1 > /dev/null)
    echo "isSregistry=$isSregistry"
    if  [ "$isSregistry" != "" ] && [ "${SREGISTRY_URL}" != "" ] && [ "${SREGISTRY_IMAGE}" != "" ]; then
-       sregistry rm "${IMAGE_URI}" >> "${LOG_FILE}"
+       sregistry rmi "${IMAGE_URI}" >> "${LOG_FILE}"
    else
        singularity run -B /mnt shub://"${SREGISTRY_URL}/${SREGISTRY_IMAGE}" rmi "${IMAGE_URI}" >> "${LOG_FILE}"
    fi
