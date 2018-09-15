@@ -82,7 +82,7 @@ inputs:
     hpc_workdir_prefix:
         type: string
         description: prefix of the directory name holding the actual calculation
-        default: "salome"
+        default: "bmap"
 
     hpc_volumes:
         description: volumes to be mounted on the targeted machine
@@ -124,15 +124,15 @@ inputs:
 
     Helix_current:
         description: specifiy current in the insert (default is "31 KA")
-        default: "31000"
+        default: "31000."
 
     Bitter_current:
         description: specifiy current in the Bitters (default is "31 KA")
-        default: "31000"
+        default: "31000."
 
     Supra_current:
         description: specifiy current in the supra (default is "31 KA")
-        default: "31000"
+        default: "31000."
 
     R_max:
         description: specifiy r max in m (default is "0")
@@ -254,12 +254,14 @@ node_templates:
                     - {get_input: Z_min}
                     - {get_input: N_Z}
 
-            # publish:
-            #    entrypoint: {get_input: mso4sc_datacatalogue_entrypoint}
-            # 	 api_key: {get_input: mso4sc_datacatalogue_key}
-            #    dataset: {get_input: mso4sc_datacatalogue_key} #Id of the dataset in which the file will be published.
-            #    file_path: { concat:[{get_input: magnetcfg}, '_Field_Map.dat']} #Local path of the output file in the computation node.
-            #    name: Name used to publish the file in the repository.
+            # see single-sbatch-output/blueprint.yaml for ex
+            publish:
+                entrypoint: {get_input: mso4sc_datacatalogue_entrypoint}
+                api_key: {get_input: mso4sc_datacatalogue_key}
+                dataset: {get_input: mso4sc_outdataset_outputs_at}
+                file_path: { concat:[{get_input: magnetcfg}, '_Field_Map.dat']}
+                name: "FieldMap"
+                description: "Magnetic Field Map"
 
         relationships:
             - type: job_contained_in_hpc
