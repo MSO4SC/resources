@@ -66,8 +66,6 @@ inputs:
 dsl_definitions:
     - &singularity_image_filename
         "mso4sc-opm-image.simg"
-    - &job_prefix:
-        "mso4sc_opm_"
 
 
 
@@ -78,7 +76,7 @@ node_templates:
             config: { get_input: mso4sc_hpc_primary }
             base_dir: { get_input: base_dir }
             workdir_prefix: "opm"
-            job_prefix: *job_prefix
+            job_prefix: "mso4sc_opm_"
             skip_cleanup: True
 #            simulate: True  # COMMENT to test against a real HPC
 
@@ -108,7 +106,7 @@ node_templates:
                 inputs:
                     - { get_input: mso4sc_dataset_input_url }
                     - { get_input: singularity_image_uri }
-                    - "mso4sc-opm-image.simg"
+                    - *singularity_image_filename
         relationships:
             - type: job_contained_in_hpc
               target: main_hpc_node
