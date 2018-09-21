@@ -71,7 +71,7 @@ dsl_definitions:
     - &za_work_path
         '$CURRENT_WORKDIR' # ZA main simulation directory
     - &za_mail
-        "durmaz@zib.de" # $5 - ZA developer mail address
+        "ernst@zib.de" # $5 - ZA developer mail address
     - &za_image
         "zibaffinity.simg" # ZA image file name
     - &za_image_path
@@ -146,6 +146,8 @@ dsl_definitions:
         - gcc/5.3.0
         - openmpi/1.10.2
         - singularity/2.4.2
+    - &za_scale_param
+        61 # ZA number of jobs in parallel    
      
 
 node_templates:
@@ -225,7 +227,7 @@ node_templates:
                 type: 'SBATCH'
                 modules: *za_modules_block
                 command: { concat: [' ', *za_work_path, '/' , *za_mpi_em_slurm] }
-                scale: 2
+                scale: *za_scale_param
             deployment:
                 bootstrap: 'scripts/za_mpi_em_bootstrap.sh'
                 revert: 'scripts/za_mpi_em_revert.sh'
@@ -282,7 +284,7 @@ node_templates:
                 type: 'SBATCH'
                 modules: *za_modules_block
                 command: { concat: [' ', *za_work_path, '/' , *za_mpi_nvt_slurm] }
-                scale: 2
+                scale: *za_scale_param
             deployment:
                 bootstrap: 'scripts/za_mpi_nvt_bootstrap.sh'
                 revert: 'scripts/za_mpi_nvt_revert.sh'
@@ -339,7 +341,7 @@ node_templates:
                 type: 'SBATCH'
                 modules: *za_modules_block
                 command: { concat: [' ', *za_work_path , '/' , *za_mpi_npt_slurm] }
-                scale: 2
+                scale: *za_scale_param
             deployment:
                 bootstrap: 'scripts/za_mpi_npt_bootstrap.sh'
                 revert: 'scripts/za_mpi_npt_revert.sh'
@@ -396,7 +398,7 @@ node_templates:
                 type: 'SBATCH'
                 modules: *za_modules_block
                 command: { concat: [' ', *za_work_path , '/' , *za_mpi_md_slurm] }
-                scale: 2
+                scale: *za_scale_param
             deployment:
                 bootstrap: 'scripts/za_mpi_md_bootstrap.sh'
                 revert: 'scripts/za_mpi_md_revert.sh'
@@ -453,7 +455,7 @@ node_templates:
                 type: 'SBATCH'
                 modules: *za_modules_block
                 command: { concat: [' ', *za_work_path , '/' , *za_mpi_rerun_slurm] }
-                scale: 2
+                scale: *za_scale_param
             deployment:
                 bootstrap: 'scripts/za_mpi_rerun_bootstrap.sh'
                 revert: 'scripts/za_mpi_rerun_revert.sh'
