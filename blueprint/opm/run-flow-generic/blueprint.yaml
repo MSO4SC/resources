@@ -22,28 +22,11 @@ imports:
     - http://raw.githubusercontent.com/MSO4SC/cloudify-hpc-plugin/master/plugin.yaml
 
 inputs:
-    # Monitor
-    monitor_entrypoint:
-        description: Monitor entrypoint IP
-        default: ""
-        type: string
-
-    # Job prefix name
-    job_prefix:
-        description: Job name prefix in HPCs
-        default: "mso_"
-        type: string
-
     # First HPC configuration
     mso4sc_hpc_primary:
         description: Configuration for the primary HPC to be used
         default: {}
     
-    # Second HPC configuration
-    mso4sc_hpc_secondary:
-        description: Configuration for the secondary HPC to be used
-        default: {}
-
     parallel_tasks:
         description: number of tasks/processes to run in parallel
         default: 1
@@ -72,27 +55,28 @@ inputs:
         description: URI pointing to the singularity image
         default: "shub://sregistry.srv.cesga.es/mso4sc/opm-release:latest"
 
-    singularity_image_filename:
-        description: Filename of the singularity image
-        default: "mso4sc-opm-release.simg"
-
     hpc_partition:
         description: Computing partition to use on the HPC system chosen
-        default: "thinnodes"
+        default: ""
 
     hpc_reservation:
         description: Computing reservation to use on the HPC system chosen
-        default: "MSO4SC"
+        default: ""
+
+dsl_definitions:
+    - &singularity_image_filename
+        "mso4sc-opm-image.simg"
+
+
 
 node_templates:
     main_hpc_node:
         type: hpc.nodes.Compute
         properties:
             config: { get_input: mso4sc_hpc_primary }
-            external_monitor_entrypoint: { get_input: monitor_entrypoint }
             base_dir: { get_input: base_dir }
             workdir_prefix: "opm"
-            job_prefix: { get_input: job_prefix }
+            job_prefix: "mso4sc_opm_"
             skip_cleanup: True
 #            simulate: True  # COMMENT to test against a real HPC
 
@@ -106,7 +90,7 @@ node_templates:
                     - singularity/2.4.2
                 partition: { get_input: hpc_partition }
                 reservation: { get_input: hpc_reservation }
-                image: { concat: [ '$CURRENT_WORKDIR/', { get_input: singularity_image_filename } ] }
+                image: { concat: [ '$CURRENT_WORKDIR/', *singularity_image_filename ] }
                 home: '$HOME:/home/$USER'
                 volumes:
                     - '/scratch '
@@ -122,7 +106,7 @@ node_templates:
                 inputs:
                     - { get_input: mso4sc_dataset_input_url }
                     - { get_input: singularity_image_uri }
-                    - { get_input: singularity_image_filename }
+                    - *singularity_image_filename
         relationships:
             - type: job_contained_in_hpc
               target: main_hpc_node
