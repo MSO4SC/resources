@@ -101,6 +101,7 @@ node_templates:
             base_dir: *job_hpc_workdir
             workdir_prefix: *prefix
             job_prefix: *job_prefix
+            skip_cleanup: *skip_cleanup
 
     job_toolboxes:
         type: hpc.nodes.singularity_job
