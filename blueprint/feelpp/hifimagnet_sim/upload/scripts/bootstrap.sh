@@ -14,14 +14,14 @@ echo "nargs: $nargs" >> ${LOG_FILE}
 echo "last arg: ${!nargs}" >> ${LOG_FILE}
 
 # params for singularity images:
-# $1 - { get_input: sregistry_storage }
-# $2 - { get_input: singularity_image_filename - aka collection/}
-# $3 - { get_input: singularity_image_uri }
-# $4 - { get_input: singularity_image_cleanup }
-# $5 - { get_input: sregistry_client }
-# $6 - { get_input: sregistry_secrets } 
-# $7 - { get_input: sregistry_url }
-# $8 - { get_input: sregistry_image } 
+# $1   - { get_input: sregistry_storage }
+# $2   - { get_input: singularity_image_filename - aka collection/}
+# $3   - { get_input: singularity_image_uri }
+# $4   - { get_input: singularity_image_cleanup }
+# $5   - { get_input: sregistry_client }
+# $6   - { get_input: sregistry_secrets } 
+# $7  - { get_input: sregistry_url }
+# $8  - { get_input: sregistry_image } 
 
 # params for output
 # $9 - {get_input: hpc_feelpp}
@@ -114,7 +114,7 @@ if [ ! -f "${SREGISTRY_STORAGE}/$IMAGE_NAME" ]; then
        sregistry pull "${IMAGE_URI}" >> "${LOG_FILE}" 2>&1
        status=$?
        if [ $status != "0" ]; then
-	   echo "sregistry get ${IMAGE_URI}: FAILS" >> "${LOG_FILE}"
+	   echo "sregistry pull ${IMAGE_URI}: FAILS" >> "${LOG_FILE}"
 	   exit 1
        fi
        sregistry rename "${IMAGE_URI}" "${IMAGE_NAME}" >> "${LOG_FILE}" 2>&1

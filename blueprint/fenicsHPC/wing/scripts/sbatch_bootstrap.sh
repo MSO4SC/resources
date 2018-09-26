@@ -37,7 +37,6 @@ cat > $FILE <<- EOM
 #SBATCH -n $NO_CORES
 #SBATCH --ntasks-per-node=$NO_CPN
 #SBATCH -t $TIME
-#SBATCH --reservation=$8
 
 module add gcc/5.3.0
 module add openmpi/1.10.2

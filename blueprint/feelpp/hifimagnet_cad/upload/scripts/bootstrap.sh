@@ -6,12 +6,12 @@
 # Custom logs
 LOG_FILE=$0.log
 
-echo "bootstrap" >> ${LOG_FILE}
-echo "parameters: $@" >> ${LOG_FILE}
+echo "bootstrap" >> "${LOG_FILE}"
+echo "parameters: $*" >> "${LOG_FILE}"
 
 nargs=$#
-echo "nargs: $nargs" >> ${LOG_FILE}
-echo "last arg: ${!nargs}" >> ${LOG_FILE}
+echo "nargs: $nargs" >> "${LOG_FILE}"
+echo "last arg: ${!nargs}" >> "${LOG_FILE}"
 
 # params for singularity images:
 # $1 - { get_input: sregistry_storage }
@@ -23,54 +23,38 @@ echo "last arg: ${!nargs}" >> ${LOG_FILE}
 # $7 - { get_input: sregistry_url }
 # $8 - { get_input: sregistry_image } 
 
-# params for output
-# $9 - {get_input: hpc_feelpp}
-
 # params fo input data
-# $10 - { get_input: mso4sc_dataset_input_url }
-# $11 - { get_input: mso4sc_datacatalogue_key }
+# $9 - { get_input: mso4sc_dataset_model }
+# $10 - { get_input: mso4sc_datacatalogue_key }
 
 # input file
-# $12 - {get_input: cadcfg}
+# $11 - {get_input: cadcfg}
 
-export SREGISTRY_STORAGE=$1 >> ${LOG_FILE}
+export SREGISTRY_STORAGE=$1 >> "${LOG_FILE}"
 
 IMAGE_NAME=$2
 IMAGE_URI=$3
 # IMAGE_CLEANUP=$4
 
-export SREGISTRY_CLIENT=$5
-export SREGISTRY_CLIENT_SECRETS=$6
+export SREGISTRY_CLIENT=$5 >> "${LOG_FILE}"
+export SREGISTRY_CLIENT_SECRETS=$6 >> "${LOG_FILE}"
 
-echo "SREGISTRY_STORAGE=$SREGISTRY_STORAGE" >> ${LOG_FILE} 2>&1
-echo "SREGISTRY_CLIENT=$SREGISTRY_CLIENT" >> ${LOG_FILE} 2>&1
-echo "SREGISTRY_CLIENT_SECRETS=$SREGISTRY_CLIENT_SECRETS=" >> ${LOG_FILE} 2>&1
-
-SREGISTRY_URL=${7}
-SREGISTRY_IMAGE=${8}
-
-# # Feel output result directory
-if [ $nargs -ge 9 ]; then
-    FEELPP_OUTPUT_DIR=${9}
-    echo "FEELPP_OUTPUT_DIR=${FEELPP_OUTPUT_DIR}" >> ${LOG_FILE} 2>&1
-    if [ ! -d ${FEELPP_OUTPUT_DIR} ]; then
-	mkdir -p ${FEELPP_OUTPUT_DIR} >> ${LOG_FILE} >> ${LOG_FILE} 2>&1
-    fi
-fi
+SREGISTRY_URL=$7
+SREGISTRY_IMAGE=$8
 
 # Ckan:
 DATASET=""
 CATALOGUE_TOKEN=""
 DATA=""
 
+if [ "$nargs" -ge 9 ]; then
+    DATASET=${9}
+fi
 if [ "$nargs" -ge 10 ]; then
-    DATASET=${10}
+    CATALOGUE_TOKEN=${10}
 fi
 if [ "$nargs" -ge 11 ]; then
-    CATALOGUE_TOKEN=${11}
-fi
-if [ "$nargs" -ge 12 ]; then
-    DATA=${12}
+    DATA=${11}
 fi
 
 
@@ -114,16 +98,16 @@ if [ ! -f "${SREGISTRY_STORAGE}/$IMAGE_NAME" ]; then
        sregistry pull "${IMAGE_URI}" >> "${LOG_FILE}" 2>&1
        status=$?
        if [ $status != "0" ]; then
-	   echo "sregistry get ${IMAGE_URI}: FAILS" >> "${LOG_FILE}"
+	   echo "sregistry pull ${IMAGE_URI}: FAILS" >> "${LOG_FILE}"
 	   exit 1
        fi
+       echo "Rename $IMAGE_URI to $IMAGE_NAME" >> "${LOG_FILE}"
        sregistry rename "${IMAGE_URI}" "${IMAGE_NAME}" >> "${LOG_FILE}" 2>&1
        status=$?
        if [ $status != "0" ]; then
 	   echo "sregistry rename ${IMAGE_URI} ${IMAGE_NAME}: FAILS" >> "${LOG_FILE}"
 	   exit 1
        fi
-       
    else
        echo "Get $IMAGE_URI ($IMAGE_NAME) using intermediate shub://${SREGISTRY_URL}/${SREGISTRY_IMAGE}" >> "${LOG_FILE}"
        # On Cesga:

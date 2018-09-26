@@ -6,12 +6,12 @@
 # Custom logs
 LOG_FILE=$0.log
 
-echo "bootstrap" >> ${LOG_FILE}
-echo "parameters: $@" >> ${LOG_FILE}
+echo "bootstrap" >> "${LOG_FILE}"
+echo "parameters: $*" >> "${LOG_FILE}"
 
 nargs=$#
-echo "nargs: $nargs" >> ${LOG_FILE}
-echo "last arg: ${!nargs}" >> ${LOG_FILE}
+echo "nargs: $nargs" >> "${LOG_FILE}"
+echo "last arg: ${!nargs}" >> "${LOG_FILE}"
 
 # params for singularity images:
 # $1 - { get_input: sregistry_storage }
@@ -23,54 +23,57 @@ echo "last arg: ${!nargs}" >> ${LOG_FILE}
 # $7 - { get_input: sregistry_url }
 # $8 - { get_input: sregistry_image } 
 
-# params for output
-# $9 - {get_input: hpc_feelpp}
-
 # params fo input data
-# $10 - { get_input: mso4sc_dataset_input_url }
-# $11 - { get_input: mso4sc_datacatalogue_key }
+# $9 - { get_input: mso4sc_dataset_model }
+# $10 - { get_input: mso4sc_datacatalogue_key }
 
-# input file
-# $12 - {get_input: cadcfg}
+# input data
 
-export SREGISTRY_STORAGE=$1 >> ${LOG_FILE}
+: ${Helix_current=0}
+: ${Bitter_current=0}
+: ${Supra_current=0}
+: ${R_max=0}
+: ${R_min=0}
+: ${N_R=1}
+: ${Z_max=0}
+: ${Z_min=0}
+: ${N_Z=1}
+
+${12:-${Helix_current}}
+${13:-${Bitter_current}}
+${14:-${Supra_current}}
+${15:-${R_max}}
+${16:-${R_min}}
+${17:-${N_R}}
+${18:-${Z_max}}
+${19:-${Z_min}}
+${20:-${N_Z}}
+
+export SREGISTRY_STORAGE=$1 >> "${LOG_FILE}"
 
 IMAGE_NAME=$2
 IMAGE_URI=$3
 # IMAGE_CLEANUP=$4
 
-export SREGISTRY_CLIENT=$5
-export SREGISTRY_CLIENT_SECRETS=$6
+export SREGISTRY_CLIENT=$5 >> "${LOG_FILE}"
+export SREGISTRY_CLIENT_SECRETS=$6 >> "${LOG_FILE}"
 
-echo "SREGISTRY_STORAGE=$SREGISTRY_STORAGE" >> ${LOG_FILE} 2>&1
-echo "SREGISTRY_CLIENT=$SREGISTRY_CLIENT" >> ${LOG_FILE} 2>&1
-echo "SREGISTRY_CLIENT_SECRETS=$SREGISTRY_CLIENT_SECRETS=" >> ${LOG_FILE} 2>&1
-
-SREGISTRY_URL=${7}
-SREGISTRY_IMAGE=${8}
-
-# # Feel output result directory
-if [ $nargs -ge 9 ]; then
-    FEELPP_OUTPUT_DIR=${9}
-    echo "FEELPP_OUTPUT_DIR=${FEELPP_OUTPUT_DIR}" >> ${LOG_FILE} 2>&1
-    if [ ! -d ${FEELPP_OUTPUT_DIR} ]; then
-	mkdir -p ${FEELPP_OUTPUT_DIR} >> ${LOG_FILE} >> ${LOG_FILE} 2>&1
-    fi
-fi
+SREGISTRY_URL=$7
+SREGISTRY_IMAGE=$8
 
 # Ckan:
 DATASET=""
 CATALOGUE_TOKEN=""
 DATA=""
 
+if [ "$nargs" -ge 9 ]; then
+    DATASET=${9}
+fi
 if [ "$nargs" -ge 10 ]; then
-    DATASET=${10}
+    CATALOGUE_TOKEN=${10}
 fi
 if [ "$nargs" -ge 11 ]; then
-    CATALOGUE_TOKEN=${11}
-fi
-if [ "$nargs" -ge 12 ]; then
-    DATA=${12}
+    DATA=${11}
 fi
 
 
@@ -173,8 +176,7 @@ if [ "x$DATASET" != "x" ] && [ "$DATASET" != "None" ]; then
 	curl $DATASET -o $ARCHIVE
 	isDownloaded=$?
     fi
-    # harcoded working:
-    # curl -H "Authorization: 5c1fcb82-9987-47df-9f7f-f02363b18419" http://193.144.35.207:80/dataset/1fc75820-496d-428c-83ce-446c783fa4a2/resource/0c541e65-6f6d-4f52-9682-a072f44c8fa8/download/insert-h1h4.tgz -o insert-h1h4.tgz
+z
     # isDownloaded=$?
     if [ "$isDowloaded" == 1 ]; then
 	echo "curl $OPTIONS $DATASET -o $ARCHIVE : FAILS" >> "${LOG_FILE}"
@@ -183,15 +185,37 @@ if [ "x$DATASET" != "x" ] && [ "$DATASET" != "None" ]; then
     
     TYPE=$(file $ARCHIVE | perl -pi -e "s|$ARCHIVE: ||")
     echo "type($ARCHIVE)=$TYPE"  >> "${LOG_FILE}"
-    
+
     tar zxvf "$ARCHIVE" >> "${LOG_FILE}"
 
     # check if input file is present
-    if [ ! -f "$DATA" ]; then
-	echo "$DATA: no such file in dataset $DATASET"
+    if [ ! -f "${DATA}.d" ]; then
+	echo "${DATA}.d: no such file in dataset $DATASET"
 	exit 1
     fi
+    
 fi
+
+cat > input.in <<EOF
+${Helix_current}
+${Bitter_current}
+EOF
+
+# check if the are supra
+if [ egrep "^1 " ${DATA}.d ]; then
+    cat >> input.in <<EOF
+    ${Supra_current}
+EOF
+fi
+
+cat >> input.in <<EOF
+${R_max}
+${R_min}
+${Z_max}
+${Z_min}
+${N_R}
+${N_Z}
+EOF
 
 # ctx logger info "Some logging"
 # # read access

@@ -1,0 +1,101 @@
+= {hifimagnet} basic workflow TOSCA
+
+This is the basic demonstrator of {hifimagnet} workflow for CAD/Meshing
+of High Field Magnets.
+
+It actually create CAD and generate mesh for a givien dataset.
+
+== Running in the orchestrator CLI
+
+* Create a `local-blueprint-inputs.yaml` from the template file.
+** Define the HPC ressource you are planning to use.
+** Enter your credentials (`user/passwd`)
+** Setup <<inputs, input parameters>>
+
+* Connect to the cloudify client via docker:
+[source]
+----
+docker pull mso4sc/msoorchestrator-cli
+docker run -it --rm \
+    -v $HOME/MSO4SC/resources:/resources \
+     mso4sc/msoorchestrator-cli
+----
+
+* Within the docker:
+[source]
+----
+cfy profiles use  ORCHESTRATOR_IP -t  default_tenant -u USER -p PASSWD
+----
+
+Then you can simply deploy your application using:
+[source]
+----
+./deploy up
+----
+
+To undeploy on the orchestrator, just:
+[source]
+----
+./deploy down
+----
+
+NOTE: If the application fails during one step of the deploy up process, you'll have to
+force cancel execution by hands. `cfy executions list`, `cfy executions cancel -f <id>`
+in the orchestrator client (*docker).
+
+[TIP]
+====
+Some useful commands :
+
+* `cfy status`
+* `cfy deployment list`
+* `cfy deployment delete -f <name>`
+* `cfy execution list`
+* `cfy execution cancel -f <id>
+* `cfy deployment delete -f <name>`
+* `cfy blueprint list`
+* `cfy blueprint delete <name>`
+
+====
+
+See https://github.com/MSO4SC/MSOOrchestrator-CLI/blob/master/README.adoc#remote-mode for details
+
+
+== Package workflow for {MSO4SC} portal
+
+To package the workflow for latter use in the portal, just create a gzipped archive `hifimagnet_cad.tgz`
+using :
+[source]
+----
+./deploy pkg
+----
+
+[#inputs]
+== Input parameters
+
+The main parameters are noted in **bold**
+
+=== HPC settings
+
+=== Setup
+
+=== Singularity images
+
+== Synopsis
+
+* deploy:
+** load singularity image
+** eventually load dataset from CKAN URL
+** perform a few checks [TODO]
+
+* running:
+** move to base_dir/workdir_tmp_ID
+** submit batch prefix_ID using workload manager
+
+* undeploy:
+** eventually cleanup base_dir/workir_prefix_ID
+** eventually cleanup singularity image
+** upload result cad(s) and mesh [TODO]
+** remove loaded dataset
+
+see https://github.com/MSO4SC/cloudify-hpc-plugin/tree/canary for details about upload data to CKAN

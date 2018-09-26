@@ -6,12 +6,12 @@
 # Custom logs
 LOG_FILE=$0.log
 
-echo "revert" >> ${LOG_FILE}
-echo "parameters: $@" >> ${LOG_FILE}
+echo "revert" >> "${LOG_FILE}"
+echo "parameters: $*" >> "${LOG_FILE}"
 
 nargs=$#
-echo "nargs: $nargs" >> ${LOG_FILE}
-echo "last arg: ${!nargs}" >> ${LOG_FILE}
+echo "nargs: $nargs" >> "${LOG_FILE}"
+echo "last arg: ${!nargs}" >> "${LOG_FILE}"
 
 # params for singularity images:
 # $1 - { get_input: sregistry_storage }
@@ -22,6 +22,7 @@ echo "last arg: ${!nargs}" >> ${LOG_FILE}
 # $6 - { get_input: sregistry_secrets } 
 # $7 - { get_input: sregistry_url }
 # $8 - { get_input: sregistry_image } 
+
 
 export SREGISTRY_STORAGE=$1 >> "${LOG_FILE}"
 
