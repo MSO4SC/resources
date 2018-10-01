@@ -74,7 +74,7 @@ node_templates:
                 nodes: 1
                 tasks: 1
                 tasks_per_node: 1
-                max_time: '00:05:00'
+                max_time: '00:10:00'
             deployment:
                 bootstrap: 'scripts/bootstrap.sh'
                 revert: 'scripts/revert.sh'
