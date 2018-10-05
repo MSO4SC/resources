@@ -20,52 +20,65 @@ tosca_definitions_version: cloudify_dsl_1_3
 
 imports:
     # to speed things up, it is possible to download this file,
-    - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-manager/18.1.11/resources/rest-service/cloudify/types/types.yaml
-    # - https://raw.githubusercontent.com/MSO4SC/cloudify-hpc-plugin/master/plugin.yaml
-    - https://raw.githubusercontent.com/Trophime/cloudify-hpc-plugin/master/plugin.yaml
+    # - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-manager/18.1.11/resources/rest-service/cloudify/types/types.yaml
+    - http://www.getcloudify.org/spec/cloudify/4.3.1/types.yaml
+    # - https://raw.githubusercontent.com/MSO4SC/cloudify-hpc-plugin/canary/plugin.yaml
+    - https://raw.githubusercontent.com/Trophime/cloudify-hpc-plugin/add_checks/plugin.yaml
 
 inputs:
     email_user:
         description: email address for reporting
-        default: "christophe.trophime@lncmi.cnrs.fr"
-    email_type:
-        description: define mail-type
-        default: "ALL"
+        default: "first.lastname@domain"
+    # email_type:
+    #     type: string
+    #     description: define mail-type
+    #     default: "ALL"
+    #     # constraints:
+    #     #     - valid_values: ["ALL", "END", "FAIL"]
 
-    # Monitor
-    monitor_entrypoint:
-        description: Monitor entrypoint IP
-        default: "193.144.35.146"
-        type: string
+    # # Monitor
+    # monitor_entrypoint:
+    #     description: Monitor entrypoint IP
+    #     default: "193.144.35.146"
+    #     type: string
 
-    # Job prefix name
-    job_prefix:
-        description: Job name prefix in HPCs
-        default: "mso4sc"
-        type: string
+    # # Job prefix name
+    # job_prefix:
+    #     description: Job name prefix in HPCs
+    #     default: "mso4sc"
+    #     type: string
 
     # CESGA FTII parameters
     mso4sc_hpc_primary:
         description: FTII connection credentials
         default: {}
 
+    parallel_nodes:
+        description: number of nodes to run in parallel(optional)
+        default: ''
+
+    parallel_tasks_per_node:
+        description: number of tasks per node (optional)
+        default: ''
+
     parallel_tasks:
-        description: number of tasks/processes to run in parallel
-        default: 2
+        type: integer
+        description: number of tasks to run in parallel (mandatory)
+        default: 1
 
     max_time:
         description: maximum allowed time for run (minutes and seconds)
         default: '00:30:00'
 
     hpc_partition:
+        type: string
         description: slurm partition to choose depending on the targeted machine
         default: 'thin-shared'
-        type: string
 
     hpc_reservation:
+        type: string
         description: slurm partition to choose depending on the targeted machine
         default: ''
-        type: string
 
     hpc_modules:
         description: modules to load depending on the targeted machine
@@ -74,108 +87,170 @@ inputs:
             - openmpi/2.0.2
             - singularity/2.4.2
 
-    # WATCH OUT : last entry should be <hpc_basedir>/feel
+    hpc_basedir:
+        type: string
+        description: basedir directory where calculations would be performed
+        default: ${LUSTRE}
+
+    # hpc_workdir_prefix:
+    #     type: string
+    #     description: prefix of the directory name holding the actual calculation
+    #     default: "hifimagnet"
+
+    # # this does work in cli not in portal
+    # hpc_feelpp:
+    #     type: string
+    #     description: feel directory where simulations will endup
+    #     default:
+    #         concat: [get_input: hpc_basedir, "/feel"]
+
+    hpc_feelpp:
+        type: string
+        description: feel directory where simulations will endup
+        default: ${LUSTRE}/feel
+
+    # # this does work in cli not in portal
+    # hpc_volumes:
+    #     description: volumes to be mounted on the targeted machine
+    #     default:
+    #         - /scratch
+    #         - /mnt
+    #         - concat: [get_input: hpc_feelpp, ":/feel"]
+
     hpc_volumes:
         description: volumes to be mounted on the targeted machine
         default:
             - /scratch
             - /mnt
-            - ${LUSTRE}/feel:feelpp
-
-    hpc_basedir:
-        type: string
-        description: basedir directory were calculations would be performed
-        default: ${LUSTRE}
-
-    hpc_workdir_prefix:
-        type: string
-        description: prefix of the directory name holding the actual calculation
-        default: "hifimagnet"
+            - ${LUSTRE}/feel:/feel
 
     # specs for running simulations
-    mso4sc_dataset_input_url:
-        description: url to retrieve for case file
+    mso4sc_dataset_model:
+        description: Model dataset
         default: "None"
 
-    execfile:
-        type: string
-        description: executable file
-        default: "feelpp_hfm_thermoelectric_model_3D_V1T1_N1"
+    mso4sc_datacatalogue_entrypoint:
+        description: entrypoint of the data catalogue
+        default: "http://193.144.35.207"
+
+    mso4sc_datacatalogue_key:
+        description: API Key to publish the outputs
+        default: ""
+
+    mso4sc_outdataset_outputs_at:
+        description: ID of the CKAN output dataset
+        default: ""
+
+    # constraints:
+    #     - valid_values:
+    #           [ "feelpp_hfm_thermoelectric_model_3D_V1T1_N1", "feelpp_hfm_coupledcartmodel_3DP1N1", "feelpp_hfm_coupledmodel_3D_P1N1" ]
+    # execfile:
+    #     type: string
+    #     description: executable file
+    #     default: "feelpp_hfm_thermoelectric_model_3D_V1T1_N1"
 
     cfgfile:
+        type: string
         description: configuration file
         default: "/usr/share/doc/hifimagnet/ThermoElectricModel/quarter-turn3D.cfg"
-        type: string
 
     do_not_delete_workdir:
+        type: boolean
         description: skip deletion of workdir
         default: true
-        type: boolean
 
-    # specs for retreiving singularity images
-    sregistry_client:
-        description: define default sregistry client
-        default: "registry"
+    # # specs for retreiving singularity images
+    # sregistry_client:
+    #     description: define default sregistry client
+    #     default: "registry"
 
-    sregistry_client_secrets:
-        description: define path to file where sregistry secret are stored
-        default: "$HOME/.sregistry"
+    # sregistry_client_secrets:
+    #     description: define path to file where sregistry secret are stored
+    #     default: "$HOME/.sregistry"
 
     sregistry_storage:
         description: define path to container directory
         default: "${LUSTRE}/singularity_images"
 
-    sregistry_url:
-        description: URI pointing to the sregistry
-        default: "sregistry.srv.cesga.es"
+    # sregistry_url:
+    #     description: URI pointing to the sregistry
+    #     default: "sregistry.srv.cesga.es"
 
-    sregistry_image:
-        description: URI pointing to the sregistry-cli image
-        default: "mso4sc/sregistry"
+    # sregistry_image:
+    #     description: URI pointing to the sregistry-cli image
+    #     default: "mso4sc/sregistry"
 
-    # singularity image
-    singularity_image_uri:
-        description: URI pointing to the singularity image
-        default: "hifimagnet/hifimagnet:stretch"
+    # # singularity image
+    # singularity_image_uri:
+    #     description: URI pointing to the singularity image
+    #     default: "hifimagnet/hifimagnet:stretch"
 
-    singularity_image_filename:
-        description: Filename of the singularity image
-        default: "hifimagnet-stretch.simg"
+    # singularity_image_filename:
+    #     description: Filename of the singularity image
+    #     default: "hifimagnet-stretch.simg"
 
-    singularity_image_cleanup:
-        # type: boolean
-        description: force remove of singularity image
-        default: "false"
-        # default: false
+    # # passing boolean to scripts work in cli not in portal
+    # singularity_image_cleanup:
+    #     type: string
+    #     description: force remove of singularity image
+    #     default: "false"
+    #     # default: false
 
+dsl_definitions:
+    - &monitor_entrypoint #Monitor entrypoint IP
+      "193.144.35.146"
+    - &job_prefix #Job name prefix in HPCs
+      "hifimagnet"
+    - &email_type # define mail-type ADD, END, FAIL
+      "ALL"
+    - &hpc_workdir_prefix
+      "coupledmodel"
+    - &sregistry_client
+      "registry"
+    - &sregistry_client_secrets
+      "$HOME/.sregistry"
+    - &sregistry_url
+      "sregistry.srv.cesga.es"
+    - &sregistry_image
+      "mso4sc/sregistry"
+    - &singularity_image_uri
+      "hifimagnet/hifimagnet:stretch"
+    - &singularity_image_filename
+      "hifimagnet-stretch.simg"
+    - &singularity_image_cleanup
+      "false"
+    - &execfile
+      "feelpp_hfm_thermoelectric_model_3D_V1T1_N1"
 
 node_templates:
     primary_hpc:
         type: hpc.nodes.Compute
         properties:
             config: {get_input: mso4sc_hpc_primary}
-            # external_monitor_entrypoint: {get_input: monitor_entrypoint}
+            # external_monitor_entrypoint: *monitor_entrypoint
             # monitor_orchestrator_available: True
-            job_prefix: {get_input: job_prefix}
+            job_prefix: *job_prefix
             base_dir: {get_input: hpc_basedir}
-            workdir_prefix: {get_input: hpc_workdir_prefix}
+            workdir_prefix: *hpc_workdir_prefix
             skip_cleanup: {get_input: do_not_delete_workdir}
             # simulate: True  # COMMENT to test against a real HPC
 
-    job_test:
+    job_sim:
         type: hpc.nodes.singularity_job
         properties:
             job_options:
                 mail_user: {get_input: email_user}
-                mail_type: {get_input: email_type}
+                mail_type: *email_type
                 modules: {get_input: hpc_modules}
                 image: {concat: [{get_input: sregistry_storage}, '/', {get_input: singularity_image_filename}]}
                 home: '${HOME}:/home/${USER}'
                 volumes: {get_input: hpc_volumes}
-                command: {concat: [{get_input: execfile}, ' --config-file ', {get_input: cfgfile}]}
+                command: {concat: [*execfile, ' --config-file ', {get_input: cfgfile}]}
                 partition: {get_input: hpc_partition}
                 reservation: {get_input: hpc_reservation}
+                nodes: {get_input: parallel_nodes}
                 tasks: {get_input: parallel_tasks}
+                tasks_per_node: {get_input: parallel_tasks_per_node}
                 max_time: {get_input: max_time}
             skip_cleanup: {get_input: do_not_delete_workdir}
             deployment:
@@ -183,21 +258,23 @@ node_templates:
                 revert: 'scripts/revert.sh'
                 inputs:
                     - {get_input: sregistry_storage}
-                    - {get_input: singularity_image_filename}
-                    - {get_input: singularity_image_uri}
-                    - {get_input: singularity_image_cleanup}
-                    - {get_input: sregistry_client}
-                    - {get_input: sregistry_client_secrets}
-                    - {get_input: sregistry_url}
-                    - {get_input: sregistry_image}
-                    - {get_input: mso4sc_dataset_input_url}
-                    - {get_input: hpc_basedir}
+                    - *singularity_image_filename
+                    - *singularity_image_uri
+                    - *singularity_image_cleanup
+                    - *sregistry_client
+                    - *sregistry_client_secrets
+                    - *sregistry_url
+                    - *sregistry_image
+                    - {get_input: hpc_feelpp}
+                    - {concat: ['"', {get_input: mso4sc_dataset_model}, '"']}
+                    - {get_input: mso4sc_datacatalogue_key}
+                    - {get_input: cfgfile}
 
         relationships:
             - type: job_contained_in_hpc
               target: primary_hpc
 
 outputs:
-    job_test:
-        description: feelpp_hfm_test results
-        value: {get_attribute: [job_test, job_name]}
+    job_sim:
+        description: hifimagnet thermoelec results
+        value: {get_attribute: [job_sim, job_name]}

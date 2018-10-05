@@ -28,16 +28,19 @@ echo "last arg: ${!nargs}" >> "${LOG_FILE}"
 # $10 - { get_input: mso4sc_datacatalogue_key }
 
 # input data
+Currents=${12}
+Rdata=${13}
+Zdata=${14}
 
-Helix_current=${12}
-Bitter_current=${13}
-Supra_current=${14}
-R_max=${15}
-R_min=${16}
-N_R=${17}
-Z_max=${18}
-Z_min=${19}
-N_Z=${20}
+Helix_current=$(echo "$Currents" |tr -d "[" | tr -d "]" | cut -d ":" -f1)
+Bitter_current=$(echo "$Currents" |tr -d "[" | tr -d "]"  |cut -d ":" -f2)
+Supra_current=$(echo "$Currents" |tr -d "[" | tr -d "]"  |cut -d ":" -f3)
+R_max=$(echo "$Rdata" |tr -d "[" | tr -d "]"  |cut -d ":" -f1)
+R_min=$(echo "$Rdata" |tr -d "[" | tr -d "]"  |cut -d ":" -f2)
+N_R=$(echo "$Rdata" |tr -d "[" | tr -d "]"  |cut -d ":" -f3)
+Z_max=$(echo "$Zdata" |tr -d "[" | tr -d "]"  |cut -d ":" -f1)
+Z_min=$(echo "$Zdata" |tr -d "[" | tr -d "]"  |cut -d ":" -f2)
+N_Z=$(echo "$Zdata" |tr -d "[" | tr -d "]"  |cut -d ":" -f3)
 
 echo "Helix_current=${Helix_current}" >> "${LOG_FILE}"
 echo "Bitter_current=${Bitter_current}" >> "${LOG_FILE}"

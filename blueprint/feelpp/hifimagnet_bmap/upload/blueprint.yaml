@@ -20,33 +20,33 @@ tosca_definitions_version: cloudify_dsl_1_3
 
 imports:
     # to speed things up, it is possible to download this file,
-    # - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-manager/18.1.11/resources/rest-service/cloudify/types/types.yaml
-    - http://www.getcloudify.org/spec/cloudify/4.3.1/types.yaml
-    # - https://raw.githubusercontent.com/MSO4SC/cloudify-hpc-plugin/canary/plugin.yaml
-    - https://raw.githubusercontent.com/Trophime/cloudify-hpc-plugin/add_checks/plugin.yaml
+    - http://raw.githubusercontent.com/mso4sc/cloudify-hpc-plugin/master/resources/types/cfy_types.yaml
+    # HPC pluging
+    - http://raw.githubusercontent.com/MSO4SC/cloudify-hpc-plugin/master/plugin.yaml
+    # - https://raw.githubusercontent.com/Trophime/cloudify-hpc-plugin/add_checks/plugin.yaml
 
 inputs:
     email_user:
         description: email address for reporting
         default: "first.lastname@domain"
-    email_type:
-        type: string
-        description: define mail-type
-        default: "ALL"
-        # constraints:
-        #     - valid_values: ["ALL", "END", "FAIL"]
+    # email_type:
+    #     type: string
+    #     description: define mail-type
+    #     default: "ALL"
+    #     # constraints:
+    #     #     - valid_values: ["ALL", "END", "FAIL"]
 
-    # Monitor
-    monitor_entrypoint:
-        description: Monitor entrypoint IP
-        default: "193.144.35.146"
-        type: string
+    # # Monitor
+    # monitor_entrypoint:
+    #     description: Monitor entrypoint IP
+    #     default: "193.144.35.146"
+    #     type: string
 
-    # Job prefix name
-    job_prefix:
-        description: Job name prefix in HPCs
-        default: "mso4sc"
-        type: string
+    # # Job prefix name
+    # job_prefix:
+    #     description: Job name prefix in HPCs
+    #     default: "mso4sc"
+    #     type: string
 
     # CESGA FTII parameters
     mso4sc_hpc_primary:
@@ -62,10 +62,10 @@ inputs:
         description: slurm partition to choose depending on the targeted machine
         default: 'thin-shared'
 
-    hpc_reservation:
-        type: string
-        description: slurm partition to choose depending on the targeted machine
-        default: ''
+    # hpc_reservation:
+    #     type: string
+    #     description: slurm partition to choose depending on the targeted machine
+    #     default: ''
 
     hpc_modules:
         description: modules to load depending on the targeted machine
@@ -114,100 +114,103 @@ inputs:
     # constraints:
     #     - valid_values:
     #           [ "feelpp_hfm_thermoelectric_model_3D_V1T1_N1", "feelpp_hfm_coupledcartmodel_3DP1N1", "feelpp_hfm_coupledmodel_3D_P1N1" ]
-    magnetcfg:
+    DataCfg:
         description: name of the magnet cfg file without extension
         default: "HL-31"
 
-    options:
+    DataOptions:
         description: options to be passed to bmap
         default: ""
 
-    Helix_current:
-        description: specifiy current in the insert (default is "31 KA")
-        default: "31000."
+    DataCurrents:
+        description: specifiy input currents in the insert (default is "[31000:31000:0]" for Helices, Bitters, Supra)
+        default: "[31000:31000:0]"
 
-    Bitter_current:
-        description: specifiy current in the Bitters (default is "31 KA")
-        default: "31000."
+    DataR:
+        description: specifiy r data in m (default is "[0:0:1]" for [min,max,N])
+        default: "[0:0:1]"
 
-    Supra_current:
-        description: specifiy current in the supra (default is "31 KA")
-        default: "31000."
+    DataZ:
+        description: specifiy z data in m (default is "[0:0:1]"  for [min,max,N])
+        default: "[0:0:1]"
 
-    R_max:
-        description: specifiy r max in m (default is "0")
-        default: "0"
-    R_min:
-        description: specifiy r max in m (default is "0")
-        default: "0"
-    N_R:
-        description: specifiy number of points along Or (default is "1")
-        default: "1"
-
-    Z_max:
-        description: specifiy r max in m (default is "0")
-        default: "0"
-    Z_min:
-        description: specifiy r max in m (default is "0")
-        default: "0"
-    N_Z:
-        description: specifiy number of points along Or (default is "1")
-        default: "1"
-
-    do_not_delete_workdir:
+    keep_workdir:
         type: boolean
         description: skip deletion of workdir
         default: true
 
-    # specs for retreiving singularity images
-    sregistry_client:
-        description: define default sregistry client
-        default: "registry"
+    # # specs for retreiving singularity images
+    # sregistry_client:
+    #     description: define default sregistry client
+    #     default: "registry"
 
-    sregistry_client_secrets:
-        description: define path to file where sregistry secret are stored
-        default: "$HOME/.sregistry"
+    # sregistry_client_secrets:
+    #     description: define path to file where sregistry secret are stored
+    #     default: "$HOME/.sregistry"
 
     sregistry_storage:
         description: define path to container directory
         default: "${LUSTRE}/singularity_images"
 
-    sregistry_url:
-        description: URI pointing to the sregistry
-        default: "sregistry.srv.cesga.es"
+    # sregistry_url:
+    #     description: URI pointing to the sregistry
+    #     default: "sregistry.srv.cesga.es"
 
-    sregistry_image:
-        description: URI pointing to the sregistry-cli image
-        default: "mso4sc/sregistry"
+    # sregistry_image:
+    #     description: URI pointing to the sregistry-cli image
+    #     default: "mso4sc/sregistry"
 
-    # singularity image
-    singularity_image_uri:
-        description: URI pointing to the singularity image
-        default: "hifimagnet/hifimagnet:stretch"
+    # # singularity image
+    # singularity_image_uri:
+    #     description: URI pointing to the singularity image
+    #     default: "hifimagnet/hifimagnet:stretch"
 
-    singularity_image_filename:
-        description: Filename of the singularity image
-        default: "hifimagnet-stretch.simg"
+    # singularity_image_filename:
+    #     description: Filename of the singularity image
+    #     default: "hifimagnet-stretch.simg"
 
-    # passing boolean to scripts work in cli not in portal
-    singularity_image_cleanup:
-        type: string
-        description: force remove of singularity image
-        default: "false"
-        # default: false
+    # # passing boolean to scripts work in cli not in portal
+    # singularity_image_cleanup:
+    #     type: string
+    #     description: force remove of singularity image
+    #     default: "false"
+    #     # default: false
 
+dsl_definitions:
+    - &monitor_entrypoint #Monitor entrypoint IP
+      "193.144.35.146"
+    - &job_prefix #Job name prefix in HPCs
+      "hifimagnet"
+    - &email_type # define mail-type ADD, END, FAIL
+      "ALL"
+    - &hpc_workdir_prefix
+      "bmap"
+    - &sregistry_client
+      "registry"
+    - &sregistry_client_secrets
+      "$HOME/.sregistry"
+    - &sregistry_url
+      "sregistry.srv.cesga.es"
+    - &sregistry_image
+      "mso4sc/sregistry"
+    - &singularity_image_uri
+      "hifimagnet/hifimagnet:stretch"
+    - &singularity_image_filename
+      "hifimagnet-stretch.simg"
+    - &singularity_image_cleanup
+      "false"
 
 node_templates:
     primary_hpc:
         type: hpc.nodes.Compute
         properties:
             config: {get_input: mso4sc_hpc_primary}
-            # external_monitor_entrypoint: {get_input: monitor_entrypoint}
+            # external_monitor_entrypoint: *monitor_entrypoint
             # monitor_orchestrator_available: True
-            job_prefix: {get_input: job_prefix}
+            job_prefix: *job_prefix
             base_dir: {get_input: hpc_basedir}
-            workdir_prefix: {get_input: hpc_workdir_prefix}
-            skip_cleanup: {get_input: do_not_delete_workdir}
+            workdir_prefix: *hpc_workdir_prefix
+            skip_cleanup: {get_input: keep_workdir}
             # simulate: True  # COMMENT to test against a real HPC
 
     job_bmap:
@@ -215,53 +218,48 @@ node_templates:
         properties:
             job_options:
                 mail_user: {get_input: email_user}
-                mail_type: {get_input: email_type}
+                mail_type: *email_type
                 modules: {get_input: hpc_modules}
-                image: {concat: [{get_input: sregistry_storage}, '/', {get_input: singularity_image_filename}]}
+                image: {concat: [{get_input: sregistry_storage}, '/', *singularity_image_filename]}
                 home: '${PWD}:/home/${USER}'
                 volumes: {get_input: hpc_volumes}
-                command: {concat: ['B_Map --interactive ', {get_input: magnetcfg}, '.d ', {get_input: options}, ' < input.in']}
+                command: {concat: ['B_Map --interactive ', {get_input: DataCfg}, '.d ', {get_input: DataOptions}, ' < input.in']}
                 partition: {get_input: hpc_partition}
-                reservation: {get_input: hpc_reservation}
+                # reservation: {get_input: hpc_reservation}
                 nodes: 1
                 tasks: 1
                 tasks_per_node: 1
                 max_time: {get_input: max_time}
-            skip_cleanup: {get_input: do_not_delete_workdir}
+            skip_cleanup: {get_input: keep_workdir}
             deployment:
                 bootstrap: 'scripts/bootstrap.sh'
                 revert: 'scripts/revert.sh'
                 #mso4sc_dataset_input_url replaced by mso4sc_dataset_model
                 inputs:
                     - {get_input: sregistry_storage}
-                    - {get_input: singularity_image_filename}
-                    - {get_input: singularity_image_uri}
-                    - {get_input: singularity_image_cleanup}
-                    - {get_input: sregistry_client}
-                    - {get_input: sregistry_client_secrets}
-                    - {get_input: sregistry_url}
-                    - {get_input: sregistry_image}
+                    - *singularity_image_filename
+                    - *singularity_image_uri
+                    - *singularity_image_cleanup
+                    - *sregistry_client
+                    - *sregistry_client_secrets
+                    - *sregistry_url
+                    - *sregistry_image
                     - {get_input: mso4sc_dataset_model}
                     - {get_input: mso4sc_datacatalogue_key}
-                    - {get_input: magnetcfg}
-                    - {get_input: Helix_current}
-                    - {get_input: Bitter_current}
-                    - {get_input: Supra_current}
-                    - {get_input: R_max}
-                    - {get_input: R_min}
-                    - {get_input: N_R}
-                    - {get_input: Z_max}
-                    - {get_input: Z_min}
-                    - {get_input: N_Z}
+                    - {get_input: DataCfg}
+                    - {get_input: DataCurrents}
+                    - {get_input: DataR}
+                    - {get_input: DataZ}
 
             # see single-sbatch-output/blueprint.yaml for ex
             publish:
-                entrypoint: {get_input: mso4sc_datacatalogue_entrypoint}
-                api_key: {get_input: mso4sc_datacatalogue_key}
-                dataset: {get_input: mso4sc_outdataset_outputs_at}
-                file_path: { concat:[{get_input: magnetcfg}, '_Field_Map.dat']}
-                name: "FieldMap"
-                description: "Magnetic Field Map"
+                - type: "CKAN"
+                  entrypoint: {get_input: mso4sc_datacatalogue_entrypoint}
+                  api_key: {get_input: mso4sc_datacatalogue_key}
+                  dataset: {get_input: mso4sc_outdataset_outputs_at}
+                  file_path: { concat:['$CURRENT_WORKDIR/', {get_input: DataCfg}, '_Field_Map.dat']}
+                  name: "FieldMap"
+                  description: { concat:["Magnetic Field Map: I=", {get_input: DataCurrents}, " R=", {get_input: DataR}, " Z=", {get_input: DataZ}]} 
 
         relationships:
             - type: job_contained_in_hpc
