@@ -1,0 +1,159 @@
+########
+# Copyright (c) 2017 MSO4SC - javier.carnero@atos.net
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+tosca_definitions_version: cloudify_dsl_1_3
+
+imports:
+    # to speed things up, it is possible to download this file,
+    - http://www.getcloudify.org/spec/cloudify/4.1/types.yaml
+    # HPC pluging
+    - http://raw.githubusercontent.com/MSO4SC/cloudify-hpc-plugin/master/plugin.yaml
+
+inputs:
+    # CESGA FTII parameters
+    mso4sc_hpc_primary:
+        description: FTII connection credentials
+        default: {}
+    
+    mso4sc_hpc_secondary:
+        description: SZE connection credentials
+        default: {}
+
+    # Job prefix name
+    job_prefix:
+        description: Job name prefix in HPCs
+        default: "mso4sc"
+        type: string
+
+    # Monitor
+    monitor_entrypoint:
+        description: Monitor entrypoint IP
+        default: "193.144.35.131"
+        type: string
+
+    hpc_number_nodes:
+        description: number of nodes to run in parallel
+        default: 1
+
+    hpc_number_cores:
+        description: number of processes to run in parallel
+        default: 24
+
+    hpc_cores_per_node:
+        description: number of processes per nodeto run in parallel
+        default: 24
+
+    hpc_directory:
+        description: the directory name for the image
+        default: ${LUSTRE}
+        type: string
+
+    hpc_max_time:
+        description: maximum allowed time for run (minutes and seconds)
+        default: '00:30:00'
+
+    mso4sc_dataset_tar:
+        description: dataset
+        default: 'meshes'
+        type: string
+
+    app_T:
+        description: final time for the simulation
+        default: "'0.4'"
+
+    app_no_samples:
+        description: number of files for saving simulation results
+        default: "'100'"
+
+    app_air_density:
+        description: density of air in kg/m^3
+        default: "'1'"
+
+    app_fluid_density:
+        description: density of the fluid in kg/m^3
+        default: "'1000'"
+  
+    app_platform_density: 
+        description: density of the platform in kg/m^3
+        default: "'.72'"
+
+    app_platform_volume:
+        description: volume of the platform in m^3
+        default: "'.25'"
+
+    app_dynamic_viscosity:
+        description: dynamic viscosity of the fluid in Pa s
+        default: "'1.0e-5'"
+
+    hpc_basedir:
+        type: string
+        description: basedir directory where calculations would be performed
+        default: ${LUSTRE}
+
+    hpc_workdir_prefix:
+        type: string
+        description: prefix of the directory name holding the actual calculation
+        default: fWT_${USER}
+
+node_templates:
+    main_hpc_node:
+        type: hpc.nodes.Compute
+        properties:
+            config: { get_input: mso4sc_hpc_primary }
+            external_monitor_entrypoint: { get_input: monitor_entrypoint }
+            job_prefix: { get_input: job_prefix }
+            base_dir: {get_input: hpc_basedir}
+            workdir_prefix: {get_input: hpc_workdir_prefix}
+#            simulate: True  # COMMENT to test against a real HPC
+
+
+    l0_parallel_job:
+        type: hpc.nodes.job
+        properties:
+            job_options:
+                type: 'SRUN'
+                modules:
+                    - gcc/5.3.0
+                    - openmpi/1.10.2
+                    - singularity/2.4.2
+                partition: 'thinnodes'
+                command: 'ls > logx1'
+                nodes: {get_input: hpc_number_nodes}
+                tasks: {get_input: hpc_number_cores}
+                tasks_per_node: {get_input : hpc_cores_per_node}
+                max_time: {get_input: hpc_max_time}
+            deployment:
+                bootstrap: 'scripts/bootstrap_1.sh'
+                revert: 'scripts/revert_1.sh'
+                inputs:
+                    - {get_input: hpc_directory}
+                    - {get_input: mso4sc_dataset_tar}
+                    - {get_input: app_T}
+                    - {get_input: app_no_samples}
+                    - {get_input: app_air_density}
+                    - {get_input: app_fluid_density}
+                    - {get_input: app_platform_density}
+                    - {get_input: app_platform_volume}
+                    - {get_input: app_dynamic_viscosity}
+
+        relationships:
+            - type: job_contained_in_hpc
+              target: main_hpc_node
+
+
+outputs:
+    second_job_name:
+        description: first job name
+        value: { get_attribute: [l0_parallel_job, job_name] }
