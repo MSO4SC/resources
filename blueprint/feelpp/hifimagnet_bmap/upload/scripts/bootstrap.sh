@@ -28,26 +28,30 @@ echo "last arg: ${!nargs}" >> "${LOG_FILE}"
 # $10 - { get_input: mso4sc_datacatalogue_key }
 
 # input data
+Currents=${12}
+Rdata=${13}
+Zdata=${14}
 
-: ${Helix_current=0}
-: ${Bitter_current=0}
-: ${Supra_current=0}
-: ${R_max=0}
-: ${R_min=0}
-: ${N_R=1}
-: ${Z_max=0}
-: ${Z_min=0}
-: ${N_Z=1}
+Helix_current=$(echo "$Currents" |tr -d "[" | tr -d "]" | cut -d ":" -f1)
+Bitter_current=$(echo "$Currents" |tr -d "[" | tr -d "]"  |cut -d ":" -f2)
+Supra_current=$(echo "$Currents" |tr -d "[" | tr -d "]"  |cut -d ":" -f3)
+R_max=$(echo "$Rdata" |tr -d "[" | tr -d "]"  |cut -d ":" -f1)
+R_min=$(echo "$Rdata" |tr -d "[" | tr -d "]"  |cut -d ":" -f2)
+N_R=$(echo "$Rdata" |tr -d "[" | tr -d "]"  |cut -d ":" -f3)
+Z_max=$(echo "$Zdata" |tr -d "[" | tr -d "]"  |cut -d ":" -f1)
+Z_min=$(echo "$Zdata" |tr -d "[" | tr -d "]"  |cut -d ":" -f2)
+N_Z=$(echo "$Zdata" |tr -d "[" | tr -d "]"  |cut -d ":" -f3)
 
-${12:-${Helix_current}}
-${13:-${Bitter_current}}
-${14:-${Supra_current}}
-${15:-${R_max}}
-${16:-${R_min}}
-${17:-${N_R}}
-${18:-${Z_max}}
-${19:-${Z_min}}
-${20:-${N_Z}}
+echo "Helix_current=${Helix_current}" >> "${LOG_FILE}"
+echo "Bitter_current=${Bitter_current}" >> "${LOG_FILE}"
+echo "Supra_current=${Supra_current}" >> "${LOG_FILE}"
+echo "R_max=${R_max}" >> "${LOG_FILE}"
+echo "R_min=${R_min}" >> "${LOG_FILE}"
+echo "N_R=${N_R}" >> "${LOG_FILE}"
+echo "Z_max=${Z_max}" >> "${LOG_FILE}"
+echo "Z_min=${Z_min}" >> "${LOG_FILE}"
+echo "N_Z=${N_Z}"  >> "${LOG_FILE}"
+
 
 export SREGISTRY_STORAGE=$1 >> "${LOG_FILE}"
 

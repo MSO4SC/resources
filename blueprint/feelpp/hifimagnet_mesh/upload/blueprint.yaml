@@ -29,24 +29,24 @@ inputs:
     email_user:
         description: email address for reporting
         default: "first.lastname@domain"
-    email_type:
-        type: string
-        description: define mail-type
-        default: "ALL"
-        # constraints:
-        #     - valid_values: ["ALL", "END", "FAIL"]
+    # email_type:
+    #     type: string
+    #     description: define mail-type
+    #     default: "ALL"
+    #     # constraints:
+    #     #     - valid_values: ["ALL", "END", "FAIL"]
 
-    # Monitor
-    monitor_entrypoint:
-        description: Monitor entrypoint IP
-        default: "193.144.35.146"
-        type: string
+    # # Monitor
+    # monitor_entrypoint:
+    #     description: Monitor entrypoint IP
+    #     default: "193.144.35.146"
+    #     type: string
 
-    # Job prefix name
-    job_prefix:
-        description: Job name prefix in HPCs
-        default: "mso4sc"
-        type: string
+    # # Job prefix name
+    # job_prefix:
+    #     description: Job name prefix in HPCs
+    #     default: "mso4sc"
+    #     type: string
 
     # CESGA FTII parameters
     mso4sc_hpc_primary:
@@ -79,10 +79,10 @@ inputs:
         description: basedir directory where calculations would be performed
         default: ${LUSTRE}
 
-    hpc_workdir_prefix:
-        type: string
-        description: prefix of the directory name holding the actual calculation
-        default: "mesh"
+    # hpc_workdir_prefix:
+    #     type: string
+    #     description: prefix of the directory name holding the actual calculation
+    #     default: "mesh"
 
     # # this does work in cli not in portal
     # hpc_feelpp:
@@ -149,54 +149,77 @@ inputs:
         description: skip deletion of workdir
         default: true
 
-    # specs for retreiving singularity images
-    sregistry_client:
-        description: define default sregistry client
-        default: "registry"
+    # # specs for retreiving singularity images
+    # sregistry_client:
+    #     description: define default sregistry client
+    #     default: "registry"
 
-    sregistry_client_secrets:
-        description: define path to file where sregistry secret are stored
-        default: "$HOME/.sregistry"
+    # sregistry_client_secrets:
+    #     description: define path to file where sregistry secret are stored
+    #     default: "$HOME/.sregistry"
 
     sregistry_storage:
         description: define path to container directory
         default: "${LUSTRE}/singularity_images"
 
-    sregistry_url:
-        description: URI pointing to the sregistry
-        default: "sregistry.srv.cesga.es"
+    # sregistry_url:
+    #     description: URI pointing to the sregistry
+    #     default: "sregistry.srv.cesga.es"
 
-    sregistry_image:
-        description: URI pointing to the sregistry-cli image
-        default: "mso4sc/sregistry"
+    # sregistry_image:
+    #     description: URI pointing to the sregistry-cli image
+    #     default: "mso4sc/sregistry"
 
-    # singularity image
-    singularity_image_uri:
-        description: URI pointing to the singularity image
-        default: "hifimagnet/hifimagnet:dev"
+    # # singularity image
+    # singularity_image_uri:
+    #     description: URI pointing to the singularity image
+    #     default: "hifimagnet/hifimagnet:dev"
 
-    singularity_image_filename:
-        description: Filename of the singularity image
-        default: "hifimagnet-dev.simg"
+    # singularity_image_filename:
+    #     description: Filename of the singularity image
+    #     default: "hifimagnet-dev.simg"
 
-    # passing boolean to scripts work in cli not in portal
-    singularity_image_cleanup:
-        type: string
-        description: force remove of singularity image
-        default: "false"
-        # default: false
+    # # passing boolean to scripts work in cli not in portal
+    # singularity_image_cleanup:
+    #     type: string
+    #     description: force remove of singularity image
+    #     default: "false"
+    #     # default: false
 
+dsl_definitions:
+    - &monitor_entrypoint #Monitor entrypoint IP
+      "193.144.35.146"
+    - &job_prefix #Job name prefix in HPCs
+      "hifimagnet"
+    - &email_type # define mail-type ADD, END, FAIL
+      "ALL"
+    - &hpc_workdir_prefix
+      "mesh"
+    - &sregistry_client
+      "registry"
+    - &sregistry_client_secrets
+      "$HOME/.sregistry"
+    - &sregistry_url
+      "sregistry.srv.cesga.es"
+    - &sregistry_image
+      "mso4sc/sregistry"
+    - &singularity_image_uri
+      "hifimagnet/hifimagnet:stretch"
+    - &singularity_image_filename
+      "hifimagnet-stretch.simg"
+    - &singularity_image_cleanup
+      "false"
 
 node_templates:
     primary_hpc:
         type: hpc.nodes.Compute
         properties:
             config: {get_input: mso4sc_hpc_primary}
-            # external_monitor_entrypoint: {get_input: monitor_entrypoint}
+            # external_monitor_entrypoint: *monitor_entrypoint
             # monitor_orchestrator_available: True
-            job_prefix: {get_input: job_prefix}
+            job_prefix: *job_prefix
             base_dir: {get_input: hpc_basedir}
-            workdir_prefix: {get_input: hpc_workdir_prefix}
+            workdir_prefix: *hpc_workdir_prefix
             skip_cleanup: {get_input: do_not_delete_workdir}
             # simulate: True  # COMMENT to test against a real HPC
 
@@ -205,7 +228,7 @@ node_templates:
         properties:
             job_options:
                 mail_user: {get_input: email_user}
-                mail_type: {get_input: email_type}
+                mail_type: *email_type
                 modules: {get_input: hpc_modules}
                 image: {concat: [{get_input: sregistry_storage}, '/', {get_input: singularity_image_filename}]}
                 home: '${HOME}:/home/${USER}'
@@ -223,24 +246,28 @@ node_templates:
                 revert: 'scripts/revert.sh'
                 inputs:
                     - {get_input: sregistry_storage}
-                    - {get_input: singularity_image_filename}
-                    - {get_input: singularity_image_uri}
-                    - {get_input: singularity_image_cleanup}
-                    - {get_input: sregistry_client}
-                    - {get_input: sregistry_client_secrets}
-                    - {get_input: sregistry_url}
-                    - {get_input: sregistry_image}
+                    - *singularity_image_filename
+                    - *singularity_image_uri
+                    - *singularity_image_cleanup
+                    - *sregistry_client
+                    - *sregistry_client_secrets
+                    - *sregistry_url
+                    - *sregistry_image
                     - {get_input: hpc_feelpp}
                     - {get_input: mso4sc_dataset_model}
                     - {get_input: mso4sc_datacatalogue_key}
                     - {get_input: cadmsh}
 
             # publish:
-            #     entrypoint: {get_input: mso4sc_datacatalogue_entrypoint}
-            #     api_key: {get_input: mso4sc_datacatalogue_key}
-            #     dataset: {get_input: mso4sc_datacatalogue_key} #Id of the dataset in which the file will be published.
-            #     file_path: {get_input: hpc_basedir} #Local path of the output file in the computation node.
-            #     name: Name used to publish the file in the repository.
+            #     - type: "CKAN"
+            #       entrypoint: {get_input: mso4sc_datacatalogue_entrypoint}
+            #       api_key: {get_input: mso4sc_datacatalogue_key}
+            #       dataset: {get_input: mso4sc_outdataset_outputs_at}
+            #       file_path:
+            #          - {concat:['$CURRENT_WORKDIR', {get_input: mshfile}, '.json']}
+            #          - {concat:['$CURRENT_WORKDIR', {get_input: mshfile}, '.h5]']}
+            #       name: {concat: ['Partionned Mesh: ', {get_input: parallel_parts}, ' parts']
+            #       description: {concat: ['Partionned Mesh: ', {get_input: parallel_parts}, ' parts']
 
         relationships:
             - type: job_contained_in_hpc

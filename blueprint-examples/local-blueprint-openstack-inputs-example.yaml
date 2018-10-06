@@ -1,0 +1,61 @@
+#############################
+# Provider specific Inputs
+#############################
+
+# Monitor
+monitor_entrypoint: ""
+
+# Job prefix name
+job_prefix: "cfyhpc"
+
+partition: "public"
+
+# First HPC configuration
+mso4sc_wm_hpc:
+    credentials:
+        host: "HOST"
+        user: "USER"
+        private_key: |
+            -----BEGIN RSA PRIVATE KEY-----
+            ....
+            -----END RSA PRIVATE KEY-----
+    country_tz: "Europe/Madrid"
+    workload_manager: "SLURM"
+
+mso4sc_datacatalogue_entrypoint: "http://193.144.35.207"
+
+mso4sc_datacatalogue_key: "****"
+
+mso4sc_outdataset_outputs_at: "dataset_id"
+
+# openstack SZE credentials
+mso4sc_wm_openstack:
+    credentials:
+        host: ""
+        user: "ubuntu"
+        private_key: |
+            -----BEGIN RSA PRIVATE KEY-----
+            ....
+            -----END RSA PRIVATE KEY-----
+        private_key_password: ""
+        tunnel:
+            host: "193.224.131.130"
+            user: "[MACHINE_USER]"
+            password: "[MACHINE_PASS]"
+    country_tz: "Europe/Paris"
+    workload_manager: "BASH"
+
+openstack_config:
+    username: "user"
+    password: "****"
+    auth_url: http://193.224.131.130/identity
+    project_name: "admin"
+    user_domain_name: "Default"
+    project_domain_name: "default"
+    region: "RegionOne"
+
+openstack_network: mso4sc
+openstack_keypair: testkeypair
+openstack_floatingip: ""
+openstack_image: "Ubuntu 16.04"
+openstack_flavor: m1.small
