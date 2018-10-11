@@ -23,34 +23,21 @@ imports:
     - http://raw.githubusercontent.com/MSO4SC/cloudify-hpc-plugin/canary/plugin.yaml
 
 inputs:
-    # Monitor
-    monitor_entrypoint:
-        description: Monitor entrypoint IP
-        default: ""
-        type: string
-
-    # Job prefix name
     job_prefix:
         description: Job name prefix in HPCs
-        default: "mso"
-        type: string
-
-    partition:
-        description: Partition in which the jobs will run
-        default: "thin-shared,shared"
+        default: "logger"
         type: string
         
     mso4sc_hpc_primary:
         description: Configuration for the primary HPC to be used
-        default: {}
-        
+        default: {}        
 
 node_templates:
     first_hpc:
         type: hpc.nodes.WorkloadManager
         properties:
             config: { get_input: mso4sc_hpc_primary }
-            external_monitor_entrypoint: { get_input: monitor_entrypoint }
+            external_monitor_entrypoint: ''
             job_prefix: { get_input: job_prefix }
             workdir_prefix: "singularity_logger"
             skip_cleanup: True
@@ -63,18 +50,20 @@ node_templates:
                 modules:
                     - gcc
                     - openmpi
-                    - singularity/2.4.2
-                partition: { get_input: partition }
+                    - singularity
+                partition: 'thin-shared,cola-corta'
                 image: 'remotelogger-cli.simg'
                 volumes:
                     - '/mnt'
                 pre:
                     - 'singularity run -B /mnt remotelogger-cli.simg -f logfilter.yaml -sh logging.mso4sc.eu -u mso4sc -p remotelogger -rk $CFY_EXECUTION_ID -q $CFY_JOB_NAME &'
-                command: "bash -c 'for i in `seq 1 300`; do echo $(hostname): $(date) >> job.log; sleep 1; done'"
+                command: "bash -c 'for i in `seq 1 100`; do echo Line-$i: $(hostname): $(date) >> job.log; sleep 1; done'"
+                post:
+                    - 'echo Logger job finished succesfully: $(hostname): $(date)'
                 nodes: 1
                 tasks: 1
                 tasks_per_node: 1
-                max_time: '00:10:00'
+                max_time: '00:03:00'
             deployment:
                 bootstrap: 'scripts/bootstrap.sh'
                 revert: 'scripts/revert.sh'
