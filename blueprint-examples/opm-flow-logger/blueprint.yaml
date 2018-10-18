@@ -1,0 +1,100 @@
+########
+# Copyright (c) 2017 MSO4SC - javier.carnero@atos.net
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+tosca_definitions_version: cloudify_dsl_1_3
+
+imports:
+    # to speed things up, it is possible to download this file,
+    - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-manager/18.1.11/resources/rest-service/cloudify/types/types.yaml
+    # HPC pluging
+    - http://raw.githubusercontent.com/MSO4SC/cloudify-hpc-plugin/canary/plugin.yaml
+
+inputs:
+    # First HPC configuration
+    mso4sc_hpc_primary:
+        description: Configuration for the primary HPC to be used
+        default: {}
+
+    parallel_tasks:
+        description: number of tasks/processes to run in parallel
+        default: 1
+
+    max_time:
+        description: maximum allowed time for run (minutes and seconds)
+        default: '00:30:00'
+
+    mso4sc_dataset_input_url:
+        description: url to retrieve for case file
+        default: "https://gitlab.srv.cesga.es/atgeirr/OPM-public-testing-data/raw/master/spe1.tgz"
+
+    base_dir:
+        description: Working directory
+        default: "$HOME"
+
+
+
+dsl_definitions:
+    - &singularity_image_filename
+        "mso4sc-opm-image.simg"
+    - &hpc_partition
+        "cola-corta,thin-shared,thinnodes"
+    - &singularity_image_uri
+        "shub://sregistry.srv.cesga.es/mso4sc/opm-release:latest"
+
+
+
+node_templates:
+    main_hpc_node:
+        type: hpc.nodes.WorkloadManager
+        properties:
+            config: { get_input: mso4sc_hpc_primary }
+            base_dir: { get_input: base_dir }
+            workdir_prefix: "opm"
+            job_prefix: "mso4sc_opm_"
+            skip_cleanup: True
+#            simulate: True  # COMMENT to test against a real HPC
+
+    opm_flow_single_job:
+        type: hpc.nodes.SingularityJob
+        properties:
+            job_options:
+                modules:
+                    - gcc/5.3.0
+                    - openmpi/1.10.2
+                    - singularity/2.4.2
+                partition: *hpc_partition
+                image: { concat: [ '$CURRENT_WORKDIR/', *singularity_image_filename ] }
+                volumes:
+                    - '/scratch '
+                    - '/mnt'
+                pre:
+                    - 'singularity run -B /mnt remotelogger-cli.simg -f logfilter.yaml -sh logging.mso4sc.eu -u mso4sc -p remotelogger -rk $CFY_EXECUTION_ID -q $CFY_JOB_NAME &'
+                command: 'flow $CURRENT_WORKDIR/run_generated.param output_dir=$CURRENT_WORKDIR/simoutput'
+                post:
+                    - 'echo '
+                nodes: 1
+                tasks: { get_input: parallel_tasks }
+                max_time: { get_input: max_time }
+            deployment:
+                bootstrap: 'scripts/singularity_bootstrap_run-flow-generic.sh'
+                revert: 'scripts/singularity_revert_run-flow-generic.sh'
+                inputs:
+                    - { get_input: mso4sc_dataset_input_url }
+                    - *singularity_image_uri
+                    - *singularity_image_filename
+        relationships:
+            - type: job_managed_by_wm
+              target: main_hpc_node
+
