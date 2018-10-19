@@ -21,103 +21,67 @@ tosca_definitions_version: cloudify_dsl_1_3
 imports:
     # to speed things up, it is possible to download this file,
     # - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-manager/18.1.11/resources/rest-service/cloudify/types/types.yaml
-    - http://www.getcloudify.org/spec/cloudify/4.3.1/types.yaml
-    # - https://raw.githubusercontent.com/MSO4SC/cloudify-hpc-plugin/canary/plugin.yaml
-    - https://raw.githubusercontent.com/Trophime/cloudify-hpc-plugin/add_checks/plugin.yaml
+    - http://raw.githubusercontent.com/mso4sc/cloudify-hpc-plugin/master/resources/types/cfy_types.yaml
+    # HPC pluging
+    - http://raw.githubusercontent.com/MSO4SC/cloudify-hpc-plugin/master/plugin.yaml
+    # - http://raw.githubusercontent.com/MSO4SC/cloudify-hpc-plugin/canary/plugin.yaml
+    # - https://raw.githubusercontent.com/Trophime/cloudify-hpc-plugin/add_checks/plugin.yaml
 
 inputs:
     email_user:
         description: email address for reporting
         default: "first.lastname@domain"
-    # email_type:
-    #     type: string
-    #     description: define mail-type
-    #     default: "ALL"
-    #     # constraints:
-    #     #     - valid_values: ["ALL", "END", "FAIL"]
-
-    # # Monitor
-    # monitor_entrypoint:
-    #     description: Monitor entrypoint IP
-    #     default: "193.144.35.146"
-    #     type: string
-
-    # # Job prefix name
-    # job_prefix:
-    #     description: Job name prefix in HPCs
-    #     default: "mso4sc"
-    #     type: string
 
     # CESGA FTII parameters
     mso4sc_hpc_primary:
         description: FTII connection credentials
         default: {}
 
-    parallel_nodes:
+    resource_hpc_parallel_nodes:
         description: number of nodes to run in parallel(optional)
         default: ''
 
-    parallel_tasks_per_node:
+    resource_hpc_parallel_tasks_per_node:
         description: number of tasks per node (optional)
         default: ''
 
-    parallel_tasks:
+    resource_hpc_parallel_tasks:
         type: integer
         description: number of tasks to run in parallel (mandatory)
         default: 1
 
-    max_time:
+    resource_hpc_max_time:
         description: maximum allowed time for run (minutes and seconds)
         default: '00:30:00'
 
-    hpc_partition:
+    resource_hpc_partition:
         type: string
         description: slurm partition to choose depending on the targeted machine
-        default: 'thin-shared'
+        default: 'thinnodes'
 
-    hpc_reservation:
+    resource_hpc_reservation:
         type: string
         description: slurm partition to choose depending on the targeted machine
         default: ''
 
-    hpc_modules:
+    resource_hpc_modules:
         description: modules to load depending on the targeted machine
         default:
             - gcc/6.3.0
             - openmpi/2.0.2
             - singularity/2.4.2
 
-    hpc_basedir:
+    resource_hpc_basedir:
         type: string
         description: basedir directory where calculations would be performed
         default: ${LUSTRE}
-
-    # hpc_workdir_prefix:
-    #     type: string
-    #     description: prefix of the directory name holding the actual calculation
-    #     default: "hifimagnet"
-
-    # # this does work in cli not in portal
-    # hpc_feelpp:
-    #     type: string
-    #     description: feel directory where simulations will endup
-    #     default:
-    #         concat: [get_input: hpc_basedir, "/feel"]
 
     hpc_feelpp:
         type: string
         description: feel directory where simulations will endup
         default: ${LUSTRE}/feel
 
-    # # this does work in cli not in portal
-    # hpc_volumes:
-    #     description: volumes to be mounted on the targeted machine
-    #     default:
-    #         - /scratch
-    #         - /mnt
-    #         - concat: [get_input: hpc_feelpp, ":/feel"]
-
-    hpc_volumes:
+    resource_hpc_volumes:
         description: volumes to be mounted on the targeted machine
         default:
             - /scratch
@@ -141,60 +105,24 @@ inputs:
         description: ID of the CKAN output dataset
         default: ""
 
-    # constraints:
-    #     - valid_values:
-    #           [ "feelpp_hfm_thermoelectric_model_3D_V1T1_N1", "feelpp_hfm_coupledcartmodel_3DP1N1", "feelpp_hfm_coupledmodel_3D_P1N1" ]
-    # execfile:
-    #     type: string
-    #     description: executable file
-    #     default: "feelpp_hfm_thermoelectric_model_3D_V1T1_N1"
+    cadmsh:
+        description: name of the mesh file without extension (supporty geo,msh extension)
+        default: "HL-31_H1"
 
     cfgfile:
         type: string
         description: configuration file
         default: "/usr/share/doc/hifimagnet/ThermoElectricModel/quarter-turn3D.cfg"
 
-    do_not_delete_workdir:
+    workdir_keep:
         type: boolean
         description: skip deletion of workdir
         default: true
 
     # # specs for retreiving singularity images
-    # sregistry_client:
-    #     description: define default sregistry client
-    #     default: "registry"
-
-    # sregistry_client_secrets:
-    #     description: define path to file where sregistry secret are stored
-    #     default: "$HOME/.sregistry"
-
     sregistry_storage:
         description: define path to container directory
         default: "${LUSTRE}/singularity_images"
-
-    # sregistry_url:
-    #     description: URI pointing to the sregistry
-    #     default: "sregistry.srv.cesga.es"
-
-    # sregistry_image:
-    #     description: URI pointing to the sregistry-cli image
-    #     default: "mso4sc/sregistry"
-
-    # # singularity image
-    # singularity_image_uri:
-    #     description: URI pointing to the singularity image
-    #     default: "hifimagnet/hifimagnet:stretch"
-
-    # singularity_image_filename:
-    #     description: Filename of the singularity image
-    #     default: "hifimagnet-stretch.simg"
-
-    # # passing boolean to scripts work in cli not in portal
-    # singularity_image_cleanup:
-    #     type: string
-    #     description: force remove of singularity image
-    #     default: "false"
-    #     # default: false
 
 dsl_definitions:
     - &monitor_entrypoint #Monitor entrypoint IP
@@ -204,7 +132,7 @@ dsl_definitions:
     - &email_type # define mail-type ADD, END, FAIL
       "ALL"
     - &hpc_workdir_prefix
-      "coupledmodel"
+      "thermoelec"
     - &sregistry_client
       "registry"
     - &sregistry_client_secrets
@@ -212,11 +140,11 @@ dsl_definitions:
     - &sregistry_url
       "sregistry.srv.cesga.es"
     - &sregistry_image
-      "mso4sc/sregistry"
+      "mso4sc/sregistry:latest"
     - &singularity_image_uri
-      "hifimagnet/hifimagnet:stretch"
+      "hifimagnet/hifimagnet:v0.103"
     - &singularity_image_filename
-      "hifimagnet-stretch.simg"
+      "hifimagnet-hifimagnet-v0.103.simg"
     - &singularity_image_cleanup
       "false"
     - &execfile
@@ -230,10 +158,50 @@ node_templates:
             # external_monitor_entrypoint: *monitor_entrypoint
             # monitor_orchestrator_available: True
             job_prefix: *job_prefix
-            base_dir: {get_input: hpc_basedir}
+            base_dir: {get_input: resource_hpc_basedir}
             workdir_prefix: *hpc_workdir_prefix
-            skip_cleanup: {get_input: do_not_delete_workdir}
+            skip_cleanup: {get_input: workdir_keep}
             # simulate: True  # COMMENT to test against a real HPC
+
+    job_partition:
+        type: hpc.nodes.singularity_job
+        properties:
+            job_options:
+                mail_user: {get_input: email_user}
+                mail_type: *email_type
+                modules: {get_input: resource_hpc_modules}
+                image: {concat: [{get_input: sregistry_storage}, '/', *singularity_image_filename]}
+                home: '${PWD}:/home/${USER}'
+                volumes: {get_input: resource_hpc_volumes}
+                command: {concat: ['/home/${USER}/partition.sh ', {get_input: cadmsh}, ' ', {get_input: resource_hpc_parallel_tasks}, '  > partition.log 2>&1']}
+                partition: {get_input: resource_hpc_partition}
+                reservation: {get_input: resource_hpc_reservation}
+                nodes: 1
+                tasks: 1
+                tasks_per_node: 1
+                max_time: {get_input: resource_hpc_max_time}
+            skip_cleanup: {get_input: workdir_keep}
+            deployment:
+                bootstrap: 'scripts/bootstrap.sh'
+                revert: 'scripts/revert.sh'
+                inputs:
+                    - {get_input: sregistry_storage}
+                    - *singularity_image_filename
+                    - *singularity_image_uri
+                    - *singularity_image_cleanup
+                    - *sregistry_client
+                    - *sregistry_client_secrets
+                    - *sregistry_url
+                    - *sregistry_image
+                    - {get_input: hpc_feelpp}
+                    - {get_input: mso4sc_dataset_model}
+                    - {get_input: mso4sc_datacatalogue_key}
+
+        relationships:
+            - type: job_contained_in_hpc
+              target: primary_hpc
+            # - type: job_depends_on
+            #   target: job_convert
 
     job_sim:
         type: hpc.nodes.singularity_job
@@ -241,18 +209,18 @@ node_templates:
             job_options:
                 mail_user: {get_input: email_user}
                 mail_type: *email_type
-                modules: {get_input: hpc_modules}
-                image: {concat: [{get_input: sregistry_storage}, '/', {get_input: singularity_image_filename}]}
+                modules: {get_input: resource_hpc_modules}
+                image: {concat: [{get_input: sregistry_storage}, '/', *singularity_image_filename]}
                 home: '${HOME}:/home/${USER}'
-                volumes: {get_input: hpc_volumes}
-                command: {concat: [*execfile, ' --config-file ', {get_input: cfgfile}]}
-                partition: {get_input: hpc_partition}
-                reservation: {get_input: hpc_reservation}
-                nodes: {get_input: parallel_nodes}
-                tasks: {get_input: parallel_tasks}
-                tasks_per_node: {get_input: parallel_tasks_per_node}
-                max_time: {get_input: max_time}
-            skip_cleanup: {get_input: do_not_delete_workdir}
+                volumes: {get_input: resource_hpc_volumes}
+                command: {concat: [*execfile, ' --config-file ', {get_input: cfgfile}, ' > sim.log 2>&1']}
+                partition: {get_input: resource_hpc_partition}
+                reservation: {get_input: resource_hpc_reservation}
+                nodes: {get_input: resource_hpc_parallel_nodes}
+                tasks: {get_input: resource_hpc_parallel_tasks}
+                tasks_per_node: {get_input: resource_hpc_parallel_tasks_per_node}
+                max_time: {get_input: resource_hpc_max_time}
+            skip_cleanup: {get_input: workdir_keep}
             deployment:
                 bootstrap: 'scripts/bootstrap.sh'
                 revert: 'scripts/revert.sh'
@@ -270,11 +238,29 @@ node_templates:
                     - {get_input: mso4sc_datacatalogue_key}
                     - {get_input: cfgfile}
 
+            # /feel/hifimagnet/ThermoElectricModel/HL-31_H1_p.json/thermoelectric-nonlinear_V1T1_N1/np_32
+            publish:
+                - type: "CKAN"
+                  entrypoint: {get_input: mso4sc_datacatalogue_entrypoint}
+                  api_key: {get_input: mso4sc_datacatalogue_key}
+                  dataset: {get_input: mso4sc_outdataset_outputs_at}
+                  file_path:
+                      - {concat: [{get_input: hpc_feelpp}, '/hifimagnet/ThermoElectricModel/', {get_input: cadmsh}, '_p.json//thermoelectric-nonlinear_V1T1_N1/np_', {get_input: resource_hpc_parallel_tasks}]}
+                  name: 'ThermoElectricModel'
+                  description: {concat: ['ThermoElectricModel: ', {get_input: cfgfile}, ', ', {get_input: resource_hpc_parallel_tasks}, ' parts']}
+
         relationships:
             - type: job_contained_in_hpc
               target: primary_hpc
+            # - type: job_depends_on
+            #   target: job_convert
+            - type: job_depends_on
+              target: job_partition
 
 outputs:
+    job_partition:
+        description: feelpp_mesh_partitioner results
+        value: {get_attribute: [job_partition, job_name]}
     job_sim:
         description: hifimagnet thermoelec results
         value: {get_attribute: [job_sim, job_name]}

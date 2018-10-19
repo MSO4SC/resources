@@ -6,12 +6,12 @@
 # Custom logs
 LOG_FILE=$0.log
 
-echo "bootstrap" >> ${LOG_FILE}
-echo "parameters: $@" >> ${LOG_FILE}
+echo "bootstrap" >> "${LOG_FILE}"
+echo "parameters: $*" >> "${LOG_FILE}"
 
 nargs=$#
-echo "nargs: $nargs" >> ${LOG_FILE}
-echo "last arg: ${!nargs}" >> ${LOG_FILE}
+echo "nargs: $nargs" >> "${LOG_FILE}"
+echo "last arg: ${!nargs}" >> "${LOG_FILE}"
 
 # params for singularity images:
 # $1   - { get_input: sregistry_storage }
@@ -44,7 +44,7 @@ export SREGISTRY_CLIENT_SECRETS=$6
 
 echo "SREGISTRY_STORAGE=$SREGISTRY_STORAGE" >> ${LOG_FILE} 2>&1
 echo "SREGISTRY_CLIENT=$SREGISTRY_CLIENT" >> ${LOG_FILE} 2>&1
-echo "SREGISTRY_CLIENT_SECRETS=$SREGISTRY_CLIENT_SECRETS=" >> ${LOG_FILE} 2>&1
+echo "SREGISTRY_CLIENT_SECRETS=$SREGISTRY_CLIENT_SECRETS" >> ${LOG_FILE} 2>&1
 
 SREGISTRY_URL=${7}
 SREGISTRY_IMAGE=${8}
@@ -106,7 +106,7 @@ if [ ! -d "${SREGISTRY_STORAGE}" ]; then
 fi
 				      
 # Get Singularity image if not already installed
-if [ ! -f "${SREGISTRY_STORAGE}/$IMAGE_NAME" ]; then
+if [ ! -f "${SREGISTRY_STORAGE}/${IMAGE_NAME}" ]; then
    isSregistry=$(which sregistry)
    if  [ "$isSregistry" != "" ] && [ "${SREGISTRY_URL}" != "" ] && [ "${SREGISTRY_IMAGE}" != "" ]; then
        echo "Get ${IMAGE_NAME} using sregistry-cli" >> "${LOG_FILE}"
@@ -117,29 +117,21 @@ if [ ! -f "${SREGISTRY_STORAGE}/$IMAGE_NAME" ]; then
 	   echo "sregistry pull ${IMAGE_URI}: FAILS" >> "${LOG_FILE}"
 	   exit 1
        fi
-       sregistry rename "${IMAGE_URI}" "${IMAGE_NAME}" >> "${LOG_FILE}" 2>&1
-       status=$?
-       if [ $status != "0" ]; then
-	   echo "sregistry rename ${IMAGE_URI} ${IMAGE_NAME}: FAILS" >> "${LOG_FILE}"
-	   exit 1
-       fi
-       
    else
-       echo "Get $IMAGE_URI ($IMAGE_NAME) using intermediate shub://${SREGISTRY_URL}/${SREGISTRY_IMAGE}" >> "${LOG_FILE}"
-       # On Cesga:
-       singularity run -B /mnt shub://"${SREGISTRY_URL}"/"${SREGISTRY_IMAGE}" pull "${IMAGE_URI}" >> "${LOG_FILE}" 2>&1
-       status=$?
-       echo "singularity run -B /mnt shub://${SREGISTRY_URL}/${SREGISTRY_IMAGE} pull ${IMAGE_URI} (status=$status)" >> "${LOG_FILE}"
-       if [ $status != "0" ]; then
-	   echo "singularity run -B /mnt shub://${SREGISTRY_URL}/${SREGISTRY_IMAGE} pull ${IMAGE_URI}: FAILS" >> "${LOG_FILE}"
-	   exit 1
+       SREGISTRY_NAME=$(echo ${SREGISTRY_IMAGE} | tr '/' '-' |  tr ':' '-')
+       if [ ! -f "${SREGISTRY_STORAGE}/${SREGISTRY_NAME}" ]; then
+           echo "Get $SREGISTRY_IMAGE ($SREGISTRY_NAME) using intermediate shub://${SREGISTRY_URL}/${SREGISTRY_IMAGE}" >> "${LOG_FILE}"
+	   singularity run -B /mnt shub://"${SREGISTRY_URL}"/"${SREGISTRY_IMAGE}" --quiet pull "${SREGISTRY_IMAGE}" >> "${LOG_FILE}" 2>&1
+           if [ $status != "0" ]; then
+	       echo "singularity run -B /mnt shub://${SREGISTRY_URL}/${SREGISTRY_IMAGE} --quiet pull ${SREGISTRY_IMAGE}: FAILS" >> "${LOG_FILE}"
+	       exit 1
+           fi
        fi
-       echo "Rename $IMAGE_URI to $IMAGE_NAME" >> "${LOG_FILE}"
-       singularity run -B /mnt shub://"${SREGISTRY_URL}"/"${SREGISTRY_IMAGE}" rename "${IMAGE_URI}" "${IMAGE_NAME}" >> "${LOG_FILE}" 2>&1
+       # On Cesga:
+       singularity run -B /mnt "${SREGISTRY_STORAGE}/${SREGISTRY_NAME}".simg --quiet pull "${IMAGE_URI}" >> "${LOG_FILE}" 2>&1
        status=$?
-       echo "singularity run -B /mnt shub://${SREGISTRY_URL}/${SREGISTRY_IMAGE} rename ${IMAGE_URI} ${IMAGE_NAME} (status=$status)" >> "${LOG_FILE}"
        if [ $status != "0" ]; then
-	   echo "singularity run -B /mnt shub://${SREGISTRY_URL}/${SREGISTRY_IMAGE} rename ${IMAGE_URI}: FAILS" >> "${LOG_FILE}"
+	   echo "singularity run -B /mnt ${SREGISTRY_STORAGE}/${SREGISTRY_NAME}.simg --quiet pull ${IMAGE_URI}: FAILS" >> "${LOG_FILE}"
 	   exit 1
        fi
    fi
@@ -165,7 +157,6 @@ fi
 
 if [ "x$DATASET" != "x" ] && [ "$DATASET" != "None" ]; then
     echo "curl $OPTIONS $DATASET -o $ARCHIVE" >> "${LOG_FILE}"
-    # curl $OPTIONS $DATASET -o $ARCHIVE : Not working why???
     if [ "$CATALOGUE_TOKEN" ]; then
 	curl -H "Authorization: ${CATALOGUE_TOKEN}" $DATASET -o $ARCHIVE
 	isDownloaded=$?
@@ -173,9 +164,6 @@ if [ "x$DATASET" != "x" ] && [ "$DATASET" != "None" ]; then
 	curl $DATASET -o $ARCHIVE
 	isDownloaded=$?
     fi
-    # harcoded working:
-    # curl -H "Authorization: 5c1fcb82-9987-47df-9f7f-f02363b18419" http://193.144.35.207:80/dataset/1fc75820-496d-428c-83ce-446c783fa4a2/resource/0c541e65-6f6d-4f52-9682-a072f44c8fa8/download/insert-h1h4.tgz -o insert-h1h4.tgz
-    # isDownloaded=$?
     if [ "$isDowloaded" == 1 ]; then
 	echo "curl $OPTIONS $DATASET -o $ARCHIVE : FAILS" >> "${LOG_FILE}"
         exit 1
@@ -183,13 +171,20 @@ if [ "x$DATASET" != "x" ] && [ "$DATASET" != "None" ]; then
     
     TYPE=$(file $ARCHIVE | perl -pi -e "s|$ARCHIVE: ||")
     echo "type($ARCHIVE)=$TYPE"  >> "${LOG_FILE}"
-    
+
     tar zxvf "$ARCHIVE" >> "${LOG_FILE}"
+    status=$?
+    if [ $status != "0" ]; then
+	echo "tar zxvf $ARCHIVE : FAILS" >> "${LOG_FILE}"
+	exit 1
+    fi
 
     # check if input file is present
-    if [ ! -f "$DATA" ]; then
-	echo "$DATA: no such file in dataset $DATASET"
+    if [ ! -z $DATA ]; then
+     if [ ! -f "$DATA" ]; then
+	echo "$DATA: no such file in dataset $DATASET" >> "${LOG_FILE}"
 	exit 1
+     fi
     fi
 fi
 
