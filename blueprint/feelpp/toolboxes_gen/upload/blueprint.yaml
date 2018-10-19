@@ -18,8 +18,9 @@
 tosca_definitions_version: cloudify_dsl_1_3
 
 imports:
-    - http://raw.githubusercontent.com/MSO4SC/cloudify-hpc-plugin/master/plugin.yaml
     - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-manager/18.1.11/resources/rest-service/cloudify/types/types.yaml
+    - http://raw.githubusercontent.com/MSO4SC/cloudify-hpc-plugin/master/plugin.yaml
+
 
 inputs:
     # Feelpp application
@@ -112,10 +113,12 @@ node_templates:
                 reservation: *job_hpc_reservation
                 home: '${HOME}:/home/${USER}'
                 volumes: *job_hpc_volumes
+                pre:
+                  - 'singularity run -B /mnt remotelogger-cli.simg -f logfilter.yaml -sh logging.mso4sc.eu -u mso4sc -p remotelogger -rk $CFY_EXECUTION_ID -q $CFY_JOB_NAME &'
                 command: { concat: [
                     'feelpp_toolbox_', 'solid', ' ',
                     '--case',' ', { get_input: feelpp_solid_case }, ' ',
-                    { get_input: feelpp_solid_cli } ] }
+                    { get_input: feelpp_solid_cli }, ' >> job.log' ] }
                 tasks: { get_input: job_tasks }
                 max_time: { get_input: job_max_time }
                 image: *singularity_image_file

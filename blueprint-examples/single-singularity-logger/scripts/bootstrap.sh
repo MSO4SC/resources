@@ -10,7 +10,11 @@ read -r -d '' JOB_LOG_FILTER <<"EOF"
 [
     {
         "filename": "job.log",
-        "filters": []
+        "filters": [
+            {pattern: "^Line-[0-9]0:", severity: "WARNING",   progress: "+1"},
+            {pattern: "^Line", progress: "+1"},
+            {pattern: "^Logger job finished succesfully:", severity: "OK",   progress: 100},
+        ]
     }
 ]
 EOF
