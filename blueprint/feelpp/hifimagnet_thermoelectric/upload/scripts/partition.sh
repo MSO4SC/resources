@@ -34,7 +34,9 @@ MSH=""
 if [ -f ${INPUT}.msh ]; then
     MSH=${INPUT}.msh
 elif [ -f ${INPUT}.med ]; then
-    MSH=${INPUT}.med
+    #MSH=${INPUT}.med # do not use med as it seems --gmsh.scale has no effect ??
+    gmsh -3 -bin ${INPUT}.med -o ${INPUT}.msh
+    MSH=${INPUT}.msh
 fi
 
 feelpp_mesh_partitioner --gmsh.scale=0.001 --ifile ${MSH} --ofile ${OUTPUT} --part ${PARTS} > partition.log 2>&1
