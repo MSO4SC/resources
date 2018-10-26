@@ -24,8 +24,8 @@ echo "last arg: ${!nargs}" >> "${LOG_FILE}"
 # $8 - { get_input: sregistry_image } 
 
 # params fo input data
-# $9 - { get_input: mso4sc_dataset_model }
-# $10 - { get_input: mso4sc_datacatalogue_key }
+# $9 - { get_input: mso4sc_datacatalogue_key }
+# $10 - { get_input: mso4sc_dataset_model }
 
 # input data
 Currents=${12}
@@ -70,11 +70,11 @@ DATASET=""
 CATALOGUE_TOKEN=""
 DATA=""
 
-if [ "$nargs" -ge 9 ]; then
-    DATASET=${9}
-fi
 if [ "$nargs" -ge 10 ]; then
-    CATALOGUE_TOKEN=${10}
+    DATASET=${10}
+fi
+if [ "$nargs" -ge 9 ]; then
+    CATALOGUE_TOKEN=${9}
 fi
 if [ "$nargs" -ge 11 ]; then
     DATA=${11}

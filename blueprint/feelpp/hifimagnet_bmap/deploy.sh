@@ -72,7 +72,7 @@ case $arg in
         cd ${SCRIPT_DIR}
         echo "Creating package..."
         export COPYFILE_DISABLE=1
-        tar --transform s/^upload/${APP}/ --exclude='#*#' --exclude='*~' -cvzf "${APP}.tar.gz" upload
+        tar --transform s/^upload/${APP}/ --exclude='#*#' --exclude='*~' --exclude='*.orig' -cvzf "${APP}.tar.gz" upload
         ;;
 
     *)

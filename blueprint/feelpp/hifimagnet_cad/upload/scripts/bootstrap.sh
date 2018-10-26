@@ -90,7 +90,7 @@ if [ ! -d "${SREGISTRY_STORAGE}" ]; then
 fi
 				      
 # Get Singularity image if not already installed
-if [ ! -f "${SREGISTRY_STORAGE}/$IMAGE_NAME" ]; then
+if [ ! -f "${SREGISTRY_STORAGE}/${IMAGE_NAME}" ]; then
    isSregistry=$(which sregistry)
    if  [ "$isSregistry" != "" ] && [ "${SREGISTRY_URL}" != "" ] && [ "${SREGISTRY_IMAGE}" != "" ]; then
        echo "Get ${IMAGE_NAME} using sregistry-cli" >> "${LOG_FILE}"
@@ -101,29 +101,21 @@ if [ ! -f "${SREGISTRY_STORAGE}/$IMAGE_NAME" ]; then
 	   echo "sregistry pull ${IMAGE_URI}: FAILS" >> "${LOG_FILE}"
 	   exit 1
        fi
-       echo "Rename $IMAGE_URI to $IMAGE_NAME" >> "${LOG_FILE}"
-       sregistry rename "${IMAGE_URI}" "${IMAGE_NAME}" >> "${LOG_FILE}" 2>&1
-       status=$?
-       if [ $status != "0" ]; then
-	   echo "sregistry rename ${IMAGE_URI} ${IMAGE_NAME}: FAILS" >> "${LOG_FILE}"
-	   exit 1
-       fi
    else
-       echo "Get $IMAGE_URI ($IMAGE_NAME) using intermediate shub://${SREGISTRY_URL}/${SREGISTRY_IMAGE}" >> "${LOG_FILE}"
-       # On Cesga:
-       singularity run -B /mnt shub://"${SREGISTRY_URL}"/"${SREGISTRY_IMAGE}" pull "${IMAGE_URI}" >> "${LOG_FILE}" 2>&1
-       status=$?
-       echo "singularity run -B /mnt shub://${SREGISTRY_URL}/${SREGISTRY_IMAGE} pull ${IMAGE_URI} (status=$status)" >> "${LOG_FILE}"
-       if [ $status != "0" ]; then
-	   echo "singularity run -B /mnt shub://${SREGISTRY_URL}/${SREGISTRY_IMAGE} pull ${IMAGE_URI}: FAILS" >> "${LOG_FILE}"
-	   exit 1
+       SREGISTRY_NAME=$(echo ${SREGISTRY_IMAGE} | tr '/' '-' |  tr ':' '-')
+       if [ ! -f "${SREGISTRY_STORAGE}/${SREGISTRY_NAME}" ]; then
+           echo "Get $SREGISTRY_IMAGE ($SREGISTRY_NAME) using intermediate shub://${SREGISTRY_URL}/${SREGISTRY_IMAGE}" >> "${LOG_FILE}"
+	   singularity run -B /mnt shub://"${SREGISTRY_URL}"/"${SREGISTRY_IMAGE}" --quiet pull "${SREGISTRY_IMAGE}" >> "${LOG_FILE}" 2>&1
+           if [ $status != "0" ]; then
+	       echo "singularity run -B /mnt shub://${SREGISTRY_URL}/${SREGISTRY_IMAGE} --quiet pull ${SREGISTRY_IMAGE}: FAILS" >> "${LOG_FILE}"
+	       exit 1
+           fi
        fi
-       echo "Rename $IMAGE_URI to $IMAGE_NAME" >> "${LOG_FILE}"
-       singularity run -B /mnt shub://"${SREGISTRY_URL}"/"${SREGISTRY_IMAGE}" rename "${IMAGE_URI}" "${IMAGE_NAME}" >> "${LOG_FILE}" 2>&1
+       # On Cesga:
+       singularity run -B /mnt "${SREGISTRY_STORAGE}/${SREGISTRY_NAME}".simg --quiet pull "${IMAGE_URI}" >> "${LOG_FILE}" 2>&1
        status=$?
-       echo "singularity run -B /mnt shub://${SREGISTRY_URL}/${SREGISTRY_IMAGE} rename ${IMAGE_URI} ${IMAGE_NAME} (status=$status)" >> "${LOG_FILE}"
        if [ $status != "0" ]; then
-	   echo "singularity run -B /mnt shub://${SREGISTRY_URL}/${SREGISTRY_IMAGE} rename ${IMAGE_URI}: FAILS" >> "${LOG_FILE}"
+	   echo "singularity run -B /mnt ${SREGISTRY_STORAGE}/${SREGISTRY_NAME}.simg --quiet pull ${IMAGE_URI}: FAILS" >> "${LOG_FILE}"
 	   exit 1
        fi
    fi

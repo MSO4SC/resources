@@ -29,71 +29,38 @@ inputs:
     email_user:
         description: email address for reporting
         default: "first.lastname@domain"
-    # email_type:
-    #     type: string
-    #     description: define mail-type
-    #     default: "ALL"
-    #     # constraints:
-    #     #     - valid_values: ["ALL", "END", "FAIL"]
-
-    # # Monitor
-    # monitor_entrypoint:
-    #     description: Monitor entrypoint IP
-    #     default: "193.144.35.146"
-    #     type: string
-
-    # # Job prefix name
-    # job_prefix:
-    #     description: Job name prefix in HPCs
-    #     default: "mso4sc"
-    #     type: string
 
     # CESGA FTII parameters
     mso4sc_hpc_primary:
         description: FTII connection credentials
         default: {}
 
-    max_time:
+    resource_hpc_max_time:
         description: maximum allowed time for run (minutes and seconds)
         default: '00:50:00'
 
-    hpc_partition:
+    resource_hpc_partition:
         type: string
         description: slurm partition to choose depending on the targeted machine
         default: 'thin-shared'
 
-    # hpc_reservation:
-    #     type: string
-    #     description: slurm partition to choose depending on the targeted machine
-    #     default: ''
-
-    hpc_modules:
+    resource_hpc_modules:
         description: modules to load depending on the targeted machine
         default:
             - gcc/6.3.0
             - openmpi/2.0.2
             - singularity/2.4.2
 
-    hpc_basedir:
+    resource_hpc_basedir:
         type: string
         description: basedir directory where calculations would be performed
         default: ${LUSTRE}
 
-    hpc_workdir_prefix:
-        type: string
-        description: prefix of the directory name holding the actual calculation
-        default: "bmap"
-
-    hpc_volumes:
+    resource_hpc_volumes:
         description: volumes to be mounted on the targeted machine
         default:
             - /scratch
             - /mnt
-
-    # specs for running simulations
-    # mso4sc_dataset_input_url:
-    #     description: url to retrieve for case file
-    #     default: "None"
 
     mso4sc_dataset_model:
         description: Model dataset
@@ -111,9 +78,6 @@ inputs:
         description: ID of the CKAN output dataset
         default: ""
 
-    # constraints:
-    #     - valid_values:
-    #           [ "feelpp_hfm_thermoelectric_model_3D_V1T1_N1", "feelpp_hfm_coupledcartmodel_3DP1N1", "feelpp_hfm_coupledmodel_3D_P1N1" ]
     DataCfg:
         description: name of the magnet cfg file without extension
         default: "HL-31"
@@ -134,47 +98,15 @@ inputs:
         description: specifiy z data in m (default is "[0:0:1]"  for [min,max,N])
         default: "[0:0:1]"
 
-    keep_workdir:
+    workdir_keep:
         type: boolean
         description: skip deletion of workdir
         default: true
 
     # # specs for retreiving singularity images
-    # sregistry_client:
-    #     description: define default sregistry client
-    #     default: "registry"
-
-    # sregistry_client_secrets:
-    #     description: define path to file where sregistry secret are stored
-    #     default: "$HOME/.sregistry"
-
     sregistry_storage:
         description: define path to container directory
         default: "${LUSTRE}/singularity_images"
-
-    # sregistry_url:
-    #     description: URI pointing to the sregistry
-    #     default: "sregistry.srv.cesga.es"
-
-    # sregistry_image:
-    #     description: URI pointing to the sregistry-cli image
-    #     default: "mso4sc/sregistry"
-
-    # # singularity image
-    # singularity_image_uri:
-    #     description: URI pointing to the singularity image
-    #     default: "hifimagnet/hifimagnet:stretch"
-
-    # singularity_image_filename:
-    #     description: Filename of the singularity image
-    #     default: "hifimagnet-stretch.simg"
-
-    # # passing boolean to scripts work in cli not in portal
-    # singularity_image_cleanup:
-    #     type: string
-    #     description: force remove of singularity image
-    #     default: "false"
-    #     # default: false
 
 dsl_definitions:
     - &monitor_entrypoint #Monitor entrypoint IP
@@ -192,11 +124,11 @@ dsl_definitions:
     - &sregistry_url
       "sregistry.srv.cesga.es"
     - &sregistry_image
-      "mso4sc/sregistry"
+      "mso4sc/sregistry:latest"
     - &singularity_image_uri
-      "hifimagnet/hifimagnet:stretch"
+      "hifimagnet/hifimagnet:v0.103"
     - &singularity_image_filename
-      "hifimagnet-stretch.simg"
+      "hifimagnet-hifimagnet-v0.103.simg"
     - &singularity_image_cleanup
       "false"
 
@@ -208,9 +140,9 @@ node_templates:
             # external_monitor_entrypoint: *monitor_entrypoint
             # monitor_orchestrator_available: True
             job_prefix: *job_prefix
-            base_dir: {get_input: hpc_basedir}
+            base_dir: {get_input: resource_hpc_basedir}
             workdir_prefix: *hpc_workdir_prefix
-            skip_cleanup: {get_input: keep_workdir}
+            skip_cleanup: {get_input: workdir_keep}
             # simulate: True  # COMMENT to test against a real HPC
 
     job_bmap:
@@ -219,18 +151,18 @@ node_templates:
             job_options:
                 mail_user: {get_input: email_user}
                 mail_type: *email_type
-                modules: {get_input: hpc_modules}
+                modules: {get_input: resource_hpc_modules}
                 image: {concat: [{get_input: sregistry_storage}, '/', *singularity_image_filename]}
                 home: '${PWD}:/home/${USER}'
-                volumes: {get_input: hpc_volumes}
+                volumes: {get_input: resource_hpc_volumes}
                 command: {concat: ['B_Map --interactive ', {get_input: DataCfg}, '.d ', {get_input: DataOptions}, ' < input.in']}
-                partition: {get_input: hpc_partition}
-                # reservation: {get_input: hpc_reservation}
+                partition: {get_input: resource_hpc_partition}
+                # reservation: {get_input: resource_hpc_reservation}
                 nodes: 1
                 tasks: 1
                 tasks_per_node: 1
-                max_time: {get_input: max_time}
-            skip_cleanup: {get_input: keep_workdir}
+                max_time: {get_input: resource_hpc_max_time}
+            skip_cleanup: {get_input: workdir_keep}
             deployment:
                 bootstrap: 'scripts/bootstrap.sh'
                 revert: 'scripts/revert.sh'
@@ -244,8 +176,8 @@ node_templates:
                     - *sregistry_client_secrets
                     - *sregistry_url
                     - *sregistry_image
-                    - {get_input: mso4sc_dataset_model}
                     - {get_input: mso4sc_datacatalogue_key}
+                    - {get_input: mso4sc_dataset_model}
                     - {get_input: DataCfg}
                     - {get_input: DataCurrents}
                     - {get_input: DataR}

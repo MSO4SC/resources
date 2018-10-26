@@ -27,8 +27,8 @@ echo "last arg: ${!nargs}" >> "${LOG_FILE}"
 # $9 - {get_input: hpc_feelpp}
 
 # params fo input data
-# $10 - { get_input: mso4sc_dataset_input_url }
-# $11 - { get_input: mso4sc_datacatalogue_key }
+# $10 - { get_input: mso4sc_datacatalogue_key }
+# $11 - { get_input: mso4sc_dataset_input_url }
 
 # input file
 # $12 - {get_input: cadcfg}
@@ -64,10 +64,10 @@ CATALOGUE_TOKEN=""
 DATA=""
 
 if [ "$nargs" -ge 10 ]; then
-    DATASET=${10}
+    CATALOGUE_TOKEN=${10}
 fi
 if [ "$nargs" -ge 11 ]; then
-    CATALOGUE_TOKEN=${11}
+    DATASET=${11}
 fi
 if [ "$nargs" -ge 12 ]; then
     DATA=${12}
