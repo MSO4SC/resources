@@ -116,7 +116,7 @@ inputs:
     cfgfile:
         type: string
         description: configuration file
-        default: "quarter-turn3D.cfg"
+        default: "quarter-torus3D.cfg"
 
     workdir_keep:
         type: boolean
