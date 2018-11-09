@@ -155,7 +155,7 @@ node_templates:
                 image: {concat: [{get_input: sregistry_storage}, '/', *singularity_image_filename]}
                 home: '${PWD}:/home/${USER}'
                 volumes: {get_input: resource_hpc_volumes}
-                command: {concat: ['B_Map --interactive ', {get_input: DataCfg}, '.d ', {get_input: DataOptions}, ' < input.in']}
+                command: {concat: ['B_Map --interactive ', {get_input: DataCfg}, '.d ', {get_input: DataOptions}, ' < input.in > bmap.log 2>&1']}
                 partition: {get_input: resource_hpc_partition}
                 # reservation: {get_input: resource_hpc_reservation}
                 nodes: 1
@@ -189,9 +189,9 @@ node_templates:
                   entrypoint: {get_input: mso4sc_datacatalogue_entrypoint}
                   api_key: {get_input: mso4sc_datacatalogue_key}
                   dataset: {get_input: mso4sc_outdataset_outputs_at}
-                  file_path: { concat:['$CURRENT_WORKDIR/', {get_input: DataCfg}, '_Field_Map.dat']}
+                  file_path: {concat:['$CURRENT_WORKDIR/', {get_input: DataCfg}, '_Field_Map.dat']}
                   name: "FieldMap"
-                  description: { concat:["Magnetic Field Map: I=", {get_input: DataCurrents}, " R=", {get_input: DataR}, " Z=", {get_input: DataZ}]} 
+                  description: {concat:["Magnetic Field Map: I=", {get_input: DataCurrents}, " R=", {get_input: DataR}, " Z=", {get_input: DataZ}]}
 
         relationships:
             - type: job_contained_in_hpc

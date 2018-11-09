@@ -24,11 +24,12 @@ echo "last arg: ${!nargs}" >> "${LOG_FILE}"
 # $8 - { get_input: sregistry_image } 
 
 # params fo input data
-# $9 - { get_input: mso4sc_dataset_model }
-# $10 - { get_input: mso4sc_datacatalogue_key }
+# $9 - { get_input: mso4sc_datacatalogue_key }
+# $10 - { get_input: mso4sc_dataset_model }
 
 # input file
 # $11 - {get_input: cadcfg}
+# $12 - name of the job
 
 export SREGISTRY_STORAGE=$1 >> "${LOG_FILE}"
 
@@ -47,25 +48,16 @@ DATASET=""
 CATALOGUE_TOKEN=""
 DATA=""
 
-if [ "$nargs" -ge 9 ]; then
-    DATASET=${9}
-fi
 if [ "$nargs" -ge 10 ]; then
-    CATALOGUE_TOKEN=${10}
+    DATASET=${10}
+fi
+if [ "$nargs" -ge 9 ]; then
+    CATALOGUE_TOKEN=${9}
 fi
 if [ "$nargs" -ge 11 ]; then
     DATA=${11}
 fi
 
-
-echo "${SREGISTRY_URL}" >> "${LOG_FILE}"
-echo "${SREGISTRY_IMAGE}" >> "${LOG_FILE}"
-
-# module should be optional:
-isModule=$(compgen -A function | grep  module)
-if [ "$isModule" != "" ]; then
-    module load singularity >> "${LOG_FILE}"
-fi
 
 # Singularity image retrieved from
 # https://www.singularity-hub.org/collections/253
@@ -88,37 +80,108 @@ fi
 if [ ! -d "${SREGISTRY_STORAGE}" ]; then
     mkdir -p "${SREGISTRY_STORAGE}"
 fi
-				      
-# Get Singularity image if not already installed
-if [ ! -f "${SREGISTRY_STORAGE}/${IMAGE_NAME}" ]; then
-   isSregistry=$(which sregistry)
-   if  [ "$isSregistry" != "" ] && [ "${SREGISTRY_URL}" != "" ] && [ "${SREGISTRY_IMAGE}" != "" ]; then
-       echo "Get ${IMAGE_NAME} using sregistry-cli" >> "${LOG_FILE}"
-       # On Lnmci
-       sregistry pull "${IMAGE_URI}" >> "${LOG_FILE}" 2>&1
-       status=$?
-       if [ $status != "0" ]; then
-	   echo "sregistry pull ${IMAGE_URI}: FAILS" >> "${LOG_FILE}"
-	   exit 1
-       fi
-   else
-       SREGISTRY_NAME=$(echo ${SREGISTRY_IMAGE} | tr '/' '-' |  tr ':' '-')
-       if [ ! -f "${SREGISTRY_STORAGE}/${SREGISTRY_NAME}" ]; then
-           echo "Get $SREGISTRY_IMAGE ($SREGISTRY_NAME) using intermediate shub://${SREGISTRY_URL}/${SREGISTRY_IMAGE}" >> "${LOG_FILE}"
-	   singularity run -B /mnt shub://"${SREGISTRY_URL}"/"${SREGISTRY_IMAGE}" --quiet pull "${SREGISTRY_IMAGE}" >> "${LOG_FILE}" 2>&1
-           if [ $status != "0" ]; then
-	       echo "singularity run -B /mnt shub://${SREGISTRY_URL}/${SREGISTRY_IMAGE} --quiet pull ${SREGISTRY_IMAGE}: FAILS" >> "${LOG_FILE}"
-	       exit 1
-           fi
-       fi
-       # On Cesga:
-       singularity run -B /mnt "${SREGISTRY_STORAGE}/${SREGISTRY_NAME}".simg --quiet pull "${IMAGE_URI}" >> "${LOG_FILE}" 2>&1
-       status=$?
-       if [ $status != "0" ]; then
-	   echo "singularity run -B /mnt ${SREGISTRY_STORAGE}/${SREGISTRY_NAME}.simg --quiet pull ${IMAGE_URI}: FAILS" >> "${LOG_FILE}"
-	   exit 1
-       fi
-   fi
+
+getimage(){
+
+    local URI=$1
+    URI_NAME=$(echo "${URI}" | tr '/' '-' |  tr ':' '-')
+
+    echo "getimage: ${URI} (${SREGISTRY_STORAGE}/${URI_NAME})"
+    
+    # module should be optional:
+    isSregistry=""
+    isSingularity=""
+    isModule=$(compgen -A function | grep  module)
+    if [ "$isModule" != "" ]; then
+	module load singularity >> "${LOG_FILE}"
+    else
+	isSregistry=$(which sregistry)
+	isSingularity=$(which singularity)
+	if  [ "$isSregistry" = "" ] &&  [ "$isSingularity" = "" ]; then
+	    echo "either sregistry or singularity is mandatory: please install one of them" >> "${LOG_FILE}"
+	    exit 1
+	fi
+    fi
+
+    # Get Singularity image if not already installed
+    if [ ! -f "${SREGISTRY_STORAGE}/${URI_NAME}".simg ]; then
+	if  [ "$isSregistry" != "" ] && [ "${SREGISTRY_URL}" != "" ] && [ "${SREGISTRY_IMAGE}" != "" ]; then
+	    echo "Get ${IMAGE} using sregistry-cli" >> "${LOG_FILE}"
+	    # On Lnmci
+	    sregistry pull "${URI}" >> "${LOG_FILE}" 2>&1
+	    status=$?
+	    if [ $status != "0" ]; then
+		echo "sregistry pull ${URI}: FAILS" >> "${LOG_FILE}"
+		exit 1
+	    fi
+	else
+	    SREGISTRY_NAME=$(echo "${SREGISTRY_IMAGE}" | tr '/' '-' |  tr ':' '-')
+	    if [ ! -f "${SREGISTRY_STORAGE}/${SREGISTRY_NAME}".simg ]; then
+		echo "Get $SREGISTRY_IMAGE ($SREGISTRY_NAME) using intermediate shub://${SREGISTRY_URL}/${SREGISTRY_IMAGE}" >> "${LOG_FILE}"
+		singularity run -B /mnt shub://"${SREGISTRY_URL}"/"${SREGISTRY_IMAGE}" --quiet pull "${SREGISTRY_IMAGE}" >> "${LOG_FILE}" 2>&1
+		status=$?
+		if [ $status != "0" ]; then
+		    echo "singularity run -B /mnt shub://${SREGISTRY_URL}/${SREGISTRY_IMAGE} --quiet pull ${SREGISTRY_IMAGE}: FAILS" >> "${LOG_FILE}"
+		    exit 1
+		fi
+	    fi
+	    # On Cesga:
+	    singularity run -B /mnt "${SREGISTRY_STORAGE}/${SREGISTRY_NAME}".simg --quiet pull "${URI}" >> "${LOG_FILE}" 2>&1
+	    status=$?
+	    if [ $status != "0" ]; then
+		echo "singularity run -B /mnt ${SREGISTRY_STORAGE}/${SREGISTRY_NAME}.simg --quiet pull ${URI}: FAILS" >> "${LOG_FILE}"
+		exit 1
+	    fi
+	fi
+    fi
+}
+
+################################################################################
+# see: https://github.com/MSO4SC/resources/blob/master/blueprint-examples/opm-flow-logger/scripts/singularity_bootstrap_run-flow-generic.sh
+# add a "filters": [] within each filename
+# eg:
+# "filters": [
+#     {pattern: "^================    End of simulation     ===============", severity: "OK",   progress: 100},
+#     {pattern: "^Time step",  severity: "INFO"},
+#     {pattern: "^Report step",  severity: "WARNING", progress: "+1"},
+#     {pattern: "^[\\\\s]*[:|=]", verbosity: 2},
+#     {pattern: "^Keyword", verbosity: 2},
+#     {pattern: "[\\\\s\\\\S]*", verbosity: 1},
+# ]
+#
+# Add logging part
+
+if [ ! -f ${12}_logfilter.yaml ]; then
+    JOB_LOG_FILTER_FILE="${12}_logfilter.yaml"
+    read -r -d '' JOB_LOG_FILTER <<"EOF"
+[   
+    {
+        "filename": "${12}.log",
+        "filters": []
+    },
+]
+EOF
+    echo "${JOB_LOG_FILTER}" > $JOB_LOG_FILTER_FILE
+    echo "[INFO] $(hostname):$(date) JOb log fiter: Created" >> "${LOG_FILE}"
+
+
+    getimage "mso4sc/remotelogger-cli:latest" 
+    status=$?
+    if [ $status != "0" ]; then
+	exit 1
+    fi
+
+    # singularity pull --name remotelogger-cli.simg shub://sregistry.srv.cesga.es/mso4sc/remotelogger-cli:latest
+    echo "[INFO] $(hostname):$(date) Remotelogger-cli: Downloaded"  >> "${LOG_FILE}"
+    echo "[INFO] $(hostname):$(date) Bootstrap finished succesfully!" >> "${LOG_FILE}"
+fi
+
+##################
+
+getimage "${IMAGE_URI}"
+status=$?
+if [ $status != "0" ]; then
+    exit 1
 fi
 
 # Get data from ckan
@@ -127,7 +190,7 @@ echo "CATALOGUE_TOKEN=${CATALOGUE_TOKEN}" >> "${LOG_FILE}"
 echo "DATA=${DATA}" >> "${LOG_FILE}"
 
 ARCHIVE=${DATASET}
-ARCHIVE=$(echo $ARCHIVE | perl -pi -e "s|.*/||")
+ARCHIVE=$(echo "$ARCHIVE" | perl -pi -e "s|.*/||")
 isstatus=$?
 if [ "$isstatus" == 1 ]; then
     exit 1
@@ -140,27 +203,29 @@ if [ "$CATALOGUE_TOKEN" ]; then
 fi
 
 if [ "x$DATASET" != "x" ] && [ "$DATASET" != "None" ]; then
+    isDownloaded=1
     echo "curl $OPTIONS $DATASET -o $ARCHIVE" >> "${LOG_FILE}"
-    # curl $OPTIONS $DATASET -o $ARCHIVE : Not working why???
     if [ "$CATALOGUE_TOKEN" ]; then
-	curl -H "Authorization: ${CATALOGUE_TOKEN}" $DATASET -o $ARCHIVE
+	curl -H "Authorization: ${CATALOGUE_TOKEN}" "$DATASET" -o "$ARCHIVE"
 	isDownloaded=$?
     else
-	curl $DATASET -o $ARCHIVE
+	curl "$DATASET" -o "$ARCHIVE"
 	isDownloaded=$?
     fi
-    # harcoded working:
-    # curl -H "Authorization: 5c1fcb82-9987-47df-9f7f-f02363b18419" http://193.144.35.207:80/dataset/1fc75820-496d-428c-83ce-446c783fa4a2/resource/0c541e65-6f6d-4f52-9682-a072f44c8fa8/download/insert-h1h4.tgz -o insert-h1h4.tgz
-    # isDownloaded=$?
-    if [ "$isDowloaded" == 1 ]; then
+    if [ "$isDownloaded" == 1 ]; then
 	echo "curl $OPTIONS $DATASET -o $ARCHIVE : FAILS" >> "${LOG_FILE}"
         exit 1
     fi
     
-    TYPE=$(file $ARCHIVE | perl -pi -e "s|$ARCHIVE: ||")
+    TYPE=$(file "$ARCHIVE" | perl -pi -e "s|$ARCHIVE: ||")
     echo "type($ARCHIVE)=$TYPE"  >> "${LOG_FILE}"
-    
+
     tar zxvf "$ARCHIVE" >> "${LOG_FILE}"
+    status=$?
+    if [ $status != "0" ]; then
+	echo "tar zxvf $ARCHIVE : FAILS" >> "${LOG_FILE}"
+	exit 1
+    fi
 
     # check if input file is present
     if [ ! -f "$DATA" ]; then

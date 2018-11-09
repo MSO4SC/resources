@@ -7,8 +7,8 @@ arg=$1
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/" && pwd )"
 ROOT_DIR=${SCRIPT_DIR}/../../../
 
-APP=$(basename ${PWD})
-JOB=$(echo ${APP}_generic)
+APP=$(basename "${PWD}")
+JOB=${APP}_generic
 
 UPLOAD_DIR=${SCRIPT_DIR}/upload
 TOSCA=blueprint.yaml
@@ -26,7 +26,10 @@ if [ ! -f "${ROOT_DIR}/${LOCAL}" ]; then
     exit 1
 fi
 
-cd ${UPLOAD_DIR}
+cd "${UPLOAD_DIR}" || {
+    echo "no upload directory present"
+    exit
+}
 
 case $arg in
     "up" )
@@ -35,46 +38,51 @@ case $arg in
 	if [ $isOK != 0 ]; then
 	   exit 1
 	fi
-	cfy blueprints upload ${DEBUG} -b "${JOB}" "${TOSCA}"
+	cfy blueprints upload "${DEBUG}" -b "${JOB}" "${TOSCA}"
 	isOK=$?
 	if [ $isOK != 0 ]; then
 	   exit 1
 	fi
         # read -n 1 -s -p "Press any key to continue"
         # echo ''
-        cfy deployments create ${DEBUG} -b "${JOB}" -i "${LOCAL_DIR}/${LOCAL}" --skip-plugins-validation ${JOB}
+        cfy deployments create "${DEBUG}" -b "${JOB}" -i "${LOCAL_DIR}/${LOCAL}" --skip-plugins-validation "${JOB}"
 	isOK=$?
 	if [ $isOK != 0 ]; then
 	   exit 1
 	fi
         # read -n 1 -s -p "Press any key to continue"
         # echo ''
-        cfy executions start ${DEBUG} -d "${JOB}" install
+        cfy executions start "${DEBUG}" -d "${JOB}" install
 	isOK=$?
 	if [ $isOK != 0 ]; then
 	   exit 1
 	fi
         read -n 1 -s -p "Press any key to continue"
         echo ''
-        cfy executions start ${DEBUG} -d "${JOB}" run_jobs
+        cfy executions start "${DEBUG}" -d "${JOB}" run_jobs
         ;;
 
     "down" )
         echo "Uninstalling deployment ${JOB}..."
-        cfy executions start ${DEBUG} uninstall -d "${JOB}" -p ignore_failure=true
+        cfy executions start "${DEBUG}" uninstall -d "${JOB}" -p ignore_failure=true
         echo "Deleting deployment ${JOB}..."
-        cfy deployments delete  ${DEBUG} "${JOB}"
+        cfy deployments delete  "${DEBUG}" "${JOB}"
         echo "Deleting blueprint ${JOB}..."
-        cfy blueprints delete  ${DEBUG} "${JOB}"
+        cfy blueprints delete  "${DEBUG}" "${JOB}"
         ;;
 
     "pkg")
-        cd ${SCRIPT_DIR}
+        cd "${SCRIPT_DIR}" || exit
         echo "Creating package..."
         export COPYFILE_DISABLE=1
-        tar --transform s/^upload/${APP}/ --exclude='#*#' --exclude='*~' --exclude='*.orig' -cvzf "${APP}.tar.gz" upload
+        tar --transform s/^upload/"${APP}"/ --exclude='#*#' --exclude='*~' -cvzf "${APP}.tar.gz" upload
         ;;
-
+    "check" )
+	echo "Checking yaml files ${JOB}..."
+	find "${SCRIPT_DIR}" -name \*.yaml -execdir sh -c 'yamllint -d "{extends: relaxed, rules: {line-length: {max: 120}}}"  $0' {} \;
+	echo "Checking shell scripts ${JOB}..."
+	find "${SCRIPT_DIR}" -name \*.sh -execdir sh -c 'shellcheck -e SC2086 $0' {} \;
+	;;
     *)
         echo "arg: $arg"
         echo "usage: $0 [option]"

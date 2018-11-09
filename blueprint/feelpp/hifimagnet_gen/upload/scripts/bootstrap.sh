@@ -24,14 +24,16 @@ echo "last arg: ${!nargs}" >> "${LOG_FILE}"
 # $8  - { get_input: sregistry_image } 
 
 # params for output
-# $9 - {get_input: hpc_feelpp}
+# $9 - {get_input: hpc_basedir}
+# $10 - {get_input: hpc_feelpp}
 
 # params fo input data
-# $10 - { get_input: mso4sc_datacatalogue_key }
-# $11 - { get_input: mso4sc_dataset_input_url }
+# $11 - { get_input: mso4sc_datacatalogue_key }
+# $12 - { get_input: mso4sc_dataset_input_url }
 
 # input file
-# $12 - {get_input: cadcfg}
+# $13 - {get_input: cadcfg}
+# $14 - name of the job
 
 export SREGISTRY_STORAGE=$1 >> "${LOG_FILE}"
 
@@ -51,7 +53,7 @@ SREGISTRY_IMAGE=${8}
 
 # # Feel output result directory
 if [ "$nargs" -ge 9 ]; then
-    FEELPP_OUTPUT_DIR=${9}
+    FEELPP_OUTPUT_DIR=${9}/${10}
     echo "FEELPP_OUTPUT_DIR=${FEELPP_OUTPUT_DIR}" >> "${LOG_FILE}" 2>&1
     if [ ! -d "${FEELPP_OUTPUT_DIR}" ]; then
 	mkdir -p "${FEELPP_OUTPUT_DIR}" >> "${LOG_FILE}" 2>&1
@@ -63,13 +65,13 @@ DATASET=""
 CATALOGUE_TOKEN=""
 DATA=""
 
-if [ "$nargs" -ge 10 ]; then
-    CATALOGUE_TOKEN=${10}
-fi
 if [ "$nargs" -ge 11 ]; then
-    DATASET=${11}
+    CATALOGUE_TOKEN=${11}
 fi
 if [ "$nargs" -ge 12 ]; then
+    DATASET=${11}
+fi
+if [ "$nargs" -ge 13 ]; then
     DATA=${12}
 fi
 
@@ -165,27 +167,18 @@ getimage(){
 #
 # Add logging part
 
-if [ ! -f logfilter.yaml ]; then
-    JOB_LOG_FILTER_FILE="logfilter.yaml"
+if [ ! -f ${14}_logfilter.yaml ]; then
+    JOB_LOG_FILTER_FILE="${14}_logfilter.yaml"
     read -r -d '' JOB_LOG_FILTER <<"EOF"
 [   
     {
-        "filename": "partition.log",
-        "filters": [
-            {pattern: "[\s\S]*", severity: "INFO"}
-        ]
-    }
+        "filename": "${14}.log",
+        "filters": []
     },
-    {
-        "filename": "sim.log",
-        "filters": [
-            {pattern: "[\s\S]*", severity: "INFO"}
-        ]
-    }
 ]
 EOF
     echo "${JOB_LOG_FILTER}" > $JOB_LOG_FILTER_FILE
-    echo "[INFO] $(hostname):$(date) JOb log fiter: Created" >> bootstrap.log  >> "${LOG_FILE}"
+    echo "[INFO] $(hostname):$(date) JOb log fiter: Created" >> "${LOG_FILE}"
 
 
     getimage "mso4sc/remotelogger-cli:latest" 

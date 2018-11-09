@@ -23,6 +23,9 @@ echo "last arg: ${!nargs}" >> "${LOG_FILE}"
 # $7   - { get_input: sregistry_url }
 # $8   - { get_input: sregistry_image } 
 
+# params for output
+# $9 - {get_input: hpc_basedir}
+# $10 - {get_input: hpc_feelpp}
 
 export SREGISTRY_STORAGE=$1 >> "${LOG_FILE}"
 

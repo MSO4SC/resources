@@ -63,12 +63,12 @@ inputs:
         description: basedir directory where calculations would be performed
         default: ${LUSTRE}
 
-    resource_hpc_volumes:
-        description: volumes to be mounted on the targeted machine
-        default:
-            - /scratch
-            - /mnt
-            - ${HOME}/MeshGems:/opt/DISTENE/DLim:ro
+    # resource_hpc_volumes:
+    #     description: volumes to be mounted on the targeted machine
+    #     default:
+    #         - /scratch
+    #         - /mnt
+    #         - ${HOME}/MeshGems:/opt/DISTENE/DLim:ro
 
     # specs for running simulations
     mso4sc_dataset_model:
@@ -111,11 +111,11 @@ inputs:
 
 
 dsl_definitions:
-    - &monitor_entrypoint #Monitor entrypoint IP
+    - &monitor_entrypoint
       "193.144.35.146"
-    - &job_prefix #Job name prefix in HPCs
-      "salome"
-    - &email_type # define mail-type ADD, END, FAIL
+    - &job_prefix
+      "salome_"
+    - &email_type
       "ALL"
     - &hpc_workdir_prefix
       "cad"
@@ -150,16 +150,15 @@ node_templates:
             # simulate: True  # COMMENT to test against a real HPC
 
     job_cad:
-        type: hpc.nodes.singularity_job
+        type: hpc.nodes.job
         properties:
             job_options:
+                type: 'SBATCH'
                 mail_user: {get_input: email_user}
                 mail_type: *email_type
                 modules: {get_input: resource_hpc_modules}
-                image: {concat: [{get_input: sregistry_storage}, '/', *singularity_image_filename]}
                 home: '${HOME}:/home/${USER}'
-                volumes: {get_input: resource_hpc_volumes}
-                command: {concat: ['salome -t -b -m GEOM,SMESH,HIFIMAGNET ', *hifimagnet, '/HIFIMAGNET_Cmd.py args:--cfg=', {get_input: cadcfg}, {get_input: cadoption}]}
+                command: {concat: ['singularity exec  -B /mnt ', {get_input: sregistry_storage}, '/', *singularity_image_filename, ' salome -t ', *hifimagnet, '/HIFIMAGNET_Cmd.py args:--cfg=', {get_input: cadcfg}, {get_input: cadoption}, ' > cad.log 2>&1']}
                 partition: {get_input: resource_hpc_partition}
                 reservation: {get_input: resource_hpc_reservation}
                 nodes: 1
@@ -170,7 +169,7 @@ node_templates:
             deployment:
                 bootstrap: 'scripts/bootstrap.sh'
                 revert: 'scripts/revert.sh'
-                #mso4sc_dataset_input_url replaced by mso4sc_dataset_model
+                # mso4sc_dataset_input_url replaced by mso4sc_dataset_model
                 inputs:
                     - {get_input: sregistry_storage}
                     - *singularity_image_filename
@@ -180,35 +179,24 @@ node_templates:
                     - *sregistry_client_secrets
                     - *sregistry_url
                     - *sregistry_image
-                    - {get_input: mso4sc_dataset_model}
                     - {get_input: mso4sc_datacatalogue_key}
+                    - {get_input: mso4sc_dataset_model}
                     - {get_input: cadcfg}
-
-            # # need to gzip tar the CAD file before upload
-            # publish:
-            #     - type: "CKAN"
-            #       entrypoint: {get_input: mso4sc_datacatalogue_entrypoint}
-            #       api_key: {get_input: mso4sc_datacatalogue_key}
-            #       dataset: {get_input: mso4sc_outdataset_outputs_at}
-            #       file_path: {concat:['$CURRENT_WORKDIR', {get_input: cadcfg}, '.tgz']}
-            #       name: {concat:['$CURRENT_WORKDIR', {get_input: cadcfg}, ' CAD geom']}
-            #       description: "Xao CAD geometry"
+                    - "cad"
 
         relationships:
             - type: job_contained_in_hpc
               target: primary_hpc
 
     job_mesh:
-        type: hpc.nodes.singularity_job
+        type: hpc.nodes.job
         properties:
             job_options:
+                type: 'SBATCH'
                 mail_user: {get_input: email_user}
                 mail_type: *email_type
                 modules: {get_input: resource_hpc_modules}
-                image: {concat: [{get_input: sregistry_storage}, '/', *singularity_image_filename]}
-                home: '${HOME}:/home/${USER}'
-                volumes: {get_input: resource_hpc_volumes}
-                command: {concat: ['salome -t -b -m GEOM,SMESH,HIFIMAGNET ', *hifimagnet, '/HIFIMAGNET_Cmd.py args:--cfg=', {get_input: cadcfg}, ',--mesh', {get_input: cad_meshoption}]}
+                command: {concat:['singularity exec -B /mnt -B ${HOME}/MeshGems:/opt/DISTENE/DLim:ro ', {get_input: sregistry_storage}, '/', *singularity_image_filename, ' salome -t ', *hifimagnet, '/HIFIMAGNET_Cmd.py args:--cfg=', {get_input: cadcfg}, ',--mesh', {get_input: cad_meshoption}, ' > mesh.log 2>&1']}
                 partition: {get_input: resource_hpc_partition}
                 reservation: {get_input: resource_hpc_reservation}
                 nodes: 1
@@ -228,18 +216,10 @@ node_templates:
                     - *sregistry_client_secrets
                     - *sregistry_url
                     - *sregistry_image
-                    - {get_input: mso4sc_dataset_model}
                     - {get_input: mso4sc_datacatalogue_key}
+                    - {get_input: mso4sc_dataset_model}
                     - {get_input: cadcfg}
-
-            # publish:
-            #     - type: "CKAN"
-            #       entrypoint: {get_input: mso4sc_datacatalogue_entrypoint}
-            #       api_key: {get_input: mso4sc_datacatalogue_key}
-            #       dataset: {get_input: mso4sc_outdataset_outputs_at}
-            #       file_path: {concat:["$CURRENT_WORKDIR/", {get_input: cadcfg}, '.med']}
-            #       name: {concat:["$CURRENT_WORKDIR/", {get_input: cadcfg}, ' MED mesh']}
-            #       description: "MED Mesh"
+                    - "mesh"
 
         relationships:
             - type: job_contained_in_hpc
@@ -248,16 +228,14 @@ node_templates:
               target: job_cad
 
     job_post:
-        type: hpc.nodes.singularity_job
+        type: hpc.nodes.job
         properties:
             job_options:
+                type: 'SBATCH'
                 mail_user: {get_input: email_user}
                 mail_type: *email_type
                 modules: {get_input: resource_hpc_modules}
-                image: {concat: [{get_input: sregistry_storage}, '/', *singularity_image_filename]}
-                home: '${HOME}:/home/${USER}'
-                volumes: {get_input: resource_hpc_volumes}
-                command: {concat: ['tar zcvf ', {get_input: cadcfg}, '.tgz *.xao *.brep *.med']}
+                command: {concat:['create_arch.sh ', {get_input: cadcfg}, ' > post.log 2>&1']}
                 partition: {get_input: resource_hpc_partition}
                 reservation: {get_input: resource_hpc_reservation}
                 nodes: 1
@@ -266,20 +244,11 @@ node_templates:
                 max_time: {get_input: resource_hpc_max_time}
             skip_cleanup: {get_input: workdir_keep}
             deployment:
-                bootstrap: 'scripts/bootstrap.sh'
-                revert: 'scripts/revert.sh'
+                bootstrap: 'scripts/post_bootstrap.sh'
+                revert: 'scripts/post_revert.sh'
                 inputs:
-                    - {get_input: sregistry_storage}
-                    - *singularity_image_filename
-                    - *singularity_image_uri
-                    - *singularity_image_cleanup
-                    - *sregistry_client
-                    - *sregistry_client_secrets
-                    - *sregistry_url
-                    - *sregistry_image
-                    - {get_input: mso4sc_dataset_model}
-                    - {get_input: mso4sc_datacatalogue_key}
                     - {get_input: cadcfg}
+                    - "post"
 
             publish:
                 - type: "CKAN"
