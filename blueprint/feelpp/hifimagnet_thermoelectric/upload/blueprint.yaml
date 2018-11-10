@@ -124,7 +124,7 @@ dsl_definitions:
     - &monitor_entrypoint #Monitor entrypoint IP
       "193.144.35.146"
     - &job_prefix #Job name prefix in HPCs
-      "hifimagnet"
+      "hifimagnet_"
     - &email_type # define mail-type ADD, END, FAIL
       "ALL"
     - &hpc_workdir_prefix

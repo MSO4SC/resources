@@ -256,7 +256,7 @@ node_templates:
                   api_key: {get_input: mso4sc_datacatalogue_key}
                   dataset: {get_input: mso4sc_outdataset_outputs_at}
                   file_path: {concat:["$CURRENT_WORKDIR/", {get_input: cadcfg}, '.tgz']}
-                  name: {concat:["$CURRENT_WORKDIR/", {get_input: cadcfg}, ' CAD and MED mesh']}
+                  name: {concat:[{get_input: cadcfg}, ' CAD and MED mesh']}
                   description: "CAD/MED data"
 
         relationships:

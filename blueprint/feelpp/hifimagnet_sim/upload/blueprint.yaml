@@ -177,7 +177,7 @@ dsl_definitions:
     - &monitor_entrypoint #Monitor entrypoint IP
       "193.144.35.146"
     - &job_prefix #Job name prefix in HPCs
-      "hifimagnet"
+      "hifimagnet_"
     - &email_type # define mail-type ADD, END, FAIL
       "ALL"
     - &hpc_workdir_prefix
@@ -203,7 +203,7 @@ node_templates:
                 mail_user: {get_input: email_user}
                 mail_type: *email_type
                 modules: {get_input: resource_hpc_modules}
-                image: {concat: [{get_input: sregistry_storage}, '/', *singularity_image_filename]}
+                image: {concat: [{get_input: sregistry_storage}, '/', {get_input: singularity_image_filename}]}
                 home: '${PWD}:/home/${USER}'
                 volumes: {get_input: resource_hpc_volumes}
                 #command: {concat: ['feelpp_mesh_partitioner --gmsh.scale=0.001 --ifile ', {get_input: cadmsh}, '.msh --ofile ', {get_input: cadmsh} , '_p.json --part ', {get_input: resource_hpc_parallel_tasks}, '  > partition.log 2>&1']}
@@ -221,13 +221,13 @@ node_templates:
                 revert: 'scripts/revert.sh'
                 inputs:
                     - {get_input: sregistry_storage}
-                    - *singularity_image_filename
-                    - *singularity_image_uri
-                    - *singularity_image_cleanup
-                    - *sregistry_client
-                    - *sregistry_client_secrets
-                    - *sregistry_url
-                    - *sregistry_image
+                    - {get_input: singularity_image_filename}
+                    - {get_input: singularity_image_uri}
+                    - {get_input: singularity_image_cleanup}
+                    - {get_input: sregistry_client}
+                    - {get_input: sregistry_client_secrets}
+                    - {get_input: sregistry_url}
+                    - {get_input: sregistry_image}
                     - {get_input: hpc_feelpp}
                     - {get_input: mso4sc_datacatalogue_key}
                     - {get_input: mso4sc_dataset_model}
