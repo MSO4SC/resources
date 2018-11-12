@@ -1,0 +1,171 @@
+wm_config:
+
+openstack_config:
+  username:
+    INPUT:
+      name: OpenStack user
+      description: SZE openstack user
+      type: string
+      order: 10
+  password:
+    INPUT:
+      name: OpenStack password
+      description: SZE openstack password
+      type: string
+      order: 11
+      secret: true
+  auth_url: http://193.224.131.130/identity
+  project_name:
+    INPUT:
+      name: Project name
+      description: SZE openstack project name
+      type: string
+      default: "admin"
+      order: 12
+      advanced: true
+  user_domain_name:
+    INPUT:
+      name: User domain name
+      description: SZE openstack user domain name
+      type: string
+      default: "Default"
+      order: 13
+      advanced: true
+  project_domain_name:
+    INPUT:
+      name: Domain name
+      description: SZE openstack project domain name
+      type: string
+      default: "default"
+      order: 14
+      advanced: true
+  region:
+    INPUT:
+      name: Region
+      description: SZE openstack region
+      type: string
+      default: "RegionOne"
+      order: 15
+      advanced: true
+  custom_configuration:
+    nova_client:
+      bypass_url: http://193.224.131.130/compute/v2.1
+    neutron_client:
+      endpoint_url: http://193.224.131.130:9696
+  logging:
+    use_cfy_logger: true
+    groups:
+      nova: 30
+      neutron: 30
+      cinder: 30
+      keystone: 30
+      glance: 30
+    loggers:
+      keystoneauth.session: 30
+
+openstack_flavors:
+- name: m1.small
+  description: Enough for most images
+  default: true
+  id: "2"
+  resources:
+    vcpus: 1
+    memory: 2G
+    storage: 20G
+- name: m1.nano
+  description: Smallest, minimal resources and not disk storage
+  id: "42"
+  resources:
+    vcpus: 1
+    memory: 64M
+    storage: 0G
+- name: m1.micro
+  description: Very few ram and not disk storage
+  id: "84"
+  resources:
+    vcpus: 1
+    memory: 128M
+    storage: 0G
+- name: m1.tiny
+  description: Minimal storage, for low resources images
+  id: "1"
+  resources:
+    vcpus: 1
+    memory: 512M
+    storage: 1G
+- name: m1.medium
+  description: For software with regular usage of ram and disk, and some parallelization of processes.
+  id: "3"
+  resources:
+    vcpus: 2
+    memory: 4G
+    storage: 40G
+- name: m1.large
+  description: For software with high usage of cpu, ram and disk.
+  id: "4"
+  resources:
+    vcpus: 4
+    memory: 8G
+    storage: 80G
+- name: m1.xlarge
+  description: Bigest amount of resources
+  id: "5"
+  resources:
+    vcpus: 8
+    memory: 16G
+    storage: 160G
+
+openstack_images:
+- name: Ubuntu 16.04
+  description: Ubuntu LTS 16.04
+  default: true
+  id: 53818d97-4d3c-4f6d-9525-b04e83331353
+  username: ubuntu
+  singularity: None
+  mpi: None
+  credentials:
+    host: ''
+    user: ubuntu
+    password: ''
+    private_key: ''
+    private_key_password: ''
+    tunnel:
+      host: "193.224.131.130"
+      user:
+        INPUT:
+          name: Gateway user name
+          description: SZE gateway username
+          type: string
+          order: 1
+      password:
+        INPUT:
+          name: Gateway password
+          description: SZE gateway password
+          type: string
+          order: 2
+          secret: true
+- name: CentOS-7-x86_64-GenericCloud-1802
+  description: CentOS 7
+  id: 3f483ff2-75e0-4ab8-aa4e-acb201b92153
+  username: centos
+  singularity: None
+  mpi: None
+  credentials:
+    host: ''
+    user: centos
+    password: ''
+    private_key: ''
+    private_key_password: ''
+    tunnel:
+      REPLACE: openstack_images.0.credentials.tunnel
+
+openstack_networks:
+- name: mso4sc
+  description: Default network for MSO4SC
+  default: true
+  id: 00da93b2-9192-45d0-b777-6359fe8246b7
+  version: IPv4
+  cidr: "10.0.0.0/24"
+  gateway: "10.0.0.1"
+
+openstack_volumes: None

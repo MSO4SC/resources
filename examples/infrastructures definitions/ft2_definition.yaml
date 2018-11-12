@@ -1,0 +1,83 @@
+credentials:
+  host: "ft6.cesga.es"
+  user:
+    INPUT:
+      name: HPC user name
+      description: FTII user name
+      type: string
+      order: 1
+  private_key:
+    INPUT:
+      name: SSH private key
+      description: SSH private key to connect to FTII
+      type: file
+      null: true
+      order: 2
+      secret: true
+  private_key_password:
+    INPUT:
+      name: SSH private key password
+      description: SSH private key  password to connect to FTII
+      type: string
+      null: true
+      order: 3
+      secret: true
+  password:
+    INPUT:
+      name: SSH password
+      description: SSH password to connect to FTII
+      type: string
+      null: true
+      order: 4
+      secret: true
+
+wm_config:
+  country_tz: "Europe/Madrid"
+
+partitions:
+- name: thin-shared
+  description: Subset of nodes
+  default: true
+  properties:
+    total_nodes: 2
+    cpus_per_node: 24
+    min_nodes: 0
+    max_nodes: 2
+    max_time: UNLIMITED
+    default_memory_per_cpu: 128M
+    max_memory_per_node: 512M
+    shared: true  
+
+mpi_versions:
+- name: OpenMPI 1.10.2
+  description: Stable mpi version
+  default: true
+  library: OpenMPI
+  version: "1.10.2"
+  load_command: module load gcc/5.3.0 openmpi/1.10.2
+
+singularity_versions:
+- name: Singularity 2.4.2
+  description: Stable singularity version
+  default: true
+  version: "2.4.2"
+  load_command: module load singularity/2.4.2
+
+persistent_volumes:
+- name: HOME
+  path: $HOME
+  container_mount_point: /mnt
+  description: Regular user file storage
+  default: true
+- name: LUSTRE
+  path: $LUSTRE
+  container_mount_point: /mnt
+  description: Big user files storage
+local_volumes:
+- name: TEMP
+  path: /tmp
+  container_mount_point: /tmp
+scratch_volume:
+  name: Scratch
+  path: /scratch
+  container_mount_point: /scratch
