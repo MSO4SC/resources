@@ -64,15 +64,19 @@ fi
 DATASET=""
 CATALOGUE_TOKEN=""
 DATA=""
+NAME=""
 
 if [ "$nargs" -ge 11 ]; then
     CATALOGUE_TOKEN=${11}
 fi
 if [ "$nargs" -ge 12 ]; then
-    DATASET=${11}
+    DATASET=${12}
 fi
 if [ "$nargs" -ge 13 ]; then
-    DATA=${12}
+    DATA=${13}
+fi
+if [ "$nargs" -ge 14 ]; then
+    NAME=${14}
 fi
 
 # Singularity image retrieved from
@@ -167,16 +171,18 @@ getimage(){
 #
 # Add logging part
 
-if [ ! -f ${14}_logfilter.yaml ]; then
-    JOB_LOG_FILTER_FILE="${14}_logfilter.yaml"
+if [ ! -f ${NAME}_logfilter.yaml ]; then
+    JOB_LOG_FILTER_FILE="${NAME}_logfilter.yaml"
     read -r -d '' JOB_LOG_FILTER <<"EOF"
 [   
     {
-        "filename": "${14}.log",
+        "filename": "NAME.log",
         "filters": []
     },
 ]
 EOF
+    perl -pi -e "s|NAME|${NAME}|g" ${NAME}_logfilter.yaml
+
     echo "${JOB_LOG_FILTER}" > $JOB_LOG_FILTER_FILE
     echo "[INFO] $(hostname):$(date) JOb log fiter: Created" >> "${LOG_FILE}"
 
