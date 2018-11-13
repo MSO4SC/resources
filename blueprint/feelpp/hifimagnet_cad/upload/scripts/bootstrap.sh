@@ -48,6 +48,9 @@ DATASET=""
 CATALOGUE_TOKEN=""
 DATA=""
 
+# Logger
+NAME=""
+
 if [ "$nargs" -ge 10 ]; then
     DATASET=${10}
 fi
@@ -56,6 +59,9 @@ if [ "$nargs" -ge 9 ]; then
 fi
 if [ "$nargs" -ge 11 ]; then
     DATA=${11}
+fi
+if [ "$nargs" -ge 12 ]; then
+    NAME=${12}
 fi
 
 
@@ -151,18 +157,18 @@ getimage(){
 #
 # Add logging part
 
-if [ ! -f ${12}_logfilter.yaml ]; then
-    JOB_LOG_FILTER_FILE="${12}_logfilter.yaml"
+if [ ! -f ${NAME}_logfilter.yaml ]; then
+    JOB_LOG_FILTER_FILE="${NAME}_logfilter.yaml"
     read -r -d '' JOB_LOG_FILTER <<"EOF"
 [   
     {
-        "filename": "${12}.log",
+        "filename": "${NAME}.log",
         "filters": []
     },
 ]
 EOF
     echo "${JOB_LOG_FILTER}" > $JOB_LOG_FILTER_FILE
-    echo "[INFO] $(hostname):$(date) JOb log fiter: Created" >> "${LOG_FILE}"
+    echo "[INFO] $(hostname):$(date) Job log fiter: Created" >> "${LOG_FILE}"
 
 
     getimage "mso4sc/remotelogger-cli:latest" 
@@ -177,6 +183,24 @@ EOF
 fi
 
 ##################
+
+
+if [ ! -f ${NAME}_logfilter.yaml ]; then
+    JOB_LOG_FILTER_FILE="${NAME}_logfilter.yaml"
+    read -r -d '' JOB_LOG_FILTER <<"EOF"
+[   
+    {
+        "filename": "NAME.log",
+        "filters": []
+    },
+]
+EOF
+    perl -pi -e "s|NAME|${NAME}|g" ${NAME}_logfilter.yaml
+
+    echo "${JOB_LOG_FILTER}" > $JOB_LOG_FILTER_FILE
+    echo "[INFO] $(hostname):$(date) Job log fiter: Created" >> "${LOG_FILE}"
+fi
+
 
 getimage "${IMAGE_URI}"
 status=$?
@@ -234,6 +258,25 @@ if [ "x$DATASET" != "x" ] && [ "$DATASET" != "None" ]; then
     fi
 fi
 
-# ctx logger info "Some logging"
-# # read access
-# ctx node properties tasks
+# Create script to run:
+echo "Generating create_${NAME}.sh" >> "${LOG_FILE}"
+
+cat > create_${NAME}.sh <<"EOF"
+#!/bin/bash
+
+singularity run -B /mnt \
+  STORAGE/mso4sc-remotelogger-cli-latest.simg \
+  -f NAME_logfilter.yaml -sh logging.mso4sc.eu -u mso4sc -p remotelogger -rk $4 -q hifimagnet > logger0.log 2>&1 &
+
+singularity exec -B /mnt \
+ -B ${HOME}/MeshGems:/opt/DISTENE/DLim:ro \
+ STORAGE/IMAGE \
+ salome -t $1/HIFIMAGNET_Cmd.py args:--cfg=$2,$3 > $NAME.log 2>&1
+EOF
+
+perl -pi -e "s|STORAGE|${SREGISTRY_STORAGE}|g" create_${NAME}.sh
+perl -pi -e "s|IMAGE|${IMAGE_NAME}|g" create_${NAME}.sh
+perl -pi -e "s|NAME|${NAME}|g" create_${NAME}.sh
+
+chmod u+x create_${NAME}.sh
+cat create_${NAME}.sh >> "${LOG_FILE}"
