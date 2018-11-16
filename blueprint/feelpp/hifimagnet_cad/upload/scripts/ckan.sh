@@ -58,4 +58,7 @@ get_ckan_data() {
 }    
 
 get_ckan_data $CATALOGUE_TOKEN $DATASET $DATA
-# get_ckan_data $CATALOGUE_TOKEN $LICENSE_DATASET dlim8.key "False"
+
+#LICENSE_DATASET="http://193.144.35.207/dataset/meshgems-license"
+# # set UNTAR option to false
+#get_ckan_data $CATALOGUE_TOKEN $LICENSE_DATASET dlim8.key "False"

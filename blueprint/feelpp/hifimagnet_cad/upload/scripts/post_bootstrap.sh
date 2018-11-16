@@ -105,7 +105,12 @@ if [ "$nargs" -ge 7 ]; then
 fi
 
 cat > create_arch.sh <<"EOF"
-#! /bin/bash
+#!/bin/bash
+
+singularity run -B /mnt \
+  STORAGE/mso4sc-remotelogger-cli-latest.simg \
+  -f post_logfilter.yaml -sh logging.mso4sc.eu -u mso4sc -p remotelogger -rk $2 -q hifimagnet > post_logger0.log 2>&1 &
+
 
 tar zcvf $1.tgz *.xao *.brep *.med > post.log 2>&1  
 EOF
@@ -135,7 +140,7 @@ if [ ! -f post_logfilter.yaml ]; then
     {
         "filename": "post.log",
         "filters": []
-    },
+    }
 ]
 EOF
     echo "${JOB_LOG_FILTER}" > $JOB_LOG_FILTER_FILE

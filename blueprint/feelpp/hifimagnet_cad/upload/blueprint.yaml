@@ -158,7 +158,7 @@ node_templates:
                 mail_type: *email_type
                 modules: {get_input: resource_hpc_modules}
                 home: '${HOME}:/home/${USER}'
-                command: {concat:['create_cad.sh ', *hifimagnet, ' ', {get_input: cadcfg}, ' ', {get_input: cadoption}, ' $CFY_EXECUTION_ID']}
+                command: {concat:['create_cad.sh ', $CFY_EXECUTION_ID, ' ', *hifimagnet, ' ', {get_input: cadcfg}, ' ', {get_input: cadoption}]}
                 partition: {get_input: resource_hpc_partition}
                 reservation: {get_input: resource_hpc_reservation}
                 nodes: 1
@@ -196,7 +196,7 @@ node_templates:
                 mail_user: {get_input: email_user}
                 mail_type: *email_type
                 modules: {get_input: resource_hpc_modules}
-                command: {concat:['create_mesh.sh ', *hifimagnet, ' ', {get_input: cadcfg}, ' --mesh', {get_input: cad_meshoption}, ' $CFY_EXECUTION_ID']}
+                command: {concat:['create_mesh.sh ' $CFY_EXECUTION_ID, ' ', *hifimagnet, ' ', {get_input: cadcfg}, ',--mesh', {get_input: cad_meshoption}]}
                 partition: {get_input: resource_hpc_partition}
                 reservation: {get_input: resource_hpc_reservation}
                 nodes: 1
@@ -235,7 +235,7 @@ node_templates:
                 mail_user: {get_input: email_user}
                 mail_type: *email_type
                 modules: {get_input: resource_hpc_modules}
-                command: {concat:['create_arch.sh ', {get_input: cadcfg}, ' $CFY_EXECUTION_ID']}
+                command: {concat:['create_arch.sh ', {get_input: cadcfg}, ' ', $CFY_EXECUTION_ID]}
                 partition: {get_input: resource_hpc_partition}
                 reservation: {get_input: resource_hpc_reservation}
                 nodes: 1
@@ -260,8 +260,8 @@ node_templates:
                   entrypoint: {get_input: mso4sc_datacatalogue_entrypoint}
                   api_key: {get_input: mso4sc_datacatalogue_key}
                   dataset: {get_input: mso4sc_outdataset_outputs_at}
-                  file_path: {concat:["$CURRENT_WORKDIR/", {get_input: cadcfg}, '.tgz']}
-                  name: {concat:["$CURRENT_WORKDIR/", {get_input: cadcfg}, ' CAD and MED mesh']}
+                  file_path: {concat:[{get_input: cadcfg}, '.tgz']}
+                  name: {concat:[{get_input: cadcfg}, ' CAD and MED mesh']}
                   description: "CAD/MED data"
 
         relationships:
