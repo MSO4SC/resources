@@ -355,6 +355,8 @@ node_templates:
         job_options:
             type: 'SHELL'
             image: { concat: [ '$CURRENT_WORKDIR/', 'opm.simg' ] }
+            pre:
+                - 'singularity run -B /mnt remotelogger-cli.simg -f logfilter.yaml -sh logging.mso4sc.eu -u mso4sc -p remotelogger -rk $CFY_EXECUTION_ID -q $CFY_JOB_NAME &'
             command: 'mpirun singularity exec -B /mnt opm.simg flow $CURRENT_WORKDIR/run_generated.param output_dir=$CURRENT_WORKDIR/simoutput'
             post:
                 - 'tar czv output.tgz $CURRENT_WORKDIR/simoutput '
