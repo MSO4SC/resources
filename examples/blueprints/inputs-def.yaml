@@ -1,26 +1,3 @@
-########
-# Copyright (c) 2017-2018 MSO4SC - javier.carnero@atos.net
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#        http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-tosca_definitions_version: cloudify_dsl_1_3
-
-imports:
-    # to speed things up, it is possible to download this file,
-    - http://raw.githubusercontent.com/mso4sc/cloudify-hpc-plugin/master/resources/types/cfy_types.yaml
-    # HPC pluging
-    - http://raw.githubusercontent.com/MSO4SC/cloudify-hpc-plugin/staging/plugin.yaml
-
 inputs:
   ################### HPC Infrastructre ##################
   # It will be rendered as HPC select box
@@ -104,7 +81,7 @@ inputs:
         type: list
         choices:
           REPLACE: primary_hpc.definition.partitions
-          
+
   # Won't be rendered, their value is a match with other inputs
   hpc_wm_config:
     default:
@@ -199,6 +176,99 @@ inputs:
   cloud_network:
     default:
       REPLACE: openstack_network.id
+
+  ################# Second Cloud Infrastructre #################
+  # It will be rendered as OpenStack select box
+  secondary_cloud:
+    default:
+      INPUT:
+        name: EOSC Hub
+        description: Select the EOSC infrastructure to be used
+        order: 70
+        type: list
+        choices:
+          REPLACE: INFRA_CONFIG.eosc_list
+  
+  # each one will be rendered in MSO4SC accordingly (lists->select box)
+  eosc_image:
+    default:
+      INPUT:
+        name: Image
+        description: Select base EOSC image to be used
+        type: list
+        advanced: true
+        order: 80
+        choices:
+          REPLACE: secondary_cloud.definition.eosc_images
+  
+  eosc_flavor:
+    default:
+      INPUT:
+        name: Flavor
+        description: Select OpenStack flavor to be used
+        type: list
+        advanced: true
+        order: 61
+        choices:
+          REPLACE: secondary_cloud.definition.eosc_flavors
+  
+  eosc_network:
+    default:
+      INPUT:
+        name: Network
+        description: Select OpenStack network
+        type: list
+        advanced: true
+        order: 62
+        choices:
+          REPLACE: secondary_cloud.definition.eosc_networks
+  
+  # Won't be rendered, their value is a match with other inputs
+  secondary_cloud_wm_config:
+    default:
+      REPLACE: secondary_cloud.definition.wm_config
+  secondary_cloud_wm_credentials:
+    default:
+      REPLACE: eosc_image.credentials
+  eosc_config:
+    default:
+      REPLACE: secondary_cloud.definition.eosc_config
+  secondary_cloud_image_name:
+    default:
+      REPLACE: eosc_image.name
+  secondary_cloud_image_id:
+    default:
+      REPLACE: eosc_image.id
+  secondary_cloud_image_user:
+    default:
+      REPLACE: eosc_image.credentials.user
+  secondary_cloud_image_pass:
+    default:
+      REPLACE: eosc_image.credentials.password
+  secondary_cloud_image_public:
+    default:
+      REPLACE: eosc_image.credentials.public_key
+  secondary_cloud_image_private:
+    default:
+      REPLACE: eosc_image.credentials.private_key
+  secondary_cloud_flavor_id:
+    default:
+      REPLACE: eosc_flavor.id
+  secondary_cloud_flavor_name:
+    default:
+      REPLACE: eosc_flavor.name
+  secondary_cloud_flavor_memory:
+    default:
+      REPLACE: eosc_flavor.config.memory
+  secondary_cloud_flavor_config:
+    default:
+      REPLACE: eosc_flavor.config
+  secondary_cloud_network_id:
+    default:
+      REPLACE: eosc_network.id
+  secondary_cloud_network_config:
+    default:
+      REPLACE: eosc_network.config
 
   ################### Data Publish ##################  
 
@@ -320,135 +390,3 @@ inputs:
         advanced: true
         order: 130
         type: string
-
-  #######################################################
-
-node_templates:
-    hpc_wm:
-        type: hpc.nodes.WorkloadManager
-        properties:
-            config: { get_input: hpc_wm_config }
-            credentials: { get_input: hpc_wm_credentials }
-            external_monitor_entrypoint: { get_input: monitor_entrypoint }
-            job_prefix: { get_input: job_prefix }
-            base_dir: { get_input: "hpc_base_dir" }
-            monitor_period: 15
-            skip_cleanup: true
-            simulate: True  # COMMENT to test against a real HPC
-            workdir_prefix: "four_scale"
-    
-    first_job:
-        type: hpc.nodes.Job
-        properties:
-            job_options:
-                type: 'SBATCH'
-                command: "touch.script fourth_example_1.test"
-                scale: 4
-            deployment:
-                bootstrap: 'scripts/bootstrap_sbatch_example.sh'
-                revert: 'scripts/revert_sbatch_example.sh'
-                inputs:
-                    - 'first_job'
-                    - { get_input: partition_name }
-            skip_cleanup: True
-        relationships:
-            - type: job_managed_by_wm
-              target: hpc_wm
-
-    second_parallel_job:
-        type: hpc.nodes.SingularityJob
-        properties:
-            job_options:
-                pre:
-                - { get_input: mpi_load_command }
-                - { get_input: singularity_load_command }
-                partition: { get_input: partition_name }
-                image: {concat: [{ get_input: singularity_image_storage },'/',{ get_input: singularity_image_filename }] }
-                volumes:
-                  - { get_input: scratch_voulume_mount_point }
-                command: 'touch fourth_example_2.test'
-                nodes: 1
-                tasks: 1
-                tasks_per_node: 1
-                max_time: '00:01:00'
-                scale: 2
-            deployment:
-                bootstrap: 'scripts/singularity_bootstrap_example.sh'
-                revert: 'scripts/singularity_revert_example.sh'
-                inputs:
-                - { get_input: singularity_image_storage }
-                - { get_input: singularity_image_filename }
-                - { get_input: singularity_image_uri }
-            skip_cleanup: True
-        relationships:
-            - type: job_managed_by_wm
-              target: hpc_wm
-            - type: job_depends_on
-              target: first_job
-    
-    third_parallel_job:
-        type: hpc.nodes.SingularityJob
-        properties:
-            job_options:
-                pre:
-                - { get_input: mpi_load_command }
-                - { get_input: singularity_load_command }
-                partition: { get_input: partition_name }
-                image: {concat: [{ get_input: singularity_image_storage },'/',{ get_input: singularity_image_filename }] }
-                volumes:
-                  - { get_input: scratch_voulume_mount_point }
-                command: 'touch fourth_example_3.test'
-                nodes: 1
-                tasks: 1
-                tasks_per_node: 1
-                max_time: '00:01:00'
-                scale: 2
-            deployment:
-                bootstrap: 'scripts/singularity_bootstrap_example.sh'
-                revert: 'scripts/singularity_revert_example.sh'
-                inputs:
-                - { get_input: singularity_image_storage }
-                - { get_input: singularity_image_filename }
-                - { get_input: singularity_image_uri }
-            skip_cleanup: True
-        relationships:
-            - type: job_managed_by_wm
-              target: hpc_wm
-            - type: job_depends_on
-              target: first_job
-
-    fourth_job:
-        type: hpc.nodes.Job
-        properties:
-            job_options:
-                type: 'SBATCH'
-                command: "touch.script fourth_example_4.test"
-                scale: 4
-            deployment:
-                bootstrap: 'scripts/bootstrap_sbatch_example.sh'
-                revert: 'scripts/revert_sbatch_example.sh'
-                inputs:
-                    - 'fourth_job'
-                    - { get_input: partition_name }
-            skip_cleanup: True
-        relationships:
-            - type: job_managed_by_wm
-              target: hpc_wm
-            - type: job_depends_on
-              target: second_parallel_job
-            - type: job_depends_on
-              target: third_parallel_job
-
-outputs:
-    first_job_name:
-        description: first job name
-        value: { get_attribute: [first_job, job_name] }
-    second_job_name:
-        description: second job name
-        value: { get_attribute: [second_parallel_job, job_name] }
-    third_job_name:
-        description: third job name
-        value: { get_attribute: [third_parallel_job, job_name] }
-    fourth_job_name:
-        description: fourth job name
-        value: { get_attribute: [fourth_job, job_name] }
