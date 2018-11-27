@@ -191,7 +191,7 @@ node_templates:
                     - *sregistry_client_secrets
                     - *sregistry_url
                     - *sregistry_image
-                    - {get_input: hpc_basedir}
+                    - {get_input: resource_hpc_basedir}
                     - {get_input: hpc_feelpp}
                     - {get_input: mso4sc_datacatalogue_key}
                     - {get_input: mso4sc_dataset_model}
@@ -216,7 +216,7 @@ node_templates:
                     - {concat: ['singularity run -B /mnt ', {get_input: sregistry_storage}, '/mso4sc-remotelogger-cli-latest.simg -f sim_logfilter.yaml -sh logging.mso4sc.eu -u mso4sc -p remotelogger -rk $CFY_EXECUTION_ID -q hfimagnet > logger1.log 2>&1 &']}
                 command: {concat: [*execfile, ' --config-file ', {get_input: cfgfile}, ' > sim.log 2>&1']}
                 post:
-                    - {concat: ['cd {get_input: resource_hpc_basedir} && tar zcvf ../', {get_input: cfgfile}, '.tgz ' , {get_input: hpc_feelpp}]}
+                    - {concat: ['cd ', {get_input: resource_hpc_basedir}, ' && tar zcvf ../', {get_input: cfgfile}, '.tgz ' , {get_input: hpc_feelpp}]}
                 partition: {get_input: resource_hpc_partition}
                 reservation: {get_input: resource_hpc_reservation}
                 nodes: {get_input: resource_hpc_parallel_nodes}
@@ -236,7 +236,7 @@ node_templates:
                     - *sregistry_client_secrets
                     - *sregistry_url
                     - *sregistry_image
-                    - {get_input: hpc_basedir}
+                    - {get_input: resource_hpc_basedir}
                     - {get_input: hpc_feelpp}
                     - {get_input: mso4sc_datacatalogue_key}
                     - {concat: ['"', {get_input: mso4sc_dataset_model}, '"']}
