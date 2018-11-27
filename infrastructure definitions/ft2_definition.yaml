@@ -47,6 +47,17 @@ partitions:
     default_memory_per_cpu: 128M
     max_memory_per_node: 512M
     shared: true  
+- name: cola-corta
+  description: Full nodes for short jobs
+  properties:
+    total_nodes: 8
+    cpus_per_node: 24
+    min_nodes: 1
+    max_nodes: 8
+    max_time: UNLIMITED
+    default_memory_per_cpu: 128M
+    max_memory_per_node: 512M
+    shared: false
 
 mpi_versions:
 - name: OpenMPI 1.10.2

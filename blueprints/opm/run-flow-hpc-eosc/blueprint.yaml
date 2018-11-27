@@ -16,12 +16,12 @@
 tosca_definitions_version: cloudify_dsl_1_3
 
 imports:
-  # to speed things up, it is possible to download this file,
-  - http://raw.githubusercontent.com/mso4sc/cloudify-hpc-plugin/master/resources/types/cfy_types.yaml
-  - https://raw.githubusercontent.com/MSO4SC/cloudify-im-extension/master/im.yaml
-  # HPC pluging
-  - http://raw.githubusercontent.com/MSO4SC/cloudify-hpc-plugin/staging/plugin.yaml
-  - inputs-def.yaml
+    # to speed things up, it is possible to download this file,
+    - http://raw.githubusercontent.com/mso4sc/cloudify-hpc-plugin/master/resources/types/cfy_types.yaml
+    - https://raw.githubusercontent.com/MSO4SC/cloudify-im-extension/master/im.yaml
+    # HPC pluging
+    - http://raw.githubusercontent.com/MSO4SC/cloudify-hpc-plugin/staging/plugin.yaml
+    - inputs-def.yaml
 
 node_templates:
   hpc_wm:
@@ -31,7 +31,7 @@ node_templates:
       credentials: { get_input: hpc_wm_credentials }
       external_monitor_entrypoint: { get_input: monitor_entrypoint }
       job_prefix: { get_input: job_prefix }
-      base_dir: { get_input: hpc_base_dir }
+      base_dir: { get_input: hpc_base_dir_path }
       monitor_period: 15
       skip_cleanup: true
       workdir_prefix: "single_singularity"
@@ -49,31 +49,40 @@ node_templates:
     - type: wm_contained_in
       target: vitual_machine
 
-  hpc_job:
+  opm_flow_single_job:
     type: hpc.nodes.SingularityJob
     properties:
-      job_options: 
+      job_options:
         pre:
         - { get_input: mpi_load_command }
         - { get_input: singularity_load_command }
+        - 'singularity run -B /mnt remotelogger-cli.simg -f logfilter.yaml -sh logging.mso4sc.eu -u mso4sc -p remotelogger -e test -rk $CFY_EXECUTION_ID -q $CFY_JOB_NAME &> remotelogger.log & echo Logger $CFY_EXECUTION_ID @ CFY_JOB_NAME Launched'
         partition: { get_input: partition_name }
-        image: {concat: [{ get_input: singularity_image_storage },'/',{ get_input: singularity_image_filename }] }
+        reservation: { get_input: hpc_reservation }
+        image: { concat: [ '$CURRENT_WORKDIR/', { get_input: singularity_image_filename }] }
         volumes:
         - { get_input: scratch_voulume_mount_point }
         - { get_input: singularity_mount_point }
-        command: 'touch single.test'
-        nodes: 1
-        tasks: 1
-        tasks_per_node: 1
-        max_time: '00:01:00'
+        command: 'flow --parameter-file=$CURRENT_WORKDIR/run_generated.param --output-dir=$CURRENT_WORKDIR/simoutput'
+        nodes: { get_input: parallel_nodes }
+        tasks: { get_input: parallel_tasks }
+        tasks_per_node: { get_input: parallel_tasks_per_node }
+        max_time: { get_input: max_time }
+        post:
+        - 'tar czvf output.tgz $CURRENT_WORKDIR/simoutput '
       deployment:
-        bootstrap: 'scripts/singularity_bootstrap_example.sh'
-        # revert: 'scripts/singularity_revert_example.sh'
+        bootstrap: 'scripts/singularity_bootstrap_run-flow-generic.sh'
+        # revert: 'scripts/singularity_revert_run-flow-generic.sh'
         inputs:
-        - { get_input: singularity_image_storage }
-        - { get_input: singularity_image_filename }
+        - { get_input: input_url }
         - { get_input: singularity_image_uri }
+        - { get_input: singularity_image_filename }
       skip_cleanup: True
+      publish:
+      - dataset: { get_input: ckan_outputs_dataset }
+        file_path: "$CURRENT_WORKDIR/output.tgz"
+        name: { get_input: output_name }
+        description: { get_input: output_description }
     relationships:
     - type: job_managed_by_wm
       target: hpc_wm
@@ -83,20 +92,15 @@ node_templates:
     properties:
       job_options:
         type: 'SHELL'
-        command: 'touch vm.test'
+        command: 'touch processed_sim.out'
       skip_cleanup: True
-      publish:
-      - dataset: { get_input: ckan_outputs_dataset }
-        file_path: "$CURRENT_WORKDIR/vm.test"
-        name: "vm_test"
-        description: "output test vm"
     relationships:
-    - type: job_managed_by_wm
-      target: im_wm
-    - type: job_depends_on
-      target: hpc_job
-      
-  ########### IM extension ##########
+      - type: job_managed_by_wm
+        target: im_wm
+      - type: job_depends_on
+        target: opm_flow_single_job
+
+  ######### IM extension ##########
   vitual_machine:
     type: im.nodes.Server
     properties:

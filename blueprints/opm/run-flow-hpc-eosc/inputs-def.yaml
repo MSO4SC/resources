@@ -32,10 +32,10 @@ inputs:
         order: 22
         type: list
         choices:
-        - name: SRegistry example
-          description: SRegistry example
-          uri: 'shub://sregistry.srv.cesga.es/mso4sc/sregistry:latest'
-          file: mso4sc-sregistry-latest.simg
+        - name: OPM Flow generic
+          description: OPM Flow generic
+          uri: "shub://sregistry.srv.cesga.es/mso4sc/opm-release:latest"
+          file: mso4sc-opm-image.simg
           default: true
   
   app_mpi_version:
@@ -81,8 +81,67 @@ inputs:
         type: list
         choices:
           REPLACE: primary_hpc.definition.partitions
+  
+  # Specific OPM inputs
+  hpc_reservation:
+    default:
+      INPUT:
+        name: HPC Reservation
+        description: Computing reservation to use on the HPC system chosen
+        default: ""
+        null: true
+        advanced: true
+        order: 120
+        type: string
+  
+  parallel_tasks:
+    default:
+      INPUT:
+        name: Parallel tasks
+        description: Number of tasks/processes to run in parallel
+        default: 1
+        null: true
+        advanced: true
+        order: 110
+        type: int
+
+  parallel_nodes:
+    default:
+      INPUT:
+        name: Parallel nodes
+        description: Number of nodes on which to run
+        default: 1
+        null: false
+        advanced: true
+        order: 111
+        type: int
+
+  parallel_tasks_per_node:
+    default:
+      INPUT:
+        name: Parallel tasks per node
+        description: Number of tasks/processes to run in parallel
+        default: 1
+        null: false
+        advanced: true
+        order: 112
+        type: int
+
+  max_time:
+    default:
+      INPUT:
+        name: Max running time
+        description: Maximum allowed time for run (minutes and seconds)
+        default: '00:30:00'
+        null: false
+        advanced: true
+        order: 110
+        type: string
 
   # Won't be rendered, their value is a match with other inputs
+  hpc_base_dir_path:
+    default:
+      REPLACE: hpc_base_dir.path
   hpc_wm_config:
     default:
       REPLACE: primary_hpc.definition.wm_config
@@ -115,73 +174,7 @@ inputs:
       REPLACE: primary_hpc.definition.scratch_volume.container_mount_point
 
   ################# Cloud Infrastructre #################
-  # It will be rendered as OpenStack select box
-  primary_cloud:
-    default:
-      INPUT:
-        name: Primary OpenStack
-        description: Select the OpenStack to be used
-        order: 50
-        type: list
-        choices:
-          REPLACE: INFRA_CONFIG.openstack_list
-  
-  # each one will be rendered in MSO4SC accordingly (lists->select box)
-  openstack_image:
-    default:
-      INPUT:
-        name: Image
-        description: Select base OpenStack image to be used
-        type: list
-        advanced: true
-        order: 60
-        choices:
-          REPLACE: primary_cloud.definition.openstack_images
-  
-  openstack_flavor:
-    default:
-      INPUT:
-        name: OpenStack Flavor
-        description: Select OpenStack flavor to be used
-        type: list
-        advanced: true
-        order: 61
-        choices:
-          REPLACE: primary_cloud.definition.openstack_flavors
-  
-  openstack_network:
-    default:
-      INPUT:
-        name: OpenStack Network
-        description: Select OpenStack network
-        type: list
-        advanced: true
-        order: 62
-        choices:
-          REPLACE: primary_cloud.definition.openstack_networks
-  
-  # Won't be rendered, their value is a match with other inputs
-  cloud_wm_config:
-    default:
-      REPLACE: primary_cloud.definition.wm_config
-  cloud_wm_credentials:
-    default:
-      REPLACE: openstack_image.credentials
-  openstack_config:
-    default:
-      REPLACE: primary_cloud.definition.openstack_config
-  cloud_image:
-    default:
-      REPLACE: openstack_image.id
-  cloud_flavor:
-    default:
-      REPLACE: openstack_flavor.id
-  cloud_network:
-    default:
-      REPLACE: openstack_network.id
-
-  ################# Second Cloud Infrastructre #################
-  # It will be rendered as OpenStack select box
+  # It will be rendered as EOSC-Hub select box
   secondary_cloud:
     default:
       INPUT:
@@ -297,6 +290,26 @@ inputs:
         order: 100
         storage:
           REPLACE: USER_CONFIG.storage_list.0
+  
+  output_name:
+    default:
+      INPUT:
+        name: Outputs name
+        description: Name of the output resource
+        type: string
+        order: 101
+        advanced: True
+        default: opm-flow-output
+  
+  output_description:
+    default:
+      INPUT:
+        name: Outputs description
+        description: Name of the output resource
+        type: string
+        order: 102
+        advanced: True
+        default: "OPM Flow outputs"
 
   # Won't be rendered
   input_url:
@@ -309,75 +322,6 @@ inputs:
       REPLACE: INSTANCE_CONFIG.id
 
   ####################### Optional ######################
-  test_file:
-    default:
-      INPUT:
-        name: Test file
-        description: Only to test file input
-        default: |
-                  Test file
-        type: file
-        advanced: true
-        order: 110
-        null: true
-  
-  test_bool:
-    default:
-      INPUT:
-        name: Test bool
-        description: Only to test bool input
-        default: false
-        type: bool
-        advanced: true
-        order: 110
-        null: true
-
-  test_int:
-    default:
-      INPUT:
-        name: Test int
-        description: Only to test int input
-        default: 0
-        type: int
-        advanced: true
-        order: 110
-        null: true
-
-  test_float:
-    default:
-      INPUT:
-        name: Test float
-        description: Only to test float input
-        default: 0.0
-        type: float
-        advanced: true
-        order: 110
-        null: true
-        
-  test_complex_input:
-    default:
-      first_tag:
-        first_first_tag:
-          INPUT:
-            name: First complex input test
-            description: Only to test complex input
-            default: test1.1
-            type: string
-            advanced: true
-            order: 85
-            null: true
-        first_second_tag:
-          foo: bar
-      second_tag:
-        INPUT:
-          name: Second complex input test
-          description: Only to test complex input
-          default: test2.1
-          type: string
-          advanced: true
-          order: 86
-          null: true
-
   job_prefix:
     default:
       INPUT:
@@ -385,7 +329,7 @@ inputs:
         description: Job names prefix
         default: "mso"
         advanced: true
-        order: 120
+        order: 150
         type: string
 
   monitor_entrypoint:
@@ -396,5 +340,5 @@ inputs:
         default: ""
         null: true
         advanced: true
-        order: 130
+        order: 160
         type: string

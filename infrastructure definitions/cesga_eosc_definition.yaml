@@ -1,0 +1,79 @@
+wm_config:
+
+eosc_config: 
+  id: im
+  host: 'http://im.srv.cesga.es:8800'
+  type: InfrastructureManager
+  user:
+    INPUT:
+      name: EOSC-Hub user
+      description: Cesga EOSC-Hub user
+      type: string
+      order: 10
+  pass:
+    INPUT:
+      name: EOSC-Hub password
+      description: Cesga EOSC-Hub password
+      type: string
+      order: 11
+      secret: true
+  endpoint:
+    id: occi
+    type: OCCI
+    host: 'https://fedcloud-services.egi.cesga.es:11443'
+    proxy: 'file("/etc/im/pki/x509up_u0")'
+
+eosc_flavors:
+- name: medium_4g
+  id: default_flavour
+  default: true
+  description: Medium 4G
+  config:
+    memory: 1024M
+    storage: 4G
+    cores: 1
+    type: medium_4g
+
+eosc_images:
+- name: Centos-7
+  id: 'https://fedcloud-services.egi.cesga.es:11443/117'
+  description: Centos 7
+  default: true
+  credentials:
+    host: ''
+    user: mso4sc
+    password: 
+      INPUT:
+        name: MSO4SC Image password
+        description: MSO4SC Image password to connect to the vms
+        type: string
+        null: true
+        order: 19
+        secret: true
+    public_key:
+      INPUT:
+        name: VM's SSH public key
+        description: SSH public key to connect to the vms
+        type: file
+        null: false
+        order: 20
+        secret: false
+    private_key: 
+      INPUT:
+        name: VM's SSH private key
+        description: SSH private key to connect to the vms
+        type: file
+        null: false
+        order: 20
+        secret: true
+    private_key_password: ''
+
+eosc_networks:
+- name: default network
+  id: default_network
+  default: true
+  description: Default network for EOSC Hub
+  config:
+    outbound: True
+
+eosc_volumes: None
