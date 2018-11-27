@@ -43,9 +43,14 @@ inputs:
         description: maximum allowed time for run (minutes and seconds)
         default: '00:30:00'
 
-    mso4sc_dataset_input_url:
+    dataset_input_url:
         description: url to retrieve for case file
         default: "https://gitlab.srv.cesga.es/atgeirr/OPM-public-testing-data/raw/master/spe1.tgz"
+
+    dataset_is_private:
+        description: true if the dataset is private
+        type: string
+        default: "true"
 
     base_dir:
         description: Working directory
@@ -101,12 +106,13 @@ node_templates:
                 tasks_per_node: { get_input: parallel_tasks_per_node }
                 max_time: { get_input: max_time }
             deployment:
-                bootstrap: 'scripts/singularity_bootstrap_run-flow-generic.sh'
-                revert: 'scripts/singularity_revert_run-flow-generic.sh'
+                bootstrap: 'scripts/bootstrap.sh'
+                revert: 'scripts/revert.sh'
                 inputs:
-                    - { get_input: mso4sc_dataset_input_url }
+                    - { get_input: dataset_input_url }
                     - { get_input: singularity_image_uri }
                     - *singularity_image_filename
+                    - { get_input: dataset_is_private }
         relationships:
             - type: job_contained_in_hpc
               target: main_hpc_node
