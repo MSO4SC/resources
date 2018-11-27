@@ -26,6 +26,6 @@ tar zxvf $ARCHIVE
 DIRNAME=$(basename $ARCHIVE .tgz)
 DECK=$(ls $DIRNAME/*.DATA)
 cat << EOF > run_generated.param
-deck_filename=$(readlink -m $CURRENT_WORKDIR)/$DECK
+ecl-deck-file-name=$(readlink -m $CURRENT_WORKDIR)/$DECK
 EOF
 
