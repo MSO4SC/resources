@@ -19,7 +19,7 @@ imports:
     # to speed things up, it is possible to download this file,
     - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-manager/18.1.11/resources/rest-service/cloudify/types/types.yaml
     # HPC pluging
-    - http://raw.githubusercontent.com/MSO4SC/cloudify-hpc-plugin/staging/plugin.yaml
+    - http://raw.githubusercontent.com/MSO4SC/cloudify-hpc-plugin/master/plugin.yaml
     - inputs-def.yaml
 
     

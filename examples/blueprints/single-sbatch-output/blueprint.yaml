@@ -20,7 +20,7 @@ imports:
     # - http://www.getcloudify.org/spec/cloudify/4.1/types.yaml
     - http://raw.githubusercontent.com/mso4sc/cloudify-hpc-plugin/master/resources/types/cfy_types.yaml
     # relative import of plugin.yaml that resides in the blueprint directory
-    - http://raw.githubusercontent.com/MSO4SC/cloudify-hpc-plugin/staging/plugin.yaml
+    - http://raw.githubusercontent.com/MSO4SC/cloudify-hpc-plugin/master/plugin.yaml
     - inputs-def.yaml
 
 node_templates:

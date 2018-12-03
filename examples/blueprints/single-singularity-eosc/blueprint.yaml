@@ -20,7 +20,7 @@ imports:
   - http://raw.githubusercontent.com/mso4sc/cloudify-hpc-plugin/master/resources/types/cfy_types.yaml
   - https://raw.githubusercontent.com/MSO4SC/cloudify-im-extension/master/im.yaml
   # HPC pluging
-  - http://raw.githubusercontent.com/MSO4SC/cloudify-hpc-plugin/staging/plugin.yaml
+  - http://raw.githubusercontent.com/MSO4SC/cloudify-hpc-plugin/master/plugin.yaml
   - inputs-def.yaml
 
 node_templates:

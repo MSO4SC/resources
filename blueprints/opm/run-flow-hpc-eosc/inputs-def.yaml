@@ -17,7 +17,7 @@ inputs:
         name: Base dir
         description: Base HPC directory
         advanced: true
-        order: 21
+        order: 141
         type: list
         choices:
           REPLACE: primary_hpc.definition.persistent_volumes
@@ -29,7 +29,7 @@ inputs:
         name: Singularity Image
         description: Select the singularity image to be used
         advanced: true
-        order: 22
+        order: 30
         type: list
         choices:
         - name: OPM Flow generic
@@ -44,7 +44,7 @@ inputs:
         name: MPI version
         description: MPI version to be used
         advanced: true
-        order: 23
+        order: 31
         type: list
         choices:
           REPLACE: primary_hpc.definition.mpi_versions
@@ -55,7 +55,7 @@ inputs:
         name: Singularity version
         description: Singularity version to be used
         advanced: true
-        order: 24
+        order: 32
         type: list
         choices:
           REPLACE: primary_hpc.definition.singularity_versions
@@ -66,7 +66,7 @@ inputs:
         name: Singularity storage
         description: Singularity long term storage
         advanced: true
-        order: 25
+        order: 33
         type: list
         choices:
           REPLACE: primary_hpc.definition.persistent_volumes
@@ -88,7 +88,7 @@ inputs:
       INPUT:
         name: HPC Reservation
         description: Computing reservation to use on the HPC system chosen
-        default: ""
+        default: "MSO4SC"
         null: true
         advanced: true
         order: 120
@@ -99,10 +99,10 @@ inputs:
       INPUT:
         name: Parallel tasks
         description: Number of tasks/processes to run in parallel
-        default: 1
+        default: 24
         null: true
         advanced: true
-        order: 110
+        order: 22
         type: int
 
   parallel_nodes:
@@ -113,7 +113,7 @@ inputs:
         default: 1
         null: false
         advanced: true
-        order: 111
+        order: 23
         type: int
 
   parallel_tasks_per_node:
@@ -121,10 +121,10 @@ inputs:
       INPUT:
         name: Parallel tasks per node
         description: Number of tasks/processes to run in parallel
-        default: 1
+        default: 24
         null: false
         advanced: true
-        order: 112
+        order: 24
         type: int
 
   max_time:
@@ -135,7 +135,7 @@ inputs:
         default: '00:30:00'
         null: false
         advanced: true
-        order: 110
+        order: 25
         type: string
 
   # Won't be rendered, their value is a match with other inputs
@@ -218,6 +218,16 @@ inputs:
         order: 82
         choices:
           REPLACE: secondary_cloud.definition.eosc_networks
+  
+  aditional_arguments:
+    default:
+      INPUT:
+        name: Aditional configuration
+        description: Aditional dummy simulation config
+        type: file
+        advanced: true
+        order: 151
+        default: ""
   
   # Won't be rendered, their value is a match with other inputs
   secondary_cloud_wm_config:
@@ -333,12 +343,4 @@ inputs:
         type: string
 
   monitor_entrypoint:
-    default:
-      INPUT:
-        name: Monitor Entrypoint (not used)
-        description: Monitor entrypoint IP (Not used)
-        default: ""
-        null: true
-        advanced: true
-        order: 160
-        type: string
+    default: ""
