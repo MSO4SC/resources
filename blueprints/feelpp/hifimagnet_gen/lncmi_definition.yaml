@@ -1,0 +1,80 @@
+credentials:
+  host: "147.173.80.28"
+  user:
+    INPUT:
+      name: Lncmi user name
+      description: Lncmi user name
+      type: string
+      order: 1
+  private_key:
+    INPUT:
+      name: SSH private key
+      description: SSH private key to connect to Lncmi
+      type: file
+      null: true
+      order: 2
+      secret: true
+  private_key_password:
+    INPUT:
+      name: SSH private key password
+      description: SSH private key  password to connect to Lncmi
+      type: string
+      null: true
+      order: 3
+      secret: true
+  password:
+    INPUT:
+      name: SSH password
+      description: SSH password to connect to Lncmi
+      type: string
+      null: true
+      order: 4
+      secret: true
+
+wm_config:
+  country_tz: "Europe/Paris"
+
+partitions:
+- name: stokes
+  description: Exclusive partition
+  properties:
+    total_nodes: 4
+    cpus_per_node: 8
+    min_nodes: 1
+    max_nodes: 4
+    max_time: UNLIMITED
+    default_memory_per_cpu: 128M
+    max_memory_per_node: 512M
+    shared: false
+
+mpi_versions:
+- name: OpenMPI 2.0.2
+  description: Stable mpi version
+  default: true
+  library: OpenMPI
+  version: "2.0.2"
+  load_command: echo openmpi 2.0.2
+
+singularity_versions:
+- name: Singularity 2.4.2
+  description: Stable singularity version
+  default: true
+  version: "2.4.2"
+  load_command: echo singularity 2.4.2
+
+persistent_volumes:
+- name: HOME
+  path: $HOME
+  container_mount_point: /mnt
+  description: Regular user file storage
+  default: true
+
+local_volumes:
+- name: TEMP
+  path: /tmp
+  container_mount_point: /tmp
+
+scratch_volume:
+  name: Scratch
+  path: /scratch
+  container_mount_point: /scratch

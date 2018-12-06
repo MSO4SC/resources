@@ -1,0 +1,395 @@
+inputs:
+  email_user:
+    default:
+      INPUT:
+        name: Email
+        description: email address for reporting
+        type: string
+        order: 1
+        advanced: false
+        default: "first.lastname@domain"
+
+  ################### HPC Infrastructre ##################
+  # It will be rendered as HPC select box
+  primary_hpc:
+    default:
+      INPUT:
+        name: Primary HPC
+        description: Select the HPC to be used
+        order: 100
+        type: list
+        choices:
+          REPLACE: INFRA_CONFIG.hpc_list
+
+  hpc_base_dir:
+    default:
+      INPUT:
+        name: Base dir
+        description: Base HPC directory
+        advanced: true
+        order: 99
+        type: list
+        choices:
+          REPLACE: primary_hpc.definition.persistent_volumes
+
+  # Each one will be rendered in MSO4SC accordingly (lists->select box)
+  app_sregistry_url:
+    default:
+      INPUT:
+        name: Sregistry Service
+        description: Select the sregistry service to be used
+        advanced: true
+        order: 20
+        type: list
+        choices:
+          - name: Cesga
+            description: Cesga Sregistry
+            host: "sregistry.srv.cesga.es"
+            default: true
+          - name: Lncmi
+            description: Lncmi Sregistry
+            host: "sregistry.lcmi.local"
+            default: false
+
+  sregistry_url:
+    default:
+      REPLACE: app_sregistry_url.host
+
+  app_singularity_image:
+    default:
+      INPUT:
+        name: Singularity Image
+        description: Select the singularity image to be used
+        advanced: true
+        order: 21
+        type: list
+        choices:
+          - name: HiFiMagnet
+            description: HiFiMagnet (cesga sregistry)
+            uri: "shub://sregistry.srv.cesga.es/hifimagnet/hifimagnet:v0.103"
+            # uri: {concat: ["shub://", {get_input: sregistry_url, "/"]}
+            file: hifimagnet-hifimagnet-v0.103
+            default: true
+
+  app_mpi_version:
+    default:
+      INPUT:
+        name: MPI version
+        description: MPI version to be used
+        advanced: true
+        order: 31
+        type: list
+        choices:
+          REPLACE: primary_hpc.definition.mpi_versions
+
+  app_singularity_version:
+    default:
+      INPUT:
+        name: Singularity version
+        description: Singularity version to be used
+        advanced: true
+        order: 32
+        type: list
+        choices:
+          REPLACE: primary_hpc.definition.singularity_versions
+
+  app_singularity_storage:
+    default:
+      INPUT:
+        name: Singularity storage
+        description: Singularity long term storage
+        advanced: true
+        order: 21
+        type: list
+        choices:
+          REPLACE: primary_hpc.definition.persistent_volumes
+
+  singularity_cleanup:
+    default:
+      INPUT:
+        name: Remove Singularity app image
+        description: Remove Singularity app image from storage
+        advanced: true
+        order: 201
+        type: boolean
+        default: false
+
+  app_sregistry_client:
+    default:
+      INPUT:
+        name: Sregistry client
+        description: Sregistry client
+        advanced: true
+        order: 20
+        type: list
+        choices:
+          - name: registry
+            description: Sregistry ($HOME/.sregistry)
+            client: registry
+            file: $HOME/.sregistry
+            default: true
+          - name: docker
+            description: DockerHub ($HOME/.docker/config.json)
+            client: docker
+            file: $HOME/.docker/config.json
+
+
+  app_sregistry_image_uri:
+    default:
+      INPUT:
+        name: Sregistry image uri
+        description: Sregistry image uri
+        advanced: true
+        order: 20
+        default: "mso4sc/sregistry:latest"
+        type: list
+        choices:
+          - name: Sregistry Client
+            description: Sregistry Client (cesga sregistry)
+            uri: "shub://sregistry.srv.cesga.es/mso4sc/sregistry:latest"
+            file: mso4sc-sregistry-latest.simg
+            default: true
+
+  partition:
+    default:
+      INPUT:
+        name: Partition
+        description: Partition in which the HPC jobs will run
+        advanced: false
+        order: 101
+        type: list
+        choices:
+          REPLACE: primary_hpc.definition.partitions
+
+  hpc_reservation:
+    default:
+      INPUT:
+        name: HPC Reservation
+        description: Computing reservation to use on the HPC system chosen
+        default: "MSO4SC"
+        null: true
+        advanced: true
+        order: 102
+        type: string
+
+  parallel_tasks:
+    default:
+      INPUT:
+        name: Parallel tasks
+        description: Number of tasks/processes to run in parallel
+        default: 1
+        null: true
+        advanced: false
+        order: 103
+        type: int
+
+  parallel_nodes:
+    default:
+      INPUT:
+        name: Parallel nodes
+        description: Number of nodes on which to run
+        default: 1
+        null: false
+        advanced: true
+        order: 104
+        type: int
+
+  parallel_tasks_per_node:
+    default:
+      INPUT:
+        name: Parallel tasks per node
+        description: Number of tasks/processes to run in parallel
+        default: 24
+        null: false
+        advanced: true
+        order: 105
+        type: int
+
+  max_time:
+    default:
+      INPUT:
+        name: Max running time
+        description: Maximum allowed time for run (minutes and seconds)
+        default: '00:30:00'
+        null: false
+        advanced: false
+        order: 106
+        type: string
+
+  # Won't be rendered, their value is a match with other inputs
+  hpc_base_dir_path:
+    default:
+      REPLACE: hpc_base_dir.path
+  hpc_wm_config:
+    default:
+      REPLACE: primary_hpc.definition.wm_config
+  hpc_wm_credentials:
+    default:
+      REPLACE: primary_hpc.definition.credentials
+  mpi_load_command:
+    default:
+      REPLACE: app_mpi_version.load_command
+  singularity_load_command:
+    default:
+      REPLACE: app_singularity_version.load_command
+  singularity_image_uri:
+    default:
+      REPLACE: app_singularity_image.uri
+  singularity_image_filename:
+    default:
+      REPLACE: app_singularity_image.file
+  sregistry_client:
+    default:
+      REPLACE: app_sregistry_client.client
+  sregistry_client_secrets:
+    default:
+      REPLACE: app_sregistry_client.file
+  sregistry_storage:
+    default:
+      REPLACE: app_singularity_storage.path
+  sregistry_image_uri:
+    default:
+      REPLACE: app_sregistry_image.uri
+  sregistry_image:
+    default:
+      REPLACE: app_sregistry_image.file
+  partition_name:
+    default:
+      REPLACE: partition.name
+  singularity_image_storage:
+    default:
+      REPLACE: app_singularity_storage.path
+  singularity_mount_point:
+    default:
+      REPLACE: app_singularity_storage.container_mount_point
+  scratch_volume_mount_point:
+    default:
+      REPLACE: primary_hpc.definition.scratch_volume.container_mount_point
+
+  ################### Data Publish ##################
+  feelpp:
+    type: string
+    description: "Directory where results will be (rel. path from base_dir)"
+    default: feel
+
+  lic_dir:
+    default:
+      INPUT:
+        name: license directory
+        description: License Directory
+        order: 41
+        advanced: true
+        type: list
+        choices:
+          - name: meshgems
+            description: MeshGems License Directory
+            path: "/opt/DISTENE/DLim"
+            default: false
+          - name: ensight
+            description: Ensight License Directory
+            path: "/opt/CEI/license8"
+            default: false
+          - name: common
+            description: License Directory
+            path: "$HOME/licenses"
+            default: true
+
+  meshgems_license:
+    default:
+      INPUT:
+        advanced: true
+        order: 41
+        name: meshgems
+        path:
+          REPLACE: lic_dir.path
+        container_mount_point: /opt/DISTENE/DLim
+
+  ensight_license:
+    default:
+      INPUT:
+        advanced: true
+        order: 41
+        name: ensight
+        path:
+          REPLACE: lic_dir.path
+        container_mount_point: /opt/licenses
+
+  ################### Data Publish ##################
+
+  ckan_key:
+    description: API Key to publish the outputs
+    default: ""
+
+  # It will be rendered as a selection box of datasets
+  ckan_input_resource:
+    default:
+      INPUT:
+        name: Input dataset
+        description: Dataset resource that will be used as input
+        type: resource_list
+        order: 10
+        storage:
+          REPLACE: USER_CONFIG.storage_list.0
+
+  # It will be rendered as a selection box of datasets
+  ckan_outputs_dataset:
+    default:
+      INPUT:
+        name: Outputs dataset
+        description: Dataset in which outputs will be published
+        type: dataset_list
+        order: 10
+        storage:
+          REPLACE: USER_CONFIG.storage_list.0
+
+  output_name:
+    default:
+      INPUT:
+        name: Outputs name
+        description: Name of the output resource
+        type: string
+        order: 11
+        advanced: true
+        default: thermoelec-output
+
+  output_description:
+    default:
+      INPUT:
+        name: Outputs description
+        description: Name of the output resource
+        type: string
+        order: 12
+        advanced: true
+        default: "HiFiMagnet Thermoelec Model outputs"
+
+  # Won't be rendered
+  input_url:
+    default:
+      REPLACE: ckan_input_resource.resource.url
+
+  #################### Instance info ####################
+  instance_id:
+    default:
+      REPLACE: INSTANCE_CONFIG.id
+
+
+  #################### Instance info ####################
+  cfgfile:
+    default:
+      INPUT:
+        name: Cfg file
+        type: string
+        description: configuration file
+        default: "quarter-turn3D.cfg"
+        advanced: false
+        order: 2
+
+  workdir_keep:
+    default:
+      INPUT:
+        name: Flag to keep workdir
+        type: boolean
+        description: skip deletion of workdir
+        default: true
+        advanced: true
+        order: 200

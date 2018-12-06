@@ -13,7 +13,6 @@ JOB=${APP}_generic
 UPLOAD_DIR=${SCRIPT_DIR}/upload
 TOSCA=blueprint.yaml
 LOCAL=local-blueprint-inputs.yaml
-#LOCAL_DIR=../../../../
 LOCAL_DIR=../
 
 NO_DEBUG=""
@@ -21,18 +20,19 @@ DEBUG=${2:-${NO_DEBUG}} # from "-v" to "-vvv"
 
 echo "DEBUG=$DEBUG"
 
-if [ ! -f "${ROOT_DIR}/${LOCAL}" ]; then
-    echo "${ROOT_DIR}/${LOCAL} does not exist! See doc or blueprint examples!"
-    exit 1
-fi
-
 cd "${UPLOAD_DIR}" || {
     echo "no upload directory present"
+    echo "SCRIPT_DIR=${SCRIPT_DIR}"
     exit
 }
 
 case $arg in
     "up" )
+	if [ ! -f "${ROOT_DIR}/${LOCAL}" ]; then
+	    echo "${ROOT_DIR}/${LOCAL} does not exist! See doc or blueprint examples!"
+	    exit 1
+	fi
+
         cfy blueprints validate "${TOSCA}"
 	isOK=$?
 	if [ $isOK != 0 ]; then

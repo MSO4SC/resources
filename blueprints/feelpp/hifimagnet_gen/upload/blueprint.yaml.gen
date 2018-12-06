@@ -1,0 +1,182 @@
+########
+# Copyright (c) 2017 MSO4SC
+# Author(s) javier.carnero@atos.net
+#           guillaume.dolle@cemosis.fr
+#           christophe.trophime@lncmi.cnrs.fr
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+tosca_definitions_version: cloudify_dsl_1_3
+
+imports:
+    # to speed things up, it is possible to download this file,
+    - http://raw.githubusercontent.com/mso4sc/cloudify-hpc-plugin/master/resources/types/cfy_types.yaml
+    - https://raw.githubusercontent.com/MSO4SC/cloudify-im-extension/master/im.yaml
+    # HPC pluging
+    - http://raw.githubusercontent.com/MSO4SC/cloudify-hpc-plugin/master/plugin.yaml
+    - inputs-def.yaml
+
+node_templates:
+    primary_hpc:
+        type: hpc.nodes.WorkloadManager
+        properties:
+            config: {get_input: hpc_wm_config}
+            credentials: {get_input: hpc_wm_credentials}
+            external_monitor_entrypoint: {get_input: monitor_entrypoint}
+            job_prefix: *job_prefix
+            base_dir: {get_input: hpc_base_dir_path}
+            workdir_prefix: *hpc_workdir_prefix
+            monitor_period: 15
+            skip_cleanup: {get_input: workdir_keep}
+            # simulate: True  # COMMENT to test against a real HPC
+
+    job_partition:
+        type: hpc.nodes.SingularityJob
+        properties:
+            job_options:
+                mail_user: {get_input: email_user}
+                mail_type: *email_type
+                image: {concat: [{get_input: sregistry_storage}, '/',
+                                 {get_input: singularity_image_filename}]}
+                home: '${PWD}:/home/${USER}'
+                volumes:
+                    - {get_input: scratch_volume_mount_point}
+                    - {get_input: singularity_mount_point}
+                    - {concat: [{get_input: hpc_base_dir_path}, '/', {get_input: feelpp}, ':/feelpp']}
+                pre:
+                    - {get_input: singularity_load_command}
+                    - {concat: ['singularity run -B /mnt ',
+                                {get_input: sregistry_storage},
+                                '/mso4sc-remotelogger-cli-latest.simg ',
+                                '-f partition_logfilter.yaml ',
+                                '-sh logging.mso4sc.eu ',
+                                '-u mso4sc -p remotelogger ',
+                                '-rk $CFY_EXECUTION_ID -q hifimagnet',
+                                '> logger0.log 2>&1 &']}
+                command: {concat: ['/home/${USER}/partition.sh -i ',
+                                   {get_input: cfgfile},
+                                   ' -n ', {get_input: parallel_tasks},
+                                   ' > partition.log 2>&1']}
+                partition: {get_input: partition}
+                reservation: {get_input: hpc_reservation}
+                nodes: 1
+                tasks: 1
+                tasks_per_node: 1
+                max_time: {get_input: max_time}
+            skip_cleanup: {get_input: workdir_keep}
+            deployment:
+                bootstrap: 'scripts/bootstrap.sh'
+                revert: 'scripts/revert.sh'
+                inputs:
+                    - {get_input: sregistry_storage}
+                    - *singularity_image_filename
+                    - *singularity_image_uri
+                    - *singularity_cleanup
+                    - *sregistry_client
+                    - *sregistry_client_secrets
+                    - *sregistry_url
+                    - *sregistry_image
+                    - {get_input: base_dir}
+                    - {get_input: feelpp}
+                    - {get_input: mso4sc_datacatalogue_key}
+                    - {concat: ['"', {get_input: ckan_input_resource}, '"']}
+                    - {get_input: cfgfile}
+                    - "partition"
+
+        relationships:
+            - type: job_managed_by_wm
+              target: primary_hpc
+
+    job_sim:
+        type: hpc.nodes.SingularityJob
+        properties:
+            job_options:
+                mail_user: {get_input: email_user}
+                mail_type: *email_type
+                image: {concat: [{get_input: sregistry_storage}, '/',
+                                 {get_input: singularity_image_filename}]}
+                home: '${HOME}:/home/${USER}'
+                volumes:
+                    - {get_input: scratch_volume_mount_point}
+                    - {get_input: singularity_mount_point}
+                    - {concat: [{get_input: hpc_base_dir_path}, '/', {get_input: feelpp}, ':/feelpp']}
+                pre:
+                    - {get_input: mpi_load_command}
+                    - {get_input: singularity_load_command}
+                    - {concat: ['singularity run -B /mnt ',
+                                {get_input: sregistry_storage},
+                                '/mso4sc-remotelogger-cli-latest.simg ',
+                                '-f sim_logfilter.yaml ',
+                                '-sh logging.mso4sc.eu ',
+                                '-u mso4sc -p remotelogger ',
+                                '-rk $CFY_EXECUTION_ID -q hfimagnet',
+                                '> logger1.log 2>&1 &']}
+                command: {concat: [*execfile,
+                                   ' --config-file ', {get_input: cfgfile},
+                                   ' > sim.log 2>&1']}
+                post:
+                    - {concat: ['cd {get_input: base_dir} &&',
+                                'tar zcvf ../', {get_input: cfgfile}, '.tgz ',
+                                {get_input: feelpp}]}
+                partition: {get_input: partition}
+                reservation: {get_input: hpc_reservation}
+                nodes: {get_input: parallel_nodes}
+                tasks: {get_input: parallel_tasks}
+                tasks_per_node: {get_input: parallel_tasks_per_node}
+                max_time: {get_input: max_time}
+            skip_cleanup: {get_input: workdir_keep}
+            deployment:
+                bootstrap: 'scripts/bootstrap.sh'
+                revert: 'scripts/revert.sh'
+                inputs:
+                    - {get_input: sregistry_storage}
+                    - *singularity_image_filename
+                    - *singularity_image_uri
+                    - *singularity_cleanup
+                    - *sregistry_client
+                    - *sregistry_client_secrets
+                    - *sregistry_url
+                    - *sregistry_image
+                    - {get_input: base_dir}
+                    - {get_input: feelpp}
+                    - {get_input: mso4sc_datacatalogue_key}
+                    - {concat: ['"', {get_input:ckan_input_resource}, '"']}
+                    - {get_input: cfgfile}
+                    - "sim"
+
+            # hpc_feelpp directory is tar gzipped
+            publish:
+                - type: "CKAN"
+                  entrypoint: {get_input: ckan_input_resource}
+                  api_key: {get_input: ckan_key}
+                  dataset: {get_input: ckan_outputs_dataset}
+                  file_path:
+                      - {concat: [{get_input: cfgfile}, '.tgz']}
+                  name: 'ThermoElectricModel'
+                  description: {concat: ['ThermoElectricModel: ',
+                                         {get_input: cfgfile}, ', ',
+                                         {get_input: parallel_tasks}, ' parts']}
+
+        relationships:
+            - type: job_managed_by_wm
+              target: primary_hpc
+            - type: job_depends_on
+              target: job_partition
+
+outputs:
+    job_partition:
+        description: feelpp_mesh_partitioner results
+        value: {get_attribute: [job_partition, job_name]}
+    job_sim:
+        description: hifimagnet thermoelec results
+        value: {get_attribute: [job_sim, job_name]}
