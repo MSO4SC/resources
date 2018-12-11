@@ -23,29 +23,31 @@ imports:
     - inputs-def.yaml
 
 node_templates:
-    first_hpc:
-        type: hpc.nodes.Compute
-        properties:
-            config: { get_input: mso4sc_hpc_primary }
+    hpc_wm:
+        type: hpc.nodes.WorkloadManager
+        properties:config: { get_input: hpc_wm_config }
+            credentials: { get_input: hpc_wm_credentials }
             external_monitor_entrypoint: { get_input: monitor_entrypoint }
             job_prefix: { get_input: job_prefix }
-            workdir_prefix: "single_srun"
-            skip_cleanup: True
+            base_dir: { get_input: "hpc_base_dir" }
+            monitor_period: 15
+            skip_cleanup: true
+            simulate: True  # COMMENT to test against a real HPC
+            workdir_prefix: "single_singularity"
 
     single_job:
-        type: hpc.nodes.singularity_job
+        type: hpc.nodes.SingularityJob
         properties:
-            job_options: 
-                modules:
-                    - gcc/5.3.0
-                    - openmpi/1.10.2
-                    - singularity/2.3.1
-                partition: { get_input: partition }
-                image: '$LUSTRE/openmpi_1.10.7_ring.img'
-                home: '$HOME:/home/$USER'
+            job_options:
+                pre:
+                - { get_input: mpi_load_command }
+                - { get_input: singularity_load_command }
+                partition: { get_input: partition_name }
+                image: {concat: [{ get_input: singularity_image_storage },'/',{ get_input: singularity_image_filename }] }
                 volumes:
-                    - '/scratch'
-                command: 'ring > single.test'
+                    - { get_input: scratch_voulume_mount_point }
+                    - { get_input: singularity_mount_point }
+                command: 'touch single_singularity.test'
                 nodes: 1
                 tasks: 1
                 tasks_per_node: 1
@@ -54,12 +56,13 @@ node_templates:
                 bootstrap: 'scripts/singularity_bootstrap_example.sh'
                 revert: 'scripts/singularity_revert_example.sh'
                 inputs:
-                    - '$LUSTRE'
-                    - 'openmpi_1.10.7_ring.img'
+                - { get_input: singularity_image_storage }
+                - { get_input: singularity_image_filename }
+                - { get_input: singularity_image_uri }
             skip_cleanup: True
         relationships:
-            - type: job_contained_in_hpc
-              target: primary_hpc
+            - type: job_managed_by_wm
+              target: hpc_wm
 
 outputs:
     single_job_name:
