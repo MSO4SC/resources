@@ -56,7 +56,6 @@ node_templates:
             job_prefix: { get_input: job_prefix }
             base_dir: { get_input: "hpc_base_dir" }
             monitor_period: 15
-            skip_cleanup: true
             job_prefix: "mso4sc_opm_"
 
     opm_flow_single_job:
