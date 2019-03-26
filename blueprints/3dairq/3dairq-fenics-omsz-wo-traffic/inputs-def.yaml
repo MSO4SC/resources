@@ -1,0 +1,183 @@
+inputs:
+  ################### HPC Infrastructre ##################
+  # It will be rendered as HPC select box
+  primary_hpc:
+    default:
+      INPUT:
+        name: Primary HPC
+        description: Select the HPC to be used
+        order: 10
+        type: list
+        choices:
+          REPLACE: INFRA_CONFIG.hpc_list
+  
+  # Each one will be rendered in MSO4SC accordingly (lists->select box)
+  
+  partition:
+    default:
+      INPUT:
+        name: Partition
+        description: Partition in which the HPC jobs will run
+        advanced: true
+        order: 11
+        type: list
+        choices:
+          REPLACE: primary_hpc.definition.partitions
+
+  parallel_tasks:
+    default:
+      INPUT:
+        name: Parallel Tasks
+        desciption: Number of used CPU cores
+        default: "32"
+        advanced: false
+        order: 12
+        type: string
+
+  parallel_nodes:
+    default:
+      INPUT:
+        name: Parallel Nodes
+        desciption: Number of used nodes
+        default: "2"
+        advanced: false
+        order: 13
+        type: string
+
+  parallel_tasks_per_node:
+    default:
+      INPUT:
+        name: Parallel Tasks per Node
+        desciption: Number of tasks per used nodes
+        default: "16"
+        advanced: false
+        order: 14
+        type: string
+
+
+  max_time:
+    default:
+      INPUT:
+        name: Maximum time
+        desciption: Maximum allowed time for run (minutes and seconds)
+        default: '03:30:00'
+        advanced: false
+        order: 15
+        type: string
+
+  app_T:
+    default:
+      INPUT:
+        name: T
+        desciption: 
+        default: "20.0"
+        advanced: false
+        order: 16
+        type: string
+
+  app_alpha:
+    default:
+      INPUT:
+        name: App Alpha
+        desciption: Angle of Attack
+        default: "0.0"
+        advanced: false
+        order: 17
+        type: string
+
+
+  app_cfl_target:
+    default:
+      INPUT:
+        name: CFL Target
+        desciption: CFL number of decision of the timestep
+        default: "20.0"
+        advanced: false
+        order: 18
+        type: string
+
+  app_trip_factor:
+    default:
+      INPUT:
+        name: Trip Factor
+        desciption: Trip parameter
+        default: "0.0"
+        advanced: false
+        order: 19
+        type: string
+
+  0_wind_x:
+    default:
+      INPUT:
+        name: Wind Profile X based on Hungarian Meterology Service (2018.09.26)
+        desciption: Wind Profile X based on Hungarian Meterology Service (2018.09.26)
+        default: "https://gitlab.srv.cesga.es/budait/3dairq-demo1/raw/master/omsz20180926/wind.windx"
+        advanced: false
+        order: 20
+        type: string
+
+  0_wind_y:
+    default:
+      INPUT:
+        name: Wind Profile Y based on Hungarian Meterology Service (2018.09.26)
+        desciption: Wind Profile Y based on Hungarian Meterology Service (2018.09.26)
+        default: "https://gitlab.srv.cesga.es/budait/3dairq-demo1/raw/master/omsz20180926/wind.windy"
+        advanced: false
+        order: 21
+        type: string
+
+
+  0_maxtime:
+    default:
+      INPUT:
+        name: Simulated Time
+        desciption: Max simulation time (s)
+        default: "2000"
+        advanced: false
+        order: 21
+        type: string
+
+  0_traffic-SUMO-net:
+    default:
+      INPUT:
+        name: precalculated network file (default 10000)
+        desciption: precalculated network file (default 10000)
+        default: "https://gitlab.srv.cesga.es/budait/3dairq-demo1/raw/master/traffic_sim_10000/simple_traffic.trnet"
+        advanced: false
+        order: 22
+        type: string
+
+  0_traffic-SUMO-emi:
+    default:
+      INPUT:
+        name: Precalculated emission (default 10000)
+        desciption: precalculated emission (default 10000)
+        default: "https://gitlab.srv.cesga.es/budait/3dairq-demo1/raw/master/traffic_sim_10000/simple_traffic.tremi"
+        advanced: false
+        order: 23
+        type: string
+
+
+  # Won't be rendered, their value is a match with other inputs
+  hpc_wm_config:
+    default:
+      REPLACE: primary_hpc.definition.wm_config
+  hpc_wm_credentials:
+    default:
+      REPLACE: primary_hpc.definition.credentials
+  mpi_load_command:
+    default:
+      REPLACE: app_mpi_version.load_command
+  singularity_load_command:
+    default:
+      REPLACE: app_singularity_version.load_command
+  partition_name:
+    default:
+      REPLACE: partition.name
+
+  #################### Instance info ####################
+  instance_id:
+    default:
+      REPLACE: INSTANCE_CONFIG.id
+
+
