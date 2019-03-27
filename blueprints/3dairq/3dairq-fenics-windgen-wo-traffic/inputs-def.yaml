@@ -1,0 +1,232 @@
+inputs:
+  ################### HPC Infrastructre ##################
+  # It will be rendered as HPC select box
+  primary_hpc:
+    default:
+      INPUT:
+        name: Primary HPC
+        description: Select the HPC to be used
+        order: 10
+        type: list
+        choices:
+          REPLACE: INFRA_CONFIG.hpc_list
+  
+  # Each one will be rendered in MSO4SC accordingly (lists->select box)
+  
+  partition:
+    default:
+      INPUT:
+        name: Partition
+        description: Partition in which the HPC jobs will run
+        advanced: true
+        order: 11
+        type: list
+        choices:
+          REPLACE: primary_hpc.definition.partitions
+
+  parallel_tasks:
+    default:
+      INPUT:
+        name: Parallel Tasks
+        desciption: Number of used CPU cores
+        default: "32"
+        advanced: false
+        order: 12
+        type: string
+
+  parallel_nodes:
+    default:
+      INPUT:
+        name: Parallel Nodes
+        desciption: Number of used nodes
+        default: "2"
+        advanced: false
+        order: 13
+        type: string
+
+  parallel_tasks_per_node:
+    default:
+      INPUT:
+        name: Parallel Tasks per Node
+        desciption: Number of tasks per used nodes
+        default: "16"
+        advanced: false
+        order: 14
+        type: string
+
+
+  max_time:
+    default:
+      INPUT:
+        name: Maximum time
+        desciption: Maximum allowed time for run (minutes and seconds)
+        default: '03:30:00'
+        advanced: false
+        order: 15
+        type: string
+
+  app_T:
+    default:
+      INPUT:
+        name: T
+        desciption: 
+        default: "20.0"
+        advanced: false
+        order: 16
+        type: string
+
+  app_alpha:
+    default:
+      INPUT:
+        name: App Alpha
+        desciption: Angle of Attack
+        default: "0.0"
+        advanced: false
+        order: 17
+        type: string
+
+
+  app_cfl_target:
+    default:
+      INPUT:
+        name: CFL Target
+        desciption: CFL number of decision of the timestep
+        default: "20.0"
+        advanced: false
+        order: 18
+        type: string
+
+  app_trip_factor:
+    default:
+      INPUT:
+        name: Trip Factor
+        desciption: Trip parameter
+        default: "0.0"
+        advanced: false
+        order: 19
+        type: string
+
+  mso4sc_file_3dairq_windprofile:
+    default:
+      INPUT:
+        name: Windprofile 
+        description: Windprofile file
+        default: |
+            #### properties of the measurement ####
+            measurement.start-time=2018.09.02 00:00:00
+
+            # Measurement height in meters:
+            measurement.z=2
+            #Specific surface roughness of measurement:
+            measurement.z0=0.2
+            #Displacement height of measurement:
+            measurement.d=0
+            #Coordinate system of the measurement: descartes or polar. Descartes: x, y components, polar: magnitude, direction components:
+            measurement.coordinate-system=descartes
+
+            #Origo of the polar coordinate system: North, East, South, West:
+            measurement.coordinate-system.polar.origo=North
+            #The positive rotational direction of the polar coordinate-system: Clockwise, CounterClockwise:
+            measurement.coordinate-system.polar.positive-direction=Clockwise
+
+            #Full path of the measurement csv file. See measurement csv file specification in the wind-profile-creator-input-file-specification.md file.
+            measurement.data.path=windprofile.csv
+
+            #### properties of generated profile ####
+            #Specific surface roughness of the application area
+            profile.z0=0.2
+            #Displacement height of application area
+            profile.d=0
+
+            #Vertical offset of the generated profile in meters
+            profile.offset=85
+            #Height of the generated profile in meters
+            profile.height=400
+            #Vertical resolution of the generated profile in meters
+            profile.resolution=10
+
+            #Rotates original measurement values (degrees, cw)
+            profile.modifier.rotation=0
+            #Multiplies original measured magnitudes
+            profile.modifier.magnitude-multiplier=1.0
+
+        type: file
+        advanced: true
+        order: 20
+        null: true
+
+  mso4sc_file_3dairq_wind_csv:
+    default:
+      INPUT:
+        name: Windprofile CSV
+        description: Windprofile file
+        default: |
+            time(s);x(m/s);y(m/s)
+            0;2.4;3.7
+            300;2.9;3.5
+            600;3.6;4.1
+            900;3.8;5.2
+            1200;4;5.1
+            1500;3;6.2
+            1800;4.1;3.2
+            2100;5.2;7.1
+
+        type: file
+        advanced: true
+        order: 20
+        null: true
+
+  0_maxtime:
+    default:
+      INPUT:
+        name: Simulated Time
+        desciption: Max simulation time (s)
+        default: "2000"
+        advanced: false
+        order: 21
+        type: string
+
+  0_traffic-SUMO-net:
+    default:
+      INPUT:
+        name: precalculated network file (default 10000)
+        desciption: precalculated network file (default 10000)
+        default: "https://gitlab.srv.cesga.es/budait/3dairq-demo1/raw/master/traffic_sim_10000/simple_traffic.trnet"
+        advanced: false
+        order: 22
+        type: string
+
+  0_traffic-SUMO-emi:
+    default:
+      INPUT:
+        name: Precalculated emission (default 10000)
+        desciption: precalculated emission (default 10000)
+        default: "https://gitlab.srv.cesga.es/budait/3dairq-demo1/raw/master/traffic_sim_10000/simple_traffic.tremi"
+        advanced: false
+        order: 23
+        type: string
+
+
+  # Won't be rendered, their value is a match with other inputs
+  hpc_wm_config:
+    default:
+      REPLACE: primary_hpc.definition.wm_config
+  hpc_wm_credentials:
+    default:
+      REPLACE: primary_hpc.definition.credentials
+  mpi_load_command:
+    default:
+      REPLACE: app_mpi_version.load_command
+  singularity_load_command:
+    default:
+      REPLACE: app_singularity_version.load_command
+  partition_name:
+    default:
+      REPLACE: partition.name
+
+  #################### Instance info ####################
+  instance_id:
+    default:
+      REPLACE: INSTANCE_CONFIG.id
+
+

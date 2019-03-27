@@ -1,0 +1,144 @@
+########
+# Copyright (c) 2017 MSO4SC - javier.carnero@atos.net
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+tosca_definitions_version: cloudify_dsl_1_3
+
+imports:
+    # to speed things up, it is possible to download this file,
+    - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-manager/18.1.11/resources/rest-service/cloudify/types/types.yaml
+    # HPC pluging
+    - http://raw.githubusercontent.com/MSO4SC/cloudify-hpc-plugin/master/plugin.yaml
+    - inputs-def.yaml
+
+inputs:
+    # Job prefix name
+    job_prefix:
+        description: Job name prefix in HPCs
+        default: "mso_"
+        type: string
+
+    mso4sc_dataset_input_url:
+        description: url to retrieve for case file
+        default: "NONE"
+
+    base_dir:
+        description: Working directory
+        default: "$LUSTRE"
+   
+    workdir_pref:
+        description: directory prefix
+        default: "airQuality"
+
+    singularity_image_uri:
+        description: URI pointing to the singularity image
+        default: "shub://sregistry.srv.cesga.es/mso4sc/fenics-airq:latestv2"
+
+    singularity_image_filename:
+        description: Filename of the singularity image
+        default: "mso4sc-fenics-airq-latest.simg"
+
+    hpc_reservation:
+        description: Computing reservation to use on the HPC system chosen
+        default: "MSO4SC"
+
+node_templates:
+    hpc_wm:
+        type: hpc.nodes.WorkloadManager
+        properties:
+            config: { get_input: hpc_wm_config }
+            credentials: { get_input: hpc_wm_credentials }
+            base_dir: { get_input: base_dir }
+            workdir_prefix: { get_input: workdir_pref }
+            job_prefix: { get_input: job_prefix }
+            skip_cleanup: True
+#            simulate: True  # COMMENT to test against a real HPC
+
+    airQ_compile:
+        type: hpc.nodes.SingularityJob
+        properties:
+            job_options:
+                pre:
+                    - module load gcc
+                    - module load singularity
+                    - module load openmpi
+                partition: { get_input: partition_name }
+                image: { concat: [ '$CURRENT_WORKDIR/', { get_input: singularity_image_filename } ] }
+                volumes:
+                    - '/scratch '
+                    - '/mnt -B $PWD/unicorn:/home  --pwd /home/3DAirQualityPredictionPilot'
+                command: 'make UNICORNLIBDIR=/home > make_log 2>make_err'
+                nodes: 1
+                tasks: 1
+                tasks_per_node: 1
+                max_time: { get_input: max_time }
+            deployment:
+                bootstrap: 'scripts/singularity_bootstrap.sh'
+                revert: 'scripts/singularity_revert.sh'
+                inputs:
+                    - { get_input: singularity_image_uri }
+                    - { get_input: singularity_image_filename }
+                    - { get_input: app_T }
+                    - { get_input: app_alpha }
+                    - { get_input: app_cfl_target }
+                    - { get_input: app_trip_factor }
+                    - { get_input: mso4sc_file_3dairq_windprofile }
+                    - { get_input: mso4sc_file_3dairq_wind_csv }
+                    - { get_input: 0_maxtime }
+                    - { get_input: 0_traffic-SUMO-net }
+                    - { get_input: 0_traffic-SUMO-emi }
+                    - { get_input: mso4sc_dataset_input_url }
+
+        relationships:
+            - type: job_managed_by_wm
+              target: hpc_wm
+
+    airQ_run:
+        type: hpc.nodes.Job
+        properties:
+            job_options:
+                pre:
+                    - module load gcc
+                    - module load singularity
+                    - module load openmpi
+                command: 'touch.script'
+                type: 'SBATCH'
+            deployment:
+                bootstrap: 'scripts/sbatch_bootstrap.sh'
+                revert: 'scripts/sbatch_revert.sh'
+                inputs:
+                    - { get_input: singularity_image_uri }
+                    - { get_input: singularity_image_filename }
+                    - { get_input: parallel_tasks }
+                    - { get_input: parallel_nodes }
+                    - { get_input: parallel_tasks_per_node }
+                    - { get_input: max_time }
+                    - '1'
+                    - 'x'
+                    - { get_input: partition_name }
+                    - { get_input: mso4sc_dataset_input_url }
+        relationships:
+            - type: job_managed_by_wm
+              target: hpc_wm
+            - type: job_depends_on
+              target: airQ_compile
+
+
+outputs:
+    compile_job_name:
+        description: compile job name in the HPC
+        value: { get_attribute: [airQ_compile, job_name] }
+    run_job_name:
+        description: run job name in the HPC
+        value: { get_attribute: [airQ_run, job_name] }
